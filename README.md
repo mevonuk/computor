@@ -1,7 +1,7 @@
 # computor
 
 ## Overview
-This project is based on the Ecole 42 computor (v1) project.  The goal is to enter, reduce/simplify, and then solve, quadratic and linear equations.
+This project is based on the Ecole 42 computor (v1) project.  The goal is to enter, reduce/simplify, and then solve quadratic and linear equations.
 
 ### Contributor
 - M. Evonuk (https://github.com/mevonuk)
@@ -28,4 +28,4 @@ This project is based on the Ecole 42 computor (v1) project.  The goal is to ent
 1. Clone the repository
 2. Change to computor_v1 directory
 3. python computor.py "equation"
-	- python computor.py "2x + 3 x^2 = 5x^3 -x"
+	- e.g.: python computor.py "2x + 3 x^2 = 5x^3 -x"
