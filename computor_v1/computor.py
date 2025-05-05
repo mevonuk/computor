@@ -1,6 +1,6 @@
 import sys	# for input and exit
 import re	# for character matching redex
-import math	# for sqrt
+from my_math_tools import sqrt, abs
 	
 # check user input
 def check_input_chars(s):
@@ -306,10 +306,10 @@ def reduce(b, a, type):
 
 	if isinstance(b, int) and isinstance(a, int):
 		if a * b > 0:
-			a = int(math.fabs(a))
-			b = int(math.fabs(b))
+			a = int(abs(a))
+			b = int(abs(b))
 		factor = 2
-		while factor <= min(math.fabs(a), math.fabs(b)):
+		while factor <= min(abs(a), abs(b)):
 			while b % factor == 0 and a % factor == 0:
 				b = int(b/factor)
 				a = int(a/factor)
@@ -317,12 +317,12 @@ def reduce(b, a, type):
 		s = f"{b}/{a}"
 		if type == 1:
 			s = f"{b}i/{a}"
-		if math.fabs(b) % math.fabs(a) == 0:
+		if abs(b) % abs(a) == 0:
 			c = int(b/a)
 			s = f"{c}"
 			if type == 1:
 				s = f"{c}i"
-		if math.fabs(b) == math.fabs(a):
+		if abs(b) == abs(a):
 			if b * a < 0:
 				s = f"-1"
 			else:
@@ -385,10 +385,10 @@ if __name__ == "__main__":
 		discriminant = b * b - 4 * a * c
 		if discriminant > 0:
 			print("\nDiscriminant is positive: two real solutions:")
-			top = -b + math.sqrt(discriminant)
+			top = -b + sqrt(discriminant)
 			top = int(top) if top.is_integer() else top
 			print(reduce(top, 2 * a, 0))
-			top = -b - math.sqrt(discriminant)
+			top = -b - sqrt(discriminant)
 			top = int(top) if top.is_integer() else top
 			print(reduce(top, 2 * a, 0))
 		elif discriminant == 0:
@@ -397,7 +397,7 @@ if __name__ == "__main__":
 		else:
 			print("\nDiscriminant is negative: two complex solutions:")
 			reduced_realterm = reduce(-b, 2 * a, 0)
-			sqrtd = math.sqrt(math.fabs(discriminant))
+			sqrtd = sqrt(abs(discriminant))
 			sd = int(sqrtd) if sqrtd.is_integer() else sqrtd
 			reduced_imagterm = reduce(sd, 2 * a, 1)
 			if reduced_imagterm and reduced_imagterm[0] == '-':
