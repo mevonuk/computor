@@ -1,10 +1,25 @@
 from rational import Rational
+from complex import Complex
+from matrix import Matrix, Vector
+from function import Term, Polynomial
+from parse import parse_cmd
 
-r1 = Rational(5)
-print(r1)
+print("Welcome to computor_v2 by mevonuk")
+print("This calculator supports rational and complex numbers,")
+print("matrices, vectors, and simple functions.")
+print("\nAcceptible input:")
+print("\tvariable_name = expression (to assign a value to a variable)")
+print("\tExpression = ? (to solve expression)\n")
+print("To exit the program, enter 'exit'\n")
 
-r2 = Rational(-2)
-print(r2)
+cmd = ""
+history = {}
 
-r3 = 2**r2
-print(r3)
+while(1):
+    cmd = input("> ")
+    if cmd == 'exit':
+        exit()
+
+    if cmd:
+        print(cmd)
+        content = parse_cmd(cmd)
