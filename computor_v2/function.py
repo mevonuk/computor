@@ -1,6 +1,41 @@
 from rational import Rational
 from complex import Complex
 from matrix import Matrix, Vector
+from tree import Node
+from variable import Variable
+
+class Function:
+
+    def __init__(self, name, variable, terms):
+        if not isinstance(variable, str):
+            print("Error: variable name should be a string")
+            exit()
+        if not isinstance(name, str):
+            print("Error: function name should be a string")
+            exit()
+        if not isinstance(terms, Node):
+            print("Error: function terms should be a node type")
+            exit()
+        self.terms = terms
+        self.var = variable
+        self.name = name
+
+    def __str__(self):
+        return f"Function {self.name}({self.var}) = {self.terms}"
+    
+    def plug_var(self, value):
+        var = Variable(self.var, value)
+        self.terms.sub_var_node(var)
+        print(self.terms)
+
+
+
+n = Node(3,'x', '+')
+f = Function('f', 'x', n)
+print(f)
+f.plug_var(5)
+
+
 
 # Note: polynomial can only have one var, when solving for that var, 
 # otherwise it should be possible (for plugging in the value)
@@ -18,6 +53,7 @@ class Term:
             exit()
         if isinstance(coefficient, int) or isinstance(coefficient, float) or isinstance(coefficient, Rational) or isinstance(coefficient, Complex):
             self.coef = coefficient
+
         else:
             print("Usage Term: Coef must be int, float, rational, or complex", coefficient)
             exit()
@@ -42,9 +78,13 @@ class Term:
                 return f"({self.coef}){varible}"
         else:
             if self.coef == 1:
-                return f"{varible}"
+                if varible:
+                    return f"{varible}"
+                return "1"
             elif self.coef == -1:
-                return f"-{varible}"
+                if varible:
+                    return f"-{varible}"
+                return "-1"
             else:
                 return f"{self.coef}{varible}"
 
@@ -83,6 +123,10 @@ class Polynomial:
                     print("Error: mod operator not allowed with complex numbers")
                     exit()
         else:
+            if term.coef.real == -1:
+                self.terms[key] = [-1, term.op]
+            elif term.coef.real == 1:
+                self.terms[key] = [1, term.op]
             self.terms[key] = [term.coef, term.op]
 
     def __repr__(self):
@@ -143,3 +187,76 @@ class Polynomial:
                 self.add_term((new_value, 'dummy_var', 0, '+'))
             else:
                 self.add_term((coef, value, key[1], op))
+
+    def __sub__(self, other):
+        if not isinstance(other, Polynomial):
+            print("Addition only supported between Polynomial instances.")
+            return NotImplemented
+
+        result = Polynomial()
+
+        # First, copy all terms from self
+        for (var, exp), (coef, op) in self.terms.items():
+            result.terms[(var, exp)] = [coef, op]
+
+        # Then, add or combine terms from other
+        for (var, exp), (coef, op) in other.terms.items():
+            key = (var, exp)
+            if key in result.terms:
+                existing_coef, _ = result.terms[key]
+                # Assume + when adding terms from different polynomials
+                result.terms[key] = [existing_coef - coef, '+']
+            else:
+                result.terms[key] = [-coef, op]
+
+        return result
+    
+    def __add__(self, other):
+        if not isinstance(other, Polynomial):
+            print("Addition only supported between Polynomial instances.")
+            return NotImplemented
+
+        result = Polynomial()
+
+        # First, copy all terms from self
+        for (var, exp), (coef, op) in self.terms.items():
+            result.terms[(var, exp)] = [coef, op]
+
+        # Then, add or combine terms from other
+        for (var, exp), (coef, op) in other.terms.items():
+            key = (var, exp)
+            if key in result.terms:
+                existing_coef, _ = result.terms[key]
+                # Assume + when adding terms from different polynomials
+                result.terms[key] = [existing_coef + coef, '+']
+            else:
+                result.terms[key] = [coef, op]
+
+        return result
+
+    def __mul__(self, other):
+        if not isinstance(other, Polynomial):
+            return NotImplemented
+
+        result = Polynomial()
+
+        for (var1, exp1), (coef1, op1) in self.terms.items():
+            for (var2, exp2), (coef2, op2) in other.terms.items():
+                if var1 == var2:
+                    # Combine like variable powers
+                    new_exp = exp1 + exp2
+                    new_var = var1
+                elif var1 == "dummy_var":
+                    new_var = var2
+                    new_exp = exp2
+                elif var2 == "dummy_var":
+                    new_var = var1
+                    new_exp = exp1
+                else:
+                    print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})")
+                    exit()
+
+                new_coef = coef1 * coef2
+                result.add_term((new_coef, new_var, new_exp, '+'))
+
+        return result

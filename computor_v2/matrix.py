@@ -33,9 +33,13 @@ class Matrix:
                     lst.append(0)
                 self.data.append(lst)
         elif all(isinstance(a, list) for a in largs[0]):
+            x = len(largs[0])
+            y = len(largs[0][0])
+            for i in range(1, x):
+                if len(largs[0][i]) != y:
+                    print("Error: All rows of a matrix should have the same length")
+                    return None
             self.data = largs[0]
-            x = len(self.data)
-            y = len(self.data[0])
             self.shape = (x, y)
         else:
             print("Usage: initialize Matrix with list of lists or tuple")
@@ -67,14 +71,30 @@ class Matrix:
         else:
             return("Matrix is empty")
 
+    def __mod__(self, o):
+        print("Error: mod not allowed with matrix/vector")
+        return None
+    
+    def __rmod__(self, o):
+        print("Error: mod not allowed with matrix/vector")
+        return None
+    
+    def __pow__(self, o):
+        print("Error: pow not allowed with matrix/vector")
+        return None
+
+    def __rpow__(self, o):
+        print("Error: pow not allowed with matrix/vector")
+        return None
+          
     def __add__(self, o):
         """magic addition of matrices, only of the same size"""
         if not isinstance(o, Matrix):
             print("ERROR: attempt to add non-Matrix obj")
-            exit()
+            return None
         if o.shape[0] != self.shape[0] or o.shape[1] != self.shape[1]:
             print("ERROR: addition failed: matrices are not of the same size")
-            exit()
+            return None
         new_matrix = []
         for i in range(self.shape[0]):
             lst = []
@@ -92,10 +112,10 @@ class Matrix:
         """subtraction only for matrices of the same size"""
         if not isinstance(o, Matrix):
             print("ERROR: attempt to subtract non-Matrix obj")
-            exit()
+            return None
         if o.shape[0] != self.shape[0] or o.shape[1] != self.shape[1]:
             print("ERROR: subtraction failed: matrices are not of the same size")
-            exit()
+            return None
         new_matrix = []
         for i in range(self.shape[0]):
             lst = []
@@ -109,15 +129,16 @@ class Matrix:
         """reverse subtraction only for matrices of the same size"""
         """not actually sure what this means so probably wrong"""
         print("ERROR: not a valid demand")
-        exit()
+        return None
 
     def __truediv__(self, d): #change here
         """Division by scalar"""
         if not ( isinstance(d, int) or isinstance(d, float) or isinstance(d, Rational) or isinstance(d, Complex)):
             print("ERROR: can only divide by scalar")
-            exit()
+            return None
         if d == 0:
             print("ERROR: Division by zero")
+            return None
         new_matrix = []
         for i in range(self.shape[0]):
             lst = []
@@ -130,7 +151,7 @@ class Matrix:
     def __rtruediv__(self, d):
         """reverse Division by scalar"""
         print("ERROR: not a valid demand")
-        exit()
+        return None
 
     def __mul__(self, o):
         """Multiplication by Matrix or Scalar or Vector"""
@@ -179,12 +200,12 @@ class Matrix:
             return new_matrix
         else:
             print("ERROR: not a valid operation")
-            exit() 
+            return None
 
     def __rmul__(self, o):
         """reverse Multiplication by Matrix or Scalar or Vector"""
         print("ERROR: why are you here?")
-        exit()
+        return None
 
     def T(self):
         """Return transpose of Matrix"""
@@ -203,7 +224,7 @@ class Vector(Matrix):
         super().__init__(*args)
         if self.shape[1] != 1 and self.shape[0] != 1:
             print("ERROR: object is not a vector")
-            exit()
+            return None
 
     def dot(self, o):
         """dot product of two vectors"""
@@ -214,6 +235,6 @@ class Vector(Matrix):
             return new_value
         else:
             print("ERROR: dimension problem")
-            exit()
+            return None
 
 

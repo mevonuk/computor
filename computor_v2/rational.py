@@ -157,6 +157,9 @@ class Rational(Complex):
 		elif isinstance(n, Rational):
 			new_rational = Rational(self.real ** n.real)
 			return new_rational
+		elif isinstance(n, Complex) and n.imag == 0:
+			new_rational = Rational(self.real ** n.real)
+			return new_rational
 		else:
 			print("Bad input in r pow function")
 			return None
@@ -167,6 +170,9 @@ class Rational(Complex):
 			return new_rational
 		elif isinstance(n, Rational):
 			new_rational = Rational(n.real ** self.real)
+			return new_rational
+		elif isinstance(n, Complex) and n.imag == 0:
+			new_rational = Rational(self.real ** n.real)
 			return new_rational
 		else:
 			print("Bad input in r rpow function")
