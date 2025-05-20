@@ -1,6 +1,5 @@
 from rational import Rational
 from complex import Complex
-from matrix import Matrix, Vector
 from tree import Node
 from variable import Variable
 
@@ -21,19 +20,30 @@ class Function:
         self.name = name
 
     def __str__(self):
-        return f"Function {self.name}({self.var}) = {self.terms}"
+        #return f"Function {self.name}({self.var}) = {self.terms}"
+        return f"{self.name}({self.var})"
     
-    def plug_var(self, value):
+    def plug_var(self, value, history):
         var = Variable(self.var, value)
         self.terms.sub_var_node(var)
         print(self.terms)
 
+        print(self.terms.solve_node(history))
 
 
-n = Node(3,'x', '+')
-f = Function('f', 'x', n)
-print(f)
-f.plug_var(5)
+# m = Matrix([[3,4],[5,6]])
+
+# c = Complex(3,2)
+# r = Rational(5)
+
+# print(r*m)
+# #print(r*m)
+
+# history = {}
+# n = Node('x', m, '*')
+# f = Function('f', 'x', n)
+# print(f)
+# f.plug_var(c, history)
 
 
 

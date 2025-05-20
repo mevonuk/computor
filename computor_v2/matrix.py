@@ -11,9 +11,6 @@
 # |A| is the determinant of A, where |A| != 0
 ## this is easy for 2 x 2 matrices but then gets more complicated, skip?
 
-from rational import Rational
-from complex import Complex
-
 class Matrix:
 
     def __init__(self, *args):
@@ -133,7 +130,7 @@ class Matrix:
 
     def __truediv__(self, d): #change here
         """Division by scalar"""
-        if not ( isinstance(d, int) or isinstance(d, float) or isinstance(d, Rational) or isinstance(d, Complex)):
+        if isinstance(d, Matrix) or isinstance(d, str):
             print("ERROR: can only divide by scalar")
             return None
         if d == 0:
@@ -189,7 +186,7 @@ class Matrix:
                 new_vector = Vector(new_vector) #return vector
                 return new_vector
         #by scalar
-        elif isinstance(o, int) or isinstance(o, float) or isinstance(o, Rational) or isinstance(o, Complex):
+        elif not (isinstance(o, Matrix) or isinstance(o, str)):
             new_matrix = []
             for i in range(self.shape[0]):
                 lst = []
@@ -204,8 +201,52 @@ class Matrix:
 
     def __rmul__(self, o):
         """reverse Multiplication by Matrix or Scalar or Vector"""
-        print("ERROR: why are you here?")
-        return None
+        #by matrix
+        if isinstance(o, Matrix) and self.shape[1] == o.shape[0]:
+            new_matrix = []
+            for i in range(self.shape[0]):
+                lst = []
+                for j in range(o.shape[1]):
+                    value = 0
+                    for k in range(self.shape[1]):
+                        value += self.data[i][k] * o.data[k][j]
+                    lst.append(value)
+                new_matrix.append(lst)
+            if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+                new_vector = Vector(new_matrix) #return vector
+                return new_vector
+            else:
+                new_matrix = Matrix(new_matrix)# return matrix
+                return new_matrix
+        #by vector
+        elif isinstance(o, Vector) and self.shape[1] == o.shape[0]:
+            new_vector = []
+            for i in range(self.shape[0]):
+                lst = []
+                value = 0
+                for k in range(self.shape[1]):
+                    value += self.data[i][k] * o.data[1][k]
+                lst.append(value)
+            new_vector.append(lst)
+            if len(new_vector) == 1 and len(new_vector[0]) == 1:
+                new_scalar = new_vector[0][0] #return scalar
+                return new_scalar
+            else:
+                new_vector = Vector(new_vector) #return vector
+                return new_vector
+        #by scalar
+        elif not (isinstance(o, Matrix) or isinstance(o, str)):
+            new_matrix = []
+            for i in range(self.shape[0]):
+                lst = []
+                for j in range(self.shape[1]):
+                    lst.append(self.data[i][j] * o)
+                new_matrix.append(lst)
+            new_matrix = Matrix(new_matrix)
+            return new_matrix
+        else:
+            print("ERROR: not a valid operation")
+            return None
 
     def T(self):
         """Return transpose of Matrix"""

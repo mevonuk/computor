@@ -1,5 +1,7 @@
 import sys
 from complex import Complex
+from matrix import Matrix
+from variable import Variable
 
 class Rational(Complex):
 	def __init__(self, value):
@@ -79,6 +81,10 @@ class Rational(Complex):
 			convert = Complex(self.real, 0)
 			new_complex = convert * o
 			return new_complex
+		elif isinstance(o, Matrix):
+			return o * self
+		elif isinstance(o, Variable):
+			return o.value * self
 		else:
 			print("Bad input in r mul function")
 			return None
@@ -94,7 +100,10 @@ class Rational(Complex):
 			convert = Complex(self.real, 0)
 			new_complex = convert * o
 			return new_complex
+		elif isinstance(o, Variable):
+			return o.value * self
 		else:
+			print(o, type(o))
 			print("Bad input in r rmul function")
 			return None
 

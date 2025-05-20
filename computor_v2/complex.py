@@ -1,5 +1,6 @@
 import sys
 from my_math_tools import abs
+from matrix import Matrix
 
 class Complex:
 	def __init__(self, real_value, imag_value):
@@ -79,6 +80,7 @@ class Complex:
 			return None
 
 	def __mul__(self, o):
+		#cases needed for matrix?
 		if isinstance(o, int) or isinstance(o, float):
 			new_complex = Complex(self.real * o, self.imag * o)
 			return new_complex
@@ -89,6 +91,8 @@ class Complex:
 			d = o.imag
 			new_complex = Complex(a * c - b * d, a * d + b * c)
 			return new_complex
+		elif isinstance(o, Matrix):
+			return o * self
 		else:
 			print("Bad input in mul function")
 			return None

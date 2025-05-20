@@ -1,6 +1,5 @@
-from rational import Rational
 from complex import Complex
-from matrix import Matrix, Vector
+from matrix import Matrix
 from variable import Variable
 
 def get_value(value, history):
@@ -9,7 +8,7 @@ def get_value(value, history):
         if isinstance(result, str):
             result = get_value(result, history)
         return result
-    print("Variable " + value + " is not defined")
+    print(value + " is not defined")
     return None
 
 class Node:
@@ -23,6 +22,7 @@ class Node:
     def __str__(self):
         l = str(self.left)
         r = str(self.right)
+        o = str(self.type)
         if isinstance(self.left, Complex) and self.left.imag != 0:
             l = f"({l})"
         if isinstance(self.right, Complex) and self.right.imag != 0:
@@ -31,8 +31,12 @@ class Node:
             l = f"({l})"
         if isinstance(self.right, Node):
             r = f"({r})"
-        if self.type in set('+-*/%^') or self.type == '**':
+        if self.type in set('+-') or self.type == '**':
             o = f" {self.type} "
+        if self.type in set('*/%^'):
+            o = f"{self.type}"
+        if self.type == 'FUNC':
+            return f"{l}"
         return l + o + r
     
     def sub_var_node(self, variable):
@@ -63,8 +67,8 @@ class Node:
         if isinstance(self.right, str):
             right_value = get_value(self.right, history)
 
-        if left_value == None or right_value == None:
-            print("Equation cannot be resolved")
+        if (left_value == None or right_value == None) and self.type != 'FUNC' :
+            #print("Equation cannot be resolved")
             return None
 
         if self.type == '+':
@@ -83,7 +87,83 @@ class Node:
             if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
                 return right_value * left_value
             return None
+        if self.type == 'FUNC':
+            func = f"{self.left}"
+            func = self.left
+            return get_value(func, history)
+            
+
+
+
+
+
+
+
+# class Tree:
+
+#     def __init__(self, data):
+#         self.left = None
+#         self.right = None
+#         self.data = data
+
+#     def print_tree(self):
+#         if self.left:
+#             self.left.print_tree()
+#         print(self.data)
+#         if self.right:
+#             self.right.print_tree()
+
+#     def insert_left(self,data):
+#         if self.data:
+#             if self.left is None:
+#                 self.left = Tree(data)
+#             else:
+#                 self.left.insert_left(data)
+#         else:
+#             self.data = data
+
+#     def insert_right(self,data):
+#         if self.data:
+#             if self.right is None:
+#                 self.right = Tree(data)
+#             else:
+#                 self.right.insert_right(data)
+#         else:
+#             self.data = data
+
+# list = ['(','4.5', '+', '5',')']
+# list = ['4.5', '+', '5']
+
+# stack = []
+# tree = Tree('')
+# currenttree = tree
+# stack.append(tree)
+
+# for l in list:
+#     print(l)
+#     if l == '(':
+#         currenttree.insert_left('')
+#         stack.append(currenttree)
+#         currenttree = currenttree.left
+#     elif l in ('+_*/'):
+#         currenttree.data = l
+#         currenttree.insert_right('')
+#         stack.append(currenttree)
+#         currenttree = currenttree.right
+#     elif l == ')':
+#         currenttree = stack.pop()
+#     elif l not in ('+-*/)'):
+#         try:
+#             currenttree.data = float(l)
+#             parent = stack.pop()
+#             currenttree = parent
+#         except ValueError:
+#             raise ValueError("token is not valid", l)
         
+# tree.print_tree()
+
+    
+
 
 # r = Rational(2)
 # var = Variable('a', r)

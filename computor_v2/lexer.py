@@ -2,27 +2,9 @@ import re
 from matrix import Matrix, Vector
 from rational import Rational
 from complex import Complex
-from function import Term, Polynomial
-
-def tokenize2(expr):
-    import re
-
-    # Insert * between number and variable or (
-    expr = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expr)
-    # Insert * between ) and variable or number
-    expr = re.sub(r'(\))([a-zA-Z0-9])', r'\1*\2', expr)
-    # Insert * between variable and another variable if space between
-    expr = re.sub(r'([a-zA-Z])\s+([a-zA-Z])', r'\1*\2', expr)
-
-    token_pattern = r'''
-        (\*\*)                        # Power operator
-      | (\^|\+|\-|\*|\/|=|\(|\)|\[|\]|,|;)  # Operators, parentheses, brackets, separators
-      | (\d+\.\d+|\d+)                # Numbers
-      | (i)                           # Imaginary unit
-      | ([a-zA-Z_]\w*)                # Variables or function names
-    '''
-    tokens = re.findall(token_pattern, expr, re.VERBOSE)
-    return [t for group in tokens for t in group if t]
+from variable import Variable
+from function import Term, Polynomial, Function
+from tree import Node
 
 def tokenize(expr):
     # Only insert * where it's clearly implied, not between a function name and (
@@ -34,6 +16,9 @@ def tokenize(expr):
     expr = re.sub(r'([a-zA-Z])\s+([a-zA-Z])', r'\1*\2', expr)
     # DO NOT insert * between variable and ( — that breaks function calls
 
+    # Replace unary minus before variables (e.g., -x -> -1*x), but NOT before numbers
+    expr = re.sub(r'(?<![\w\)])-(?=[a-zA-Z_])', r'-1*', expr)
+
     token_pattern = r'''
         (\*\*)                    # Power operator
       | (\^|\+|\-|\*|\/|=|\(|\))   # Operators and parentheses
@@ -44,31 +29,27 @@ def tokenize(expr):
     tokens = re.findall(token_pattern, expr, re.VERBOSE)
     return [t for group in tokens for t in group if t]
 
+def is_number(token):
+    return re.match(r'^\d+(\.\d+)?$', token)
+
 def parse_tokens(tokens):
     output = []
     i = 0
     while i < len(tokens):
         token = tokens[i]
-
-        # Multiplication with group: f * (x)
-        if token == '*' and i + 1 < len(tokens) and tokens[i + 1] == '(':
+        
+        # Handle unary minus before a number: -5 → '-5'
+        if (
+            token == '-' and
+            i + 1 < len(tokens) and is_number(tokens[i + 1]) and
+            (i == 0 or tokens[i - 1] in ('(', '+', '-', '*', '/', '^', '='))
+        ):
+            output.append('-' + tokens[i + 1])
             i += 2
-            depth = 1
-            group = []
-            while i < len(tokens):
-                if tokens[i] == '(':
-                    depth += 1
-                elif tokens[i] == ')':
-                    depth -= 1
-                    if depth == 0:
-                        break
-                group.append(tokens[i])
-                i += 1
-            output.append('*')
-            output.append(('PAREN', parse_tokens(group)))
+            continue
         
         # Function call: f(x)
-        elif token.isalpha() and i + 1 < len(tokens) and tokens[i + 1] == '(':
+        if token.isalpha() and i + 1 < len(tokens) and tokens[i + 1] == '(':
             func_name = token
             depth = 1
             i += 2
@@ -84,28 +65,25 @@ def parse_tokens(tokens):
                 i += 1
             output.append(('FUNC', func_name, parse_tokens(group)))
 
-        # Grouped expression by itself: (x + 1)
-        elif token == '(':
-            i += 1
-            depth = 1
-            group = []
-            while i < len(tokens):
-                if tokens[i] == '(':
-                    depth += 1
-                elif tokens[i] == ')':
-                    depth -= 1
-                    if depth == 0:
-                        break
-                group.append(tokens[i])
-                i += 1
-            output.append(('PAREN', parse_tokens(group)))
-
         else:
             output.append(token)
 
         i += 1
 
     return output
+
+#if parsing a matix
+def extract_matrix_literal(s):
+    pattern = r'\[\[.*?\]\]'  # non-greedy match for matrix
+    matches = re.findall(pattern, s)
+    matrix_type = 2 # matrix type
+    if not matches:
+        pattern = r'\[.*?\]'  # non-greedy match for matrix
+        matches = re.findall(pattern, s)
+        matrix_type = 1 # vector type
+    if not matches:
+        matrix_type = 0 # not a matrix or vector type
+    return matches, matrix_type
 
 def split_terms(s):
     return re.findall(r'[+-]?\s*[^+-]+', s)
@@ -137,116 +115,7 @@ def parse_number(token):
         return Complex(real, imag)
     else:
         return Rational(real)
-
-def parse_term(s):
-    import re
-    s = s.replace(' ', '')
-    s_list = list(s)
-
-    # Fix implicit multiplications
-    i = 0
-    while i < len(s_list) - 1:
-        if s_list[i] == ')' and s_list[i+1] not in '+-*/^)':
-            s_list.insert(i+1, '*')
-        elif s_list[i].isdigit() and s_list[i+1] == '(':
-            s_list.insert(i+1, '*')
-        elif s_list[i].isdigit() and s_list[i+1].isalpha():
-            s_list.insert(i+1, '*')
-        elif s_list[i].isalpha() and s_list[i+1] == '(':
-            s_list.insert(i+1, '*')
-        elif s_list[i] == '-' and s_list[i+1].isalpha():
-            s_list.insert(i+1, '1*')
-        i += 1
-
-    s = ''.join(s_list)
-    print("Adjusted string:", s)
-
-    #term_pattern = r'([*/]?)' + r'([+-]?(?:\([^()]+\)|[a-zA-Z0-9_.+-]+))' + r'(?:\*?([a-zA-Z_][a-zA-Z_0-9]*)(?:\^(-?\d+))?)?'
-    term_pattern = r'([*/]?)' + r'([+-]?(?:\([^()]+\)|\d+(?:\.\d*)?|\.\d+)?)(?:\*?([a-zA-Z_][a-zA-Z_0-9]*)(?:\^(-?\d+))?)?'
-
-    poly_list = []
-
-    for match in re.finditer(term_pattern, s):
-        op, coef_str, var_str, exp_str = match.groups()
-        if not coef_str and not var_str:
-            continue
-
-        coef = 1
-        exp = 0
-        var = "dummy_var"
-
-        print("Match:", coef_str, var_str, exp_str, op)
-
-        # Handle sub-expressions (e.g., (x+1))
-        if coef_str.startswith('(') and coef_str.endswith(')'):
-            inner_expr = coef_str[1:-1]
-            sub_poly = parse_term(inner_expr)
-            print(sub_poly)
-            if poly_list:
-                if op == '*':
-                    p = poly_list[-1]
-                    p2 = p  * sub_poly
-                    poly_list.pop()
-                    poly_list.append(p2)
-                elif op == '/':
-                    print("Division of polys not yet supported.")
-                    exit()
-            else:
-                poly_list.append(sub_poly)
-            continue
-
-        # Handle plain terms or variables
-        if var_str:
-            var = var_str
-            exp = 1
-        if exp_str:
-            exp = int(exp_str)
-
-        if not var_str and coef_str.isalpha():  # Pure variable, like 'x'
-            coef = 1
-            var = coef_str
-            exp = 1
-        elif coef_str:
-            coef = parse_number(coef_str)
-
-
-        term = Term(coef, var, exp, '+')
-        print("term", term)
-
-        if poly_list and op == '*':
-            p = poly_list[-1]
-            p2 = Polynomial()
-            p2.add_term(term)
-            poly_list.pop()
-            poly_list.append(p * p2)
-        else:
-            p = Polynomial()
-            p.add_term(term)
-            print(p)
-            poly_list.append(p)
-
-        print("poly_list", poly_list)
-
-    poly = Polynomial()
-    for p in poly_list:
-        poly = poly + p
-
-    return poly
-
-
-#if parsing a matix
-def extract_matrix_literal(s):
-    pattern = r'\[\[.*?\]\]'  # non-greedy match for matrix
-    matches = re.findall(pattern, s)
-    matrix_type = 2 # matrix type
-    if not matches:
-        pattern = r'\[.*?\]'  # non-greedy match for matrix
-        matches = re.findall(pattern, s)
-        matrix_type = 1 # vector type
-    if not matches:
-        matrix_type = 0 # not a matrix or vector type
-    return matches, matrix_type
-
+    
 def parse_matrix_literal(matrix_str, matrix_type):
     # Remove outer brackets
     rows = matrix_str.split(';')
@@ -272,3 +141,72 @@ def parse_matrix_literal(matrix_str, matrix_type):
         return Matrix(matrix_data)
     else:
         return Vector(matrix_data)
+
+
+precedence = {
+    '**': 4,
+    '^': 4,
+    '*': 3,
+    '/': 3,
+    '%': 3,
+    '+': 2,
+    '-': 2,
+    '=': 1
+}
+
+right_associative = {'^', '**'}
+
+def parse_num(token):
+    if isinstance(token, Node):
+        return token
+    if token == 'i':
+        return Complex(0, 1)
+    if token.isalpha():
+        return token #Variable(token, None)
+    if '.' in token:
+        return Rational(float(token))
+    else:
+        return Rational(int(token))
+    
+def parse_expression(tokens, index=0, min_precedence=1):
+    def parse_primary(index):
+        token = tokens[index]
+
+        # Parentheses
+        if token == '(':
+            node, new_index = parse_expression(tokens, index + 1)
+            if tokens[new_index] != ')':
+                raise SyntaxError("Unmatched parenthesis")
+            return node, new_index + 1
+
+        # Function call tuple: ('FUNC', 'f', [['a']])
+        elif isinstance(token, tuple) and token[0] == 'FUNC':
+            func_name = token[1]
+            args_token_lists = token[2]
+
+            if len(args_token_lists) != 1:
+                raise NotImplementedError("Only single-argument functions supported")
+
+            arg_expr, _ = parse_expression(args_token_lists[0])
+            #return Node(func_name, arg_expr, 'FUNC'), index + 1
+            func = f"{func_name}({arg_expr})"
+            return Node(func, None, 'FUNC'), index + 1
+
+        return token, index + 1
+
+    lhs, index = parse_primary(index)
+
+    while index < len(tokens):
+        op = tokens[index]
+        if op not in precedence:
+            break
+        prec = precedence[op]
+        if prec < min_precedence:
+            break
+        next_min_prec = prec + (0 if op in right_associative else 1)
+
+        rhs, index = parse_expression(tokens, index + 1, next_min_prec)
+
+        lhs = Node(parse_num(lhs), parse_num(rhs), op)
+
+    return lhs, index
