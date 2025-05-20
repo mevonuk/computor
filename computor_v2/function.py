@@ -6,13 +6,13 @@ from variable import Variable
 class Function:
 
     def __init__(self, name, variable, terms):
-        if not isinstance(variable, str):
-            print("Error: variable name should be a string")
+        if not (isinstance(variable, str) or isinstance(variable, Node)):
+            print("Error: variable name should be a string or node")
             exit()
         if not isinstance(name, str):
             print("Error: function name should be a string")
             exit()
-        if not isinstance(terms, Node):
+        if not (isinstance(terms, Node) or isinstance(terms, Complex) or isinstance(terms, Rational)):
             print("Error: function terms should be a node type")
             exit()
         self.terms = terms
@@ -24,11 +24,13 @@ class Function:
         return f"{self.name}({self.var})"
     
     def plug_var(self, value, history):
+		# this needs to be changed to not overwrite x permenently
         var = Variable(self.var, value)
-        self.terms.sub_var_node(var)
-        print(self.terms)
 
-        print(self.terms.solve_node(history))
+        hold = self.terms
+        hold.sub_var_node(var)
+
+        return hold.solve_node(history)
 
 
 # m = Matrix([[3,4],[5,6]])

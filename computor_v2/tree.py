@@ -58,6 +58,7 @@ class Node:
     def solve_node(self, history):
         left_value = self.left
         right_value = self.right
+        print("solve", left_value, right_value, self.type)
         if isinstance(self.left, Node):
             left_value = self.left.solve_node(history)
         if isinstance(self.right, Node):
@@ -90,7 +91,9 @@ class Node:
         if self.type == 'FUNC':
             func = f"{self.left}"
             func = self.left
-            return get_value(func, history)
+            if isinstance(func, str):
+	            return get_value(func, history)
+            return func
             
 
 

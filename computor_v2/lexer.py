@@ -20,11 +20,12 @@ def tokenize(expr):
     expr = re.sub(r'(?<![\w\)])-(?=[a-zA-Z_])', r'-1*', expr)
 
     token_pattern = r'''
-        (\*\*)                    # Power operator
-      | (\^|\+|\-|\*|\/|=|\(|\))   # Operators and parentheses
-      | (\d+\.\d+|\d+)            # Numbers
-      | (i)                       # Imaginary unit
-      | ([a-zA-Z_]\w*)            # Variables and function names
+        (\*\*)						# Power operator
+      | (\^|\+|\-|\*|\/|=|\(|\))	# Operators and parentheses
+      | (\d+\.\d+|\d+)				# Numbers
+      | (i)							# Imaginary unit
+      | ([a-zA-Z_]\w*)				# Variables and function names
+	  | (\?)						# ? mark
     '''
     tokens = re.findall(token_pattern, expr, re.VERBOSE)
     return [t for group in tokens for t in group if t]
@@ -157,16 +158,16 @@ precedence = {
 right_associative = {'^', '**'}
 
 def parse_num(token):
-    if isinstance(token, Node):
-        return token
-    if token == 'i':
-        return Complex(0, 1)
-    if token.isalpha():
-        return token #Variable(token, None)
-    if '.' in token:
-        return Rational(float(token))
-    else:
-        return Rational(int(token))
+	if isinstance(token, Node) or isinstance(token, Complex) or isinstance(token, Rational):
+		return token
+	if token == 'i':
+		return Complex(0, 1)
+	if token.isalpha():
+		return token #Variable(token, None)
+	if '.' in token:
+		return Rational(float(token))
+	else:
+		return Rational(int(token))
     
 def parse_expression(tokens, index=0, min_precedence=1):
     def parse_primary(index):
@@ -192,7 +193,7 @@ def parse_expression(tokens, index=0, min_precedence=1):
             func = f"{func_name}({arg_expr})"
             return Node(func, None, 'FUNC'), index + 1
 
-        return token, index + 1
+        return parse_num(token), index + 1
 
     lhs, index = parse_primary(index)
 

@@ -14,24 +14,45 @@ def print_instructions():
 
 # print_instructions()
 
-s = '-x-(-4-2*x)'
-#s = '5 + i +3x^2 - f(a)'
+# tests:
+# assigning matrix
+# solving matrix containing functions and variables
+# assigning functions
+# solving functions, with variables and plugging in value of 'x' in ()
+# assigining variables, setting equal to other variables
+# solving with variables, functions
+# solving quadratic equations
 
-history = {}
+# s = '-x-(-4-2*x)'
+# s = 'y = 3'
 
-history['f(a)'] = 5
-history['x'] = 1
+# history = {}
 
-print(s)
-tokens = tokenize(s)
-tokens = parse_tokens(tokens)
-print(tokens)
+# history['f(a)'] = 5
+# history['x'] = 2
 
-tree, _ = parse_expression(tokens)
-print(tree)
-sol = tree.solve_node(history)
-if sol != None:
-    print(sol)
+
+# print(s)
+# key, value = parse_cmd(s, history)
+
+# if key and value:
+#     history[key] = value
+# print(history)
+
+# s = 'y = ?'
+# print(s)
+# key, value = parse_cmd(s, history)
+
+# print(s)
+# tokens = tokenize(s)
+# tokens = parse_tokens(tokens)
+# print(tokens)
+
+# tree, _ = parse_expression(tokens)
+# print('tree', tree)
+# sol = tree.solve_node(history)
+# if sol != None:
+#     print('sol', sol)
 
 
 #mat, mat_type = extract_matrix_literal(s)
@@ -40,7 +61,7 @@ if sol != None:
 # num = parse_term(s)
 # print("parsed:", num)
 
-exit()
+# exit()
 
 cmd = ""
 history = {}
@@ -54,7 +75,7 @@ while(1):
 
     if cmd:
         print(cmd)
-        key, value = parse_cmd(cmd)
+        key, value = parse_cmd(cmd, history)
         if key and value:
             history[key] = value
 

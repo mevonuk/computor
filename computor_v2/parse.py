@@ -1,8 +1,10 @@
 from rational import Rational
 from complex import Complex
 from matrix import Matrix, Vector
-from function import Term, Polynomial
+from function import Term, Polynomial, Function
 from lexer import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
+from lexer import parse_expression, parse_num
+from tree import get_value, Node
 
 def check_equal_signs(s):
 	# check number of = signs
@@ -67,7 +69,7 @@ def count_paren(s):
 		return 1
 	return 0
 
-def parse_cmd(cmd):
+def parse_cmd(cmd, history):
 	if not isinstance(cmd, str):
 		print("Error: Bad input to parcer, not a string")
 		return None, None
@@ -87,13 +89,52 @@ def parse_cmd(cmd):
 	value = None
 
 	tokens = tokenize(cmd)
-	print(tokens)
 	func = parse_tokens(tokens)
-	print(func)
 
 	func_def = 0
 	if func and func[0] and func[0][0] == 'FUNC':
 		func_def = 1
+
+	# check for solving, not FUNC
+	if tokens[len(tokens) - 1] == '?' and func_def == 0:
+		print("Solve equation")
+		# remove = and ?
+		end = len(tokens)-2
+		tokens = tokens[:end]
+		tokens = parse_tokens(tokens)
+
+		tree, _ = parse_expression(tokens)
+		if isinstance(tree, str):
+			sol = get_value(tree, history)
+			if not (isinstance(sol, Rational or isinstance(sol, Complex))):
+				sol = sol.solve_node(history)
+		else:
+			sol = tree.solve_node(history)
+		if sol != None:
+			print(sol)
+		return key, value
+
+	# check for solving, FUNC
+	if tokens[len(tokens) - 1] == '?' and func_def == 1:
+		print("Solve equation, func")
+		# remove = and ?
+		end = len(tokens)-2
+		tokens = tokens[:end]
+		tokens = parse_tokens(tokens)
+		print(tokens)
+
+		function = get_value(func[0][1], history)
+
+		# check for variable
+		variable = parse_num(func[0][2][0])
+		if isinstance(variable, str):
+			sol = function.terms.solve_node(history)
+			print(sol)
+		else:
+			sol = function.plug_var(variable, history)
+			print(sol)
+
+		return key, value
 
 	# first check for matrices/vectors
 	mat, mat_type = extract_matrix_literal(cmd)
@@ -114,10 +155,17 @@ def parse_cmd(cmd):
 			if tokens[0] == 'i':
 				print("ERROR: Assignment to i is forbidden")
 				return None, None
-			print("assigning variable", tokens[0])
-			print("equal to", tokens[2:])
+
+			# need to check for case where variable is set to itself plus something
+			if tokens[0] in tokens[2:]:
+				print("attempt to make variable recursive forbidden")
+				return None, None
+
 			# here parse RHS
-			return key, value
+			key = tokens[0]
+			tokens = parse_tokens(tokens[2:])
+			tree, _ = parse_expression(tokens)
+			return key, tree
 
 	# next check for functions
 	if func_def:
@@ -125,9 +173,16 @@ def parse_cmd(cmd):
 			if func[0][1] == 'i':
 				print("ERROR: Assignment to i is forbidden")
 				return None, None
-			print("assigning function", func[0][1], " of ", func[0][2])
-			print("equal to", func[2:])
+			print("assigning function", func[0][1], " of ", func[0][2], type(func[0][2]))
+			var, _ = parse_expression(func[0][2])
+			terms, _ = parse_expression(func[2:])
+			if not isinstance(terms, Node):
+				terms = Node(terms, 0, 'FUNC')
+			print("equal to", terms, type(terms))
+			key =func[0][1]
+			value = Function(func[0][1], var, terms)
 			# here parse RHS, and terms[0][2] if necessary
+			print("key", key, "terms", terms)
 			return key, value
 
 	return key, value
