@@ -186,8 +186,8 @@ def parse_cmd(cmd, history):
 			poly = value.convert_function()
 			print(poly, type(poly))
 			simplify = poly.simplify()
-			print(simplify)
-			# print(simplify.solve(history))
+			print(simplify, type(simplify))
+			print(simplify.solve(history))
 			return key, value
 
 	return key, value

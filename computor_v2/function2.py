@@ -5,135 +5,135 @@ from variable import Variable
 
 
 def add_exprs(a, b):
-    if isinstance(a, Polynomial) and isinstance(b, Polynomial):
-        return a + b
-    elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
-        # Convert a to rational with denom 1
-        a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, 'dummy_var', 0, '+'))
-        return add_rational_exprs(a_rational, b)
-    elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
-        return add_exprs(b, a)
-    elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
-        return add_rational_exprs(a, b)
-    else:
-        print("Unsupported addition combination")
-        exit()
+	if isinstance(a, Polynomial) and isinstance(b, Polynomial):
+		return a + b
+	elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
+		# Convert a to rational with denom 1
+		a_rational = RationalExpression(a, Polynomial())
+		a_rational.denominator.add_term((1, 'dummy_var', 0, '+'))
+		return add_rational_exprs(a_rational, b)
+	elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
+		return add_exprs(b, a)
+	elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
+		return add_rational_exprs(a, b)
+	else:
+		print("Unsupported addition combination")
+		exit()
 
 def add_rational_exprs(r1, r2):
-    # a/b + c/d = (ad + bc) / bd
-    new_num1 = r1.numerator * r2.denominator
-    new_num2 = r2.numerator * r1.denominator
-    new_num = new_num1 + new_num2
-    new_den = r1.denominator * r2.denominator
-    return RationalExpression(new_num, new_den)
+	# a/b + c/d = (ad + bc) / bd
+	new_num1 = r1.numerator * r2.denominator
+	new_num2 = r2.numerator * r1.denominator
+	new_num = new_num1 + new_num2
+	new_den = r1.denominator * r2.denominator
+	return RationalExpression(new_num, new_den)
 
 
 class Function:
 
-    def __init__(self, name, variable, terms):
-        if not (isinstance(variable, str) or isinstance(variable, Node)):
-            print("Error: variable name should be a string or node")
-            exit()
-        if not isinstance(name, str):
-            print("Error: function name should be a string")
-            exit()
-        if not (isinstance(terms, Node) or isinstance(terms, Complex) or isinstance(terms, Rational)):
-            print("Error: function terms should be a node type")
-            exit()
-        self.terms = terms
-        self.var = variable
-        self.name = name
+	def __init__(self, name, variable, terms):
+		if not (isinstance(variable, str) or isinstance(variable, Node)):
+			print("Error: variable name should be a string or node")
+			exit()
+		if not isinstance(name, str):
+			print("Error: function name should be a string")
+			exit()
+		if not (isinstance(terms, Node) or isinstance(terms, Complex) or isinstance(terms, Rational)):
+			print("Error: function terms should be a node type")
+			exit()
+		self.terms = terms
+		self.var = variable
+		self.name = name
 
-    def __str__(self):
-        #return f"Function {self.name}({self.var}) = {self.terms}"
-        return f"{self.name}({self.var})"
-    
-    # def plug_var(self, value, history):
+	def __str__(self):
+		#return f"Function {self.name}({self.var}) = {self.terms}"
+		return f"{self.name}({self.var})"
+	
+	# def plug_var(self, value, history):
 	# 	# this needs to be changed to not overwrite x permenently
-    #     var = Variable(self.var, value)
+	#     var = Variable(self.var, value)
 
-    #     hold = self.terms
-    #     hold.sub_var_node(var)
+	#     hold = self.terms
+	#     hold.sub_var_node(var)
 
-    #     return hold.solve_node(history)
-    
+	#     return hold.solve_node(history)
+	
 
 
-    # here
-    def convert_function(self):
-        print("Converting function tree to polynomial...")
-        polynomial = self._node_to_polynomial(self.terms)
-        return polynomial
+	# here
+	def convert_function(self):
+		print("Converting function tree to polynomial...")
+		polynomial = self._node_to_polynomial(self.terms)
+		return polynomial
 
-    def _node_to_polynomial(self, node):
-        if isinstance(node, (int, float, Complex, Rational)):
-            # Constant term
-            p = Polynomial()
-            p.add_term((node, self.var, 0, '+'))
-            return p
+	def _node_to_polynomial(self, node):
+		if isinstance(node, (int, float, Complex, Rational)):
+			# Constant term
+			p = Polynomial()
+			p.add_term((node, self.var, 0, '+'))
+			return p
 
-        if isinstance(node, str):
-            # Variable like 'x'
-            p = Polynomial()
-            p.add_term((1, node, 1, '+'))
-            return p
+		if isinstance(node, str):
+			# Variable like 'x'
+			p = Polynomial()
+			p.add_term((1, node, 1, '+'))
+			return p
 
-        if isinstance(node, Variable):
-            p = Polynomial()
-            p.add_term((1, node.name, 1, '+'))
-            return p
+		if isinstance(node, Variable):
+			p = Polynomial()
+			p.add_term((1, node.name, 1, '+'))
+			return p
 
-        if isinstance(node, Node):
-            left = self._node_to_polynomial(node.left)
-            right = self._node_to_polynomial(node.right)
+		if isinstance(node, Node):
+			left = self._node_to_polynomial(node.left)
+			right = self._node_to_polynomial(node.right)
 
-            if node.type == '+':
-                return left + right
-            elif node.type == '-':
-                return left - right
-            elif node.type == '*':
-                return left * right
-            elif node.type == '^':
-                # Must be variable or polynomial with 1 term to power
-                if isinstance(node.right, int):
-                    power = node.right
-                elif isinstance(node.right, Rational) and node.right.real % 1 == 0:
-                    power = node.right.real
-                elif isinstance(node.right, (Node, str)):
-                    right_eval = node.right
-                    if isinstance(right_eval, Node):
-                        right_eval = right_eval.solve_node({})
-                    if not isinstance(right_eval, int) and (isinstance(node.right, Rational) and not node.right.real  % 1 == 0):
-                        print("Exponent must be an integer.")
-                        exit()
-                    power = right_eval
-                else:
-                    print("Unsupported exponent type.")
-                    exit()
+			if node.type == '+':
+				return left + right
+			elif node.type == '-':
+				return left - right
+			elif node.type == '*':
+				return left * right
+			elif node.type == '^':
+				# Must be variable or polynomial with 1 term to power
+				if isinstance(node.right, int):
+					power = node.right
+				elif isinstance(node.right, Rational) and node.right.real % 1 == 0:
+					power = node.right.real
+				elif isinstance(node.right, (Node, str)):
+					right_eval = node.right
+					if isinstance(right_eval, Node):
+						right_eval = right_eval.solve_node({})
+					if not isinstance(right_eval, int) and (isinstance(node.right, Rational) and not node.right.real  % 1 == 0):
+						print("Exponent must be an integer.")
+						exit()
+					power = right_eval
+				else:
+					print("Unsupported exponent type.")
+					exit()
 
-                # Raise polynomial to power (only valid if it's a monomial)
-                base = self._node_to_polynomial(node.left)
-                result = base
-                for _ in range(power - 1):
-                    result = result * base
-                return result
-            elif node.type == '/':
-                numerator = self._node_to_polynomial(node.left)
-                denominator = self._node_to_polynomial(node.right)
+				# Raise polynomial to power (only valid if it's a monomial)
+				base = self._node_to_polynomial(node.left)
+				result = base
+				for _ in range(power - 1):
+					result = result * base
+				return result
+			elif node.type == '/':
+				numerator = self._node_to_polynomial(node.left)
+				denominator = self._node_to_polynomial(node.right)
 
-                # If both are polynomials, return rational expression
-                if isinstance(numerator, Polynomial) and isinstance(denominator, Polynomial):
-                    return RationalExpression(numerator, denominator)
-                else:
-                    print("Unsupported division of non-polynomial expressions")
-                    exit()
-            else:
-                print(f"Unsupported operation {node.type}")
-                exit()
+				# If both are polynomials, return rational expression
+				if isinstance(numerator, Polynomial) and isinstance(denominator, Polynomial):
+					return RationalExpression(numerator, denominator)
+				else:
+					print("Unsupported division of non-polynomial expressions")
+					exit()
+			else:
+				print(f"Unsupported operation {node.type}")
+				exit()
 
-        print("Unhandled node type in polynomial conversion.")
-        exit()
+		print("Unhandled node type in polynomial conversion.")
+		exit()
 
 
 
@@ -146,254 +146,254 @@ class Function:
 # each term of a polynomial is a coefficient multiplied by a variable to an exp
 class Term:
 
-    def __init__(self, coefficient, var, exp, operator):
-        if isinstance(exp, int) and exp >= 0:
-            self.exp = exp
-        else:
-            print("Usage Term: Exponent must be integer >= 0", exp)
-            exit()
-        if isinstance(coefficient, int) or isinstance(coefficient, float) or isinstance(coefficient, Rational) or isinstance(coefficient, Complex):
-            self.coef = coefficient
+	def __init__(self, coefficient, var, exp, operator):
+		if isinstance(exp, int) and exp >= 0:
+			self.exp = exp
+		else:
+			print("Usage Term: Exponent must be integer >= 0", exp)
+			exit()
+		if isinstance(coefficient, int) or isinstance(coefficient, float) or isinstance(coefficient, Rational) or isinstance(coefficient, Complex):
+			self.coef = coefficient
 
-        else:
-            print("Usage Term: Coef must be int, float, rational, or complex", coefficient)
-            exit()
-        if isinstance(var, str):
-            self.var = var
-        else:
-            print("Usage Term: Variable must be a string", var)
-            exit()
-        if operator in ('+', '-', '*', '%', '/'):
-            self.op = operator
+		else:
+			print("Usage Term: Coef must be int, float, rational, or complex", coefficient)
+			exit()
+		if isinstance(var, str):
+			self.var = var
+		else:
+			print("Usage Term: Variable must be a string", var)
+			exit()
+		if operator in ('+', '-', '*', '%', '/'):
+			self.op = operator
 
-    def __repr__(self):
-        varible = f"{self.var}^{self.exp}"
-        if self.exp == 0:
-            varible = ""
-        if self.exp == 1:
-            varible = f"{self.var}"
-        if isinstance(self.coef, Complex) and self.coef.imag != 0:
-            if self.exp == 0:
-                return f"{self.coef}"
-            else:
-                return f"({self.coef}){varible}"
-        else:
-            if self.coef == 1:
-                if varible:
-                    return f"{varible}"
-                return "1"
-            elif self.coef == -1:
-                if varible:
-                    return f"-{varible}"
-                return "-1"
-            else:
-                return f"{self.coef}{varible}"
+	def __repr__(self):
+		varible = f"{self.var}^{self.exp}"
+		if self.exp == 0:
+			varible = ""
+		if self.exp == 1:
+			varible = f"{self.var}"
+		if isinstance(self.coef, Complex) and self.coef.imag != 0:
+			if self.exp == 0:
+				return f"{self.coef}"
+			else:
+				return f"({self.coef}){varible}"
+		else:
+			if self.coef == 1:
+				if varible:
+					return f"{varible}"
+				return "1"
+			elif self.coef == -1:
+				if varible:
+					return f"-{varible}"
+				return "-1"
+			else:
+				return f"{self.coef}{varible}"
 
 class Polynomial:
-    def __init__(self):
-        self.terms = {}  # key = exponent, var, value = coefficient, operator
+	def __init__(self):
+		self.terms = {}  # key = exponent, var, value = coefficient, operator
 
-    def add_term(self, *args):
-        largs = list(args)
-        if len(largs) != 1:
-            print("Usage: add term with Term or 4-tuple")
-            exit()
-        if isinstance(largs[0], Term):
-            term = largs[0]
-        elif isinstance(largs[0], tuple):
-            term = Term(*largs[0])
-        else:
-            print("Usage: add Term with Term or 4-tuple")
-            exit()
+	def add_term(self, *args):
+		largs = list(args)
+		if len(largs) != 1:
+			print("Usage: add term with Term or 4-tuple")
+			exit()
+		if isinstance(largs[0], Term):
+			term = largs[0]
+		elif isinstance(largs[0], tuple):
+			term = Term(*largs[0])
+		else:
+			print("Usage: add Term with Term or 4-tuple")
+			exit()
 
-        key = (term.var, term.exp)
-        if key in self.terms:
-            existing_coef, _ = self.terms[key]
-            if term.op == '+':
-                self.terms[key] = [existing_coef + term.coef, '+']
-            elif term.op == '-':
-                self.terms[key] = [existing_coef - term.coef, '+']
-            elif term.op == '/':
-                self.terms[key] = [existing_coef / term.coef, '+']
-            elif term.op == '*':
-                self.terms[key] = [existing_coef * term.coef, '+']
-            elif term.op == '%':
-                if not isinstance(existing_coef, Complex) and not isinstance(term.coef, Complex):
-                    self.terms[key] = [existing_coef % term.coef, '+']
-                else:
-                    print("Error: mod operator not allowed with complex numbers")
-                    exit()
-        else:
-            if term.coef.real == -1:
-                self.terms[key] = [-1, term.op]
-            elif term.coef.real == 1:
-                self.terms[key] = [1, term.op]
-            self.terms[key] = [term.coef, term.op]
+		key = (term.var, term.exp)
+		if key in self.terms:
+			existing_coef, _ = self.terms[key]
+			if term.op == '+':
+				self.terms[key] = [existing_coef + term.coef, '+']
+			elif term.op == '-':
+				self.terms[key] = [existing_coef - term.coef, '+']
+			elif term.op == '/':
+				self.terms[key] = [existing_coef / term.coef, '+']
+			elif term.op == '*':
+				self.terms[key] = [existing_coef * term.coef, '+']
+			elif term.op == '%':
+				if not isinstance(existing_coef, Complex) and not isinstance(term.coef, Complex):
+					self.terms[key] = [existing_coef % term.coef, '+']
+				else:
+					print("Error: mod operator not allowed with complex numbers")
+					exit()
+		else:
+			if term.coef.real == -1:
+				self.terms[key] = [-1, term.op]
+			elif term.coef.real == 1:
+				self.terms[key] = [1, term.op]
+			self.terms[key] = [term.coef, term.op]
 
-    def __repr__(self):
-        if not self.terms:
-            return "0"
-        function_terms = self.terms.items()
-        parts = []
-        for i, ((var, exp), (coef, op)) in enumerate(function_terms):
-            if coef == 0:
-                continue
-            if isinstance(coef, Complex) and coef.imag != 0:
-                term = Term(coef, var, exp, op)
-            else:
-                term = Term(abs(coef.real), var, exp, op)
-            term_str = str(term)
-            if i == 0:
-                # First term: include sign only if negative
-                if not isinstance(coef, Complex) and coef < 0:
-                    parts.append(f"-{term_str}")
-                elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
-                    parts.append(f"-{term_str}")
-                else:
-                    parts.append(f"{term_str}")
-            else:
-                # Subsequent terms: prepend with + or -
-                if not isinstance(coef, Complex) and coef < 0:
-                    parts.append(f" - {term_str}")
-                elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
-                    parts.append(f" - {term_str}")
-                else:
-                    parts.append(f" + {term_str}")
-        result = "".join(parts)
-        if result:
-            return result
-        else:
-            return '0'
-        
-    def plug_in_var(self, var, value):
-        if not (isinstance(value, str) or isinstance(value, int) or isinstance(value, float) or isinstance(value, Rational) or isinstance(value, Complex)):
-            print("Error: Currently value must be a number or str")
-            exit()
-        if not isinstance(var, str):
-            print("Error: Variable name should be a string")
-            exit()
-        if var == "dummy_var":
-            print("Error: use of the variable name dummy_var is forbidden")
-            exit()
+	def __repr__(self):
+		if not self.terms:
+			return "0"
+		function_terms = self.terms.items()
+		parts = []
+		for i, ((var, exp), (coef, op)) in enumerate(function_terms):
+			if coef == 0:
+				continue
+			if isinstance(coef, Complex) and coef.imag != 0:
+				term = Term(coef, var, exp, op)
+			else:
+				term = Term(abs(coef.real), var, exp, op)
+			term_str = str(term)
+			if i == 0:
+				# First term: include sign only if negative
+				if not isinstance(coef, Complex) and coef < 0:
+					parts.append(f"-{term_str}")
+				elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
+					parts.append(f"-{term_str}")
+				else:
+					parts.append(f"{term_str}")
+			else:
+				# Subsequent terms: prepend with + or -
+				if not isinstance(coef, Complex) and coef < 0:
+					parts.append(f" - {term_str}")
+				elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
+					parts.append(f" - {term_str}")
+				else:
+					parts.append(f" + {term_str}")
+		result = "".join(parts)
+		if result:
+			return result
+		else:
+			return '0'
+		
+	def plug_in_var(self, var, value):
+		if not (isinstance(value, str) or isinstance(value, int) or isinstance(value, float) or isinstance(value, Rational) or isinstance(value, Complex)):
+			print("Error: Currently value must be a number or str")
+			exit()
+		if not isinstance(var, str):
+			print("Error: Variable name should be a string")
+			exit()
+		if var == "dummy_var":
+			print("Error: use of the variable name dummy_var is forbidden")
+			exit()
 
-        keys_to_replace = []
-        for (v, exp) in self.terms:
-            if v == var:
-                keys_to_replace.append((v, exp))
+		keys_to_replace = []
+		for (v, exp) in self.terms:
+			if v == var:
+				keys_to_replace.append((v, exp))
 
-        for key in keys_to_replace:
-            coef, op = self.terms.pop(key)
-            if not isinstance(value, str):
-                new_value = coef * (value ** key[1])
-                self.add_term((new_value, 'dummy_var', 0, '+'))
-            else:
-                self.add_term((coef, value, key[1], op))
+		for key in keys_to_replace:
+			coef, op = self.terms.pop(key)
+			if not isinstance(value, str):
+				new_value = coef * (value ** key[1])
+				self.add_term((new_value, 'dummy_var', 0, '+'))
+			else:
+				self.add_term((coef, value, key[1], op))
 
-    def __sub__(self, other):
-        if not isinstance(other, Polynomial):
-            print("Addition only supported between Polynomial instances.")
-            return NotImplemented
+	def __sub__(self, other):
+		if not isinstance(other, Polynomial):
+			print("Addition only supported between Polynomial instances.")
+			return NotImplemented
 
-        result = Polynomial()
+		result = Polynomial()
 
-        # First, copy all terms from self
-        for (var, exp), (coef, op) in self.terms.items():
-            result.terms[(var, exp)] = [coef, op]
+		# First, copy all terms from self
+		for (var, exp), (coef, op) in self.terms.items():
+			result.terms[(var, exp)] = [coef, op]
 
-        # Then, add or combine terms from other
-        for (var, exp), (coef, op) in other.terms.items():
-            key = (var, exp)
-            if key in result.terms:
-                existing_coef, _ = result.terms[key]
-                # Assume + when adding terms from different polynomials
-                result.terms[key] = [existing_coef - coef, '+']
-            else:
-                result.terms[key] = [-coef, op]
+		# Then, add or combine terms from other
+		for (var, exp), (coef, op) in other.terms.items():
+			key = (var, exp)
+			if key in result.terms:
+				existing_coef, _ = result.terms[key]
+				# Assume + when adding terms from different polynomials
+				result.terms[key] = [existing_coef - coef, '+']
+			else:
+				result.terms[key] = [-coef, op]
 
-        return result
-    
-    def __add__(self, other):
-        if not isinstance(other, Polynomial):
-            print("Addition only supported between Polynomial instances.")
-            return NotImplemented
+		return result
+	
+	def __add__(self, other):
+		if not isinstance(other, Polynomial):
+			print("Addition only supported between Polynomial instances.")
+			return NotImplemented
 
-        result = Polynomial()
+		result = Polynomial()
 
-        # First, copy all terms from self
-        for (var, exp), (coef, op) in self.terms.items():
-            result.terms[(var, exp)] = [coef, op]
+		# First, copy all terms from self
+		for (var, exp), (coef, op) in self.terms.items():
+			result.terms[(var, exp)] = [coef, op]
 
-        # Then, add or combine terms from other
-        for (var, exp), (coef, op) in other.terms.items():
-            key = (var, exp)
-            if key in result.terms:
-                existing_coef, _ = result.terms[key]
-                # Assume + when adding terms from different polynomials
-                result.terms[key] = [existing_coef + coef, '+']
-            else:
-                result.terms[key] = [coef, op]
+		# Then, add or combine terms from other
+		for (var, exp), (coef, op) in other.terms.items():
+			key = (var, exp)
+			if key in result.terms:
+				existing_coef, _ = result.terms[key]
+				# Assume + when adding terms from different polynomials
+				result.terms[key] = [existing_coef + coef, '+']
+			else:
+				result.terms[key] = [coef, op]
 
-        return result
+		return result
 
-    def __mul__(self, other):
-        if not isinstance(other, Polynomial):
-            return NotImplemented
+	def __mul__(self, other):
+		if not isinstance(other, Polynomial):
+			return NotImplemented
 
-        result = Polynomial()
+		result = Polynomial()
 
-        for (var1, exp1), (coef1, op1) in self.terms.items():
-            for (var2, exp2), (coef2, op2) in other.terms.items():
-                if var1 == var2:
-                    # Combine like variable powers
-                    new_exp = exp1 + exp2
-                    new_var = var1
-                elif var1 == "dummy_var":
-                    new_var = var2
-                    new_exp = exp2
-                elif var2 == "dummy_var":
-                    new_var = var1
-                    new_exp = exp1
-                else:
-                    print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})")
-                    exit()
+		for (var1, exp1), (coef1, op1) in self.terms.items():
+			for (var2, exp2), (coef2, op2) in other.terms.items():
+				if var1 == var2:
+					# Combine like variable powers
+					new_exp = exp1 + exp2
+					new_var = var1
+				elif var1 == "dummy_var":
+					new_var = var2
+					new_exp = exp2
+				elif var2 == "dummy_var":
+					new_var = var1
+					new_exp = exp1
+				else:
+					print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})")
+					exit()
 
-                new_coef = coef1 * coef2
-                result.add_term((new_coef, new_var, new_exp, '+'))
+				new_coef = coef1 * coef2
+				result.add_term((new_coef, new_var, new_exp, '+'))
 
-        return result
+		return result
 
 
 class RationalFunction:
-    def __init__(self, numerator, denominator):
-        if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
-            print("RationalFunction must be initialized with two Polynomial instances")
-            exit()
-        self.numerator = numerator
-        self.denominator = denominator
+	def __init__(self, numerator, denominator):
+		if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
+			print("RationalFunction must be initialized with two Polynomial instances")
+			exit()
+		self.numerator = numerator
+		self.denominator = denominator
 
-    def __repr__(self):
-        return f"({self.numerator}) / ({self.denominator})"
+	def __repr__(self):
+		return f"({self.numerator}) / ({self.denominator})"
 
-    def plug_in_var(self, var, value):
-        num = Polynomial()
-        den = Polynomial()
+	def plug_in_var(self, var, value):
+		num = Polynomial()
+		den = Polynomial()
 
-        # Copy then plug in
-        num.terms = self.numerator.terms.copy()
-        den.terms = self.denominator.terms.copy()
+		# Copy then plug in
+		num.terms = self.numerator.terms.copy()
+		den.terms = self.denominator.terms.copy()
 
-        num.plug_in_var(var, value)
-        den.plug_in_var(var, value)
+		num.plug_in_var(var, value)
+		den.plug_in_var(var, value)
 
-        return f"{num} / {den}"
+		return f"{num} / {den}"
 
 class RationalExpression:
-    def __init__(self, numerator, denominator):
-        if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
-            print("Error: Both numerator and denominator must be Polynomial instances")
-            exit()
-        self.numerator = numerator
-        self.denominator = denominator
+	def __init__(self, numerator, denominator):
+		if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
+			print("Error: Both numerator and denominator must be Polynomial instances")
+			exit()
+		self.numerator = numerator
+		self.denominator = denominator
 
-    def __repr__(self):
-        return f"({self.numerator}) / ({self.denominator})"
+	def __repr__(self):
+		return f"({self.numerator}) / ({self.denominator})"

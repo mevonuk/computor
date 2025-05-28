@@ -196,6 +196,6 @@ class Rational(Complex):
 			other = Rational(other)
 		if not isinstance(other, Rational):
 			return False
-        
+		
 		if self.real == other.real:
 			return True

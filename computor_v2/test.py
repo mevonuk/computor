@@ -5,13 +5,13 @@ from my_math_tools import quadratic
 from tree import Node
 
 def print_instructions():
-    print("Welcome to computor_v2 by mevonuk")
-    print("This calculator supports rational and complex numbers,")
-    print("matrices, vectors, and simple functions.")
-    print("\nAcceptible input:")
-    print("\tvariable_name = expression (to assign a value to a variable)")
-    print("\tExpression = ? (to solve expression)\n")
-    print("To exit the program, enter 'exit'\n")
+	print("Welcome to computor_v2 by mevonuk")
+	print("This calculator supports rational and complex numbers,")
+	print("matrices, vectors, and simple functions.")
+	print("\nAcceptible input:")
+	print("\tvariable_name = expression (to assign a value to a variable)")
+	print("\tExpression = ? (to solve expression)\n")
+	print("To exit the program, enter 'exit'\n")
 
 
 # print_instructions()
@@ -90,14 +90,14 @@ history = {}
 history['i'] = Complex(0, 1)
 
 while(1):
-    cmd = input("> ")
-    if cmd == 'exit':
-        exit()
+	cmd = input("> ")
+	if cmd == 'exit':
+		exit()
 
-    if cmd:
-        print(cmd)
-        key, value = parse_cmd(cmd, history)
-        if key and value:
-            history[key] = value
+	if cmd:
+		print(cmd)
+		key, value = parse_cmd(cmd, history)
+		if key and value:
+			history[key] = value
 
-    print(history)
+	print(history)

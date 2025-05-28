@@ -3,149 +3,149 @@ from matrix import Matrix
 from variable import Variable
 
 def get_value(value, history):
-    if value in history:
-        result = history[value]
-        if isinstance(result, str):
-            result = get_value(result, history)
-        return result
-    print(value + " is not defined")
-    return None
+	if value in history:
+		result = history[value]
+		if isinstance(result, str):
+			result = get_value(result, history)
+		return result
+	print(value + " is not defined")
+	return None
 
 def get_value2(value, history):
-    if value in history:
-        result = history[value]
-        if isinstance(result, str):
-            result = get_value(result, history)
-        return result
-    print(value + " is not defined")
-    return value
+	if value in history:
+		result = history[value]
+		if isinstance(result, str):
+			result = get_value(result, history)
+		return result
+	print(value + " is not defined")
+	return value
 
 class Node:
 
-    def __init__(self, left, right, type):
-        # left and right can be anything, op defines how they relate to each other
-        self.left = left
-        self.right = right
-        self.type = type
+	def __init__(self, left, right, type):
+		# left and right can be anything, op defines how they relate to each other
+		self.left = left
+		self.right = right
+		self.type = type
 
-    def __str__(self):
-        l = str(self.left)
-        r = str(self.right)
-        o = str(self.type)
-        if isinstance(self.left, Complex) and self.left.imag != 0:
-            l = f"({l})"
-        if isinstance(self.right, Complex) and self.right.imag != 0:
-            r = f"({r})"
-        if isinstance(self.left, Node):
-            l = f"({l})"
-        if isinstance(self.right, Node):
-            r = f"({r})"
-        if self.type in set('+-') or self.type == '**':
-            o = f" {self.type} "
-        if self.type in set('*/%^'):
-            o = f"{self.type}"
-        if self.type == 'FUNC':
-            return f"{l}"
-        return l + o + r
-    
-    def sub_var_node(self, variable):
-        if isinstance(self.left, Variable) and self.left == variable:
-            self.left = variable.value
-        elif isinstance(self.left, str) and self.left == variable.name:
-            self.left = variable.value
-        elif isinstance(self.left, Node):
-            self.left.sub_var_node(variable)
+	def __str__(self):
+		l = str(self.left)
+		r = str(self.right)
+		o = str(self.type)
+		if isinstance(self.left, Complex) and self.left.imag != 0:
+			l = f"({l})"
+		if isinstance(self.right, Complex) and self.right.imag != 0:
+			r = f"({r})"
+		if isinstance(self.left, Node):
+			l = f"({l})"
+		if isinstance(self.right, Node):
+			r = f"({r})"
+		if self.type in set('+-') or self.type == '**':
+			o = f" {self.type} "
+		if self.type in set('*/%^'):
+			o = f"{self.type}"
+		if self.type == 'FUNC':
+			return f"{l}"
+		return l + o + r
+	
+	def sub_var_node(self, variable):
+		if isinstance(self.left, Variable) and self.left == variable:
+			self.left = variable.value
+		elif isinstance(self.left, str) and self.left == variable.name:
+			self.left = variable.value
+		elif isinstance(self.left, Node):
+			self.left.sub_var_node(variable)
 
-        if isinstance(self.right, Variable) and self.right == variable:
-            self.right = variable.value
-        elif isinstance(self.right, str) and self.right == variable.name:
-            self.right = variable.value
-        elif isinstance(self.left, Node):
-            self.right.sub_var_node(variable)
+		if isinstance(self.right, Variable) and self.right == variable:
+			self.right = variable.value
+		elif isinstance(self.right, str) and self.right == variable.name:
+			self.right = variable.value
+		elif isinstance(self.left, Node):
+			self.right.sub_var_node(variable)
 
 
-    def solve_node(self, history):
-        left_value = self.left
-        right_value = self.right
-        print("solve", left_value, right_value, self.type)
-        if isinstance(self.left, Node):
-            left_value = self.left.solve_node(history)
-        if isinstance(self.right, Node):
-            right_value = self.right.solve_node(history)
-        if isinstance(self.left, str):
-            left_value = get_value(self.left, history)
-        if isinstance(self.right, str):
-            right_value = get_value(self.right, history)
+	def solve_node(self, history):
+		left_value = self.left
+		right_value = self.right
+		print("solve", left_value, right_value, self.type)
+		if isinstance(self.left, Node):
+			left_value = self.left.solve_node(history)
+		if isinstance(self.right, Node):
+			right_value = self.right.solve_node(history)
+		if isinstance(self.left, str):
+			left_value = get_value(self.left, history)
+		if isinstance(self.right, str):
+			right_value = get_value(self.right, history)
 
-        if (left_value == None or right_value == None) and self.type != 'FUNC' :
-            #print("Equation cannot be resolved")
-            return None
+		if (left_value == None or right_value == None) and self.type != 'FUNC' :
+			#print("Equation cannot be resolved")
+			return None
 
-        if self.type == '+':
-            return left_value + right_value
-        if self.type == '-':
-            return left_value - right_value
-        if self.type == '*':
-            return left_value * right_value
-        if self.type == '/':
-            return left_value / right_value
-        if self.type == '%':
-            return left_value % right_value
-        if self.type == '^':
-            return left_value ** right_value
-        if self.type == '**':
-            if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
-                return right_value * left_value
-            print("** can only be used with matrix multiplication")
-            return None
-        if self.type == 'FUNC':
-            func = f"{self.left}"
-            func = self.left
-            if isinstance(func, str):
-                return get_value(func, history)
-            return func
-            
+		if self.type == '+':
+			return left_value + right_value
+		if self.type == '-':
+			return left_value - right_value
+		if self.type == '*':
+			return left_value * right_value
+		if self.type == '/':
+			return left_value / right_value
+		if self.type == '%':
+			return left_value % right_value
+		if self.type == '^':
+			return left_value ** right_value
+		if self.type == '**':
+			if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
+				return right_value * left_value
+			print("** can only be used with matrix multiplication")
+			return None
+		if self.type == 'FUNC':
+			func = f"{self.left}"
+			func = self.left
+			if isinstance(func, str):
+				return get_value(func, history)
+			return func
+			
 
-    def simplify_node(self, history):
-        left_value = self.left
-        right_value = self.right
-        print("simplify", left_value, right_value, self.type)
-        if isinstance(self.left, Node):
-            left_value = self.left.simplify_node(history)
-        if isinstance(self.right, Node):
-            right_value = self.right.simplify_node(history)
-        if isinstance(self.left, str):
-            left_value = get_value2(self.left, history)
-        if isinstance(self.right, str):
-            right_value = get_value2(self.right, history)
+	def simplify_node(self, history):
+		left_value = self.left
+		right_value = self.right
+		print("simplify", left_value, right_value, self.type)
+		if isinstance(self.left, Node):
+			left_value = self.left.simplify_node(history)
+		if isinstance(self.right, Node):
+			right_value = self.right.simplify_node(history)
+		if isinstance(self.left, str):
+			left_value = get_value2(self.left, history)
+		if isinstance(self.right, str):
+			right_value = get_value2(self.right, history)
 
-        print("values:", left_value, right_value, self.type)
-        
-        if not (isinstance(self.right, Node) or isinstance(self.left, Node)) and not (isinstance(self.right, str) or isinstance(self.left, str)):
-            if self.type == '+':
-                return left_value + right_value
-            if self.type == '-':
-                return left_value - right_value
-            if self.type == '*':
-                return left_value * right_value
-            if self.type == '/':
-                return left_value / right_value
-            if self.type == '%':
-                return left_value % right_value
-            if self.type == '^':
-                return left_value ** right_value
-            if self.type == '**':
-                if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
-                    return right_value * left_value
-                print("** can only be used with matrix multiplication")
-                return None
-        if self.type == 'FUNC':
-            func = f"{self.left}"
-            func = self.left
-            if isinstance(func, str):
-                return get_value2(func, history)
-            return func
-        return Node(left_value, right_value, self.type)
+		print("values:", left_value, right_value, self.type)
+		
+		if not (isinstance(self.right, Node) or isinstance(self.left, Node)) and not (isinstance(self.right, str) or isinstance(self.left, str)):
+			if self.type == '+':
+				return left_value + right_value
+			if self.type == '-':
+				return left_value - right_value
+			if self.type == '*':
+				return left_value * right_value
+			if self.type == '/':
+				return left_value / right_value
+			if self.type == '%':
+				return left_value % right_value
+			if self.type == '^':
+				return left_value ** right_value
+			if self.type == '**':
+				if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
+					return right_value * left_value
+				print("** can only be used with matrix multiplication")
+				return None
+		if self.type == 'FUNC':
+			func = f"{self.left}"
+			func = self.left
+			if isinstance(func, str):
+				return get_value2(func, history)
+			return func
+		return Node(left_value, right_value, self.type)
 
 
 
@@ -212,10 +212,10 @@ class Node:
 #             currenttree = parent
 #         except ValueError:
 #             raise ValueError("token is not valid", l)
-        
+		
 # tree.print_tree()
 
-    
+	
 
 
 # r = Rational(2)
