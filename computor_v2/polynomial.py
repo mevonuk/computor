@@ -1,6 +1,6 @@
 from rational import Rational
 from complex import Complex
-from tree import Node, get_value2
+from tools import get_value2
 from variable import Variable
 
 def mul_exprs(a, b):
@@ -70,96 +70,6 @@ def add_rational_exprs(r1, r2):
 	new_num = new_num1 + new_num2
 	new_den = r1.denominator * r2.denominator
 	return RationalExpression(new_num, new_den)
-
-class Function:
-
-	def __init__(self, name, variable, terms):
-		if not (isinstance(variable, str) or isinstance(variable, Node)):
-			print("Error: variable name should be a string or node")
-			exit()
-		if not isinstance(name, str):
-			print("Error: function name should be a string")
-			exit()
-		if not (isinstance(terms, Node) or isinstance(terms, Complex) or isinstance(terms, Rational)):
-			print("Error: function terms should be a node type")
-			exit()
-		self.terms = terms
-		self.var = variable
-		self.name = name
-
-	def __str__(self):
-		#return f"Function {self.name}({self.var}) = {self.terms}"
-		return f"{self.name}({self.var})"
-	
-	# def plug_var(self, value, history):
-	# 	# this needs to be changed to not overwrite x permenently
-	#     var = Variable(self.var, value)
-
-	#     hold = self.terms
-	#     hold.sub_var_node(var)
-
-	#     return hold.solve_node(history)
-	
-
-
-	# here
-	def convert_function(self):
-		print("Converting function tree to polynomial...")
-		polynomial = self._node_to_polynomial(self.terms)
-		return polynomial
-
-	def _node_to_polynomial(self, node):
-		if isinstance(node, (int, float, Complex, Rational)):
-			p = Polynomial()
-			p.add_term((node, self.var, 0, '+'))
-			return p
-
-		if isinstance(node, str):
-			p = Polynomial()
-			p.add_term((1, node, 1, '+'))
-			return p
-
-		if isinstance(node, Variable):
-			p = Polynomial()
-			p.add_term((1, node.name, 1, '+'))
-			return p
-
-		if isinstance(node, Node):
-			left = self._node_to_polynomial(node.left)
-			right = self._node_to_polynomial(node.right)
-
-			if node.type == '+':
-				return add_exprs(left, right)
-			elif node.type == '-':
-				return sub_exprs(left, right)
-			elif node.type == '*':
-				return mul_exprs(left, right)
-			elif node.type == '/':
-				if not isinstance(left, Polynomial) or not isinstance(right, Polynomial):
-					print("Only polynomial numerator and denominator supported in rational expressions")
-					exit()
-				return RationalExpression(left, right)
-			elif node.type == '^':
-				if isinstance(node.right, int):
-					power = node.right
-				elif isinstance(node.right, Rational) and node.right.real % 1 == 0:
-					power = int(node.right.real)
-				else:
-					print("Exponent must be an integer.")
-					exit()
-				base = self._node_to_polynomial(node.left)
-				result = base
-				for _ in range(power - 1):
-					result = result * base
-				return result
-			else:
-				print(f"Unsupported operation {node.type}")
-				exit()
-
-		print("Unhandled node type in polynomial conversion.")
-		exit()
-
-
 
 
 # Note: polynomial can only have one var, when solving for that var, 
@@ -450,10 +360,14 @@ class Polynomial:
 		var = next(iter(self.terms))[0]  # get any variable used
 		# check if var in history
 		value = get_value2(var, history)
+
+		if value == var:
+			return self
+
 		result = Polynomial()
 		if isinstance(value, (int, float, Rational, Complex)):
 			# plug value into polynomial
-			result = plug_in_var(self, value)
+			result = plug_in_var(self, value, history)
 		return result
 
 	def get_degree(self):
@@ -538,24 +452,26 @@ class RationalExpression:
 		return result
 		# print(self.numerator / self.denominator)
 
-def plug_in_var(func, value):
+def plug_in_var(func, value, history):
+	if isinstance(value, str):
+		value = get_value2(value, history)
+
 	# attempt to solve top and bottom
 	if isinstance(func, RationalExpression):
-		print("plugging in value in rationalexp")
+		# print("plugging in value in rationalexp")
 		top = Polynomial()
 		bottom = Polynomial()
 		if isinstance(func.numerator, Polynomial):
-			top = plug_in_var(func.numerator, value)
+			top = plug_in_var(func.numerator, value, history)
 		if isinstance(func.denominator, Polynomial):
-			bottom = plug_in_var(func.denominator, value)
+			bottom = plug_in_var(func.denominator, value, history)
 		result = RationalExpression(top, bottom)
 		return result
 		# print(self.numerator / self.denominator)
 	elif isinstance(func, Polynomial):
-		print("plugging in val in poly")
 		if not isinstance(value, (str, int, float, Rational, Complex)):
 			print("Error: Currently value must be a number or str")
-			exit()
+			return func
 
 		result = Polynomial()
 
@@ -582,3 +498,5 @@ def plug_in_var(func, value):
 		return result
 	else:
 		print("not a rational expression or poly, cannot plug_in_var")
+
+	return func

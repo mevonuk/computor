@@ -1,8 +1,5 @@
 from complex import Complex
 from parse import parse_cmd
-from lexer import tokenize, parse_expression, parse_tokens
-from my_math_tools import quadratic
-from tree import Node
 
 def print_instructions():
 	print("Welcome to computor_v2 by mevonuk")
@@ -30,60 +27,41 @@ def print_instructions():
 
 # solving has two cases: f = ? and f(x) = 4 ? to solve for x
 
-# print following input should show simplified form: f = 2 + 4 -> f = 6
-
 # s = '-x-(-4-2*x)'
 # s = 'y = 3'
 # s = "f(Y) = (y^2 + 3*y +2 / 4)/(y+1) + 1"
-s = "f(x) = 2 x "
+s = "f(x) = x^2 + 2x + 6 "
 # s = "f(x) = 3 *  2x + x^2+1/(x+1)"
 
-# s = "f(x) = (x+1)"
+# s = "g(x) = (x+1)"
 
 history = {}
 
 # history['f(a)'] = 5
 # history['x'] = 2
-history['s'] = 'y'
+# history['s'] = 'y'
 
 print('>', s)
 key, value = parse_cmd(s, history)
 history[key] = value
 
+
+# for key in history:
+# 	print(key, history)
+
+
 s = "f(1) = ?"
 print('>', s)
 key, value = parse_cmd(s, history)
 
-s = "3 + f(1) = ?"
+s = "f(x) = 1 ?"
 print('>', s)
 key, value = parse_cmd(s, history)
 
 
-# if key and value:
-#     history[key] = value
-# print(history)
-
-# s = 'y = ?'
-# print(s)
-# key, value = parse_cmd(s, history)
-
-# print(s)
-# tokens = tokenize(s)
-# tokens = parse_tokens(tokens)
-# print(tokens)
-
-# tree, _ = parse_expression(tokens)
-# print('tree', tree)
-# sol = tree.solve_node(history)
-# if sol != None:
-#     print('sol', sol)
 
 
-#mat, mat_type = extract_matrix_literal(s)
-#print(mat, mat_type)
 
-# num = parse_term(s)
-# print("parsed:", num)
 
 exit()
 

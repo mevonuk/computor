@@ -1,24 +1,9 @@
 from complex import Complex
 from matrix import Matrix
 from variable import Variable
-
-def get_value(value, history):
-	if value in history:
-		result = history[value]
-		if isinstance(result, str):
-			result = get_value(result, history)
-		return result
-	# print(value + " is not defined")
-	return None
-
-def get_value2(value, history):
-	if value in history:
-		result = history[value]
-		if isinstance(result, str):
-			result = get_value2(result, history)
-		return result
-	# print(value + " is not defined")
-	return value
+from lex_base import tokenize, parse_tokens, parse_num_raw
+from polynomial import Polynomial, RationalExpression, plug_in_var
+from tools import get_value, get_value2
 
 class Node:
 
@@ -67,7 +52,7 @@ class Node:
 	def solve_node(self, history):
 		left_value = self.left
 		right_value = self.right
-		print("solve", left_value, right_value, self.type)
+		# print("solve", left_value, right_value, self.type)
 		if isinstance(self.left, Node):
 			left_value = self.left.solve_node(history)
 		if isinstance(self.right, Node):
@@ -99,12 +84,33 @@ class Node:
 			print("** can only be used with matrix multiplication")
 			return None
 		if self.type == 'FUNC':
-			func = f"{self.left}"
 			func = self.left
-			print(func)
-			if isinstance(func, str):
-				return get_value(func, history)
-			return func
+
+			tokens = tokenize(func)
+			func = parse_tokens(tokens)
+
+			function = get_value2(func[0][1], history)
+			if func[0][1] == function:
+				print("Error: function not defined")
+				return None
+
+			# check for variable
+			variable = parse_num_raw(func[0][2][0])
+
+			if isinstance(function, (Polynomial, RationalExpression)):
+				sol = plug_in_var(function, variable, history)
+				# this is such a hack!
+				hack = f"{sol}"
+				sol = parse_num_raw(hack)
+			elif isinstance(variable, str):
+				print(function, type(function))
+				sol = function.terms.solve_node(history)
+				print('not defined', sol)
+			else:
+				print("function not poly/rational or otherwise")
+				return None
+
+			return sol
 			
 
 	def simplify_node(self, history):
@@ -147,104 +153,3 @@ class Node:
 				return get_value2(func, history)
 			return func
 		return Node(left_value, right_value, self.type)
-
-
-
-
-
-
-# class Tree:
-
-#     def __init__(self, data):
-#         self.left = None
-#         self.right = None
-#         self.data = data
-
-#     def print_tree(self):
-#         if self.left:
-#             self.left.print_tree()
-#         print(self.data)
-#         if self.right:
-#             self.right.print_tree()
-
-#     def insert_left(self,data):
-#         if self.data:
-#             if self.left is None:
-#                 self.left = Tree(data)
-#             else:
-#                 self.left.insert_left(data)
-#         else:
-#             self.data = data
-
-#     def insert_right(self,data):
-#         if self.data:
-#             if self.right is None:
-#                 self.right = Tree(data)
-#             else:
-#                 self.right.insert_right(data)
-#         else:
-#             self.data = data
-
-# list = ['(','4.5', '+', '5',')']
-# list = ['4.5', '+', '5']
-
-# stack = []
-# tree = Tree('')
-# currenttree = tree
-# stack.append(tree)
-
-# for l in list:
-#     print(l)
-#     if l == '(':
-#         currenttree.insert_left('')
-#         stack.append(currenttree)
-#         currenttree = currenttree.left
-#     elif l in ('+_*/'):
-#         currenttree.data = l
-#         currenttree.insert_right('')
-#         stack.append(currenttree)
-#         currenttree = currenttree.right
-#     elif l == ')':
-#         currenttree = stack.pop()
-#     elif l not in ('+-*/)'):
-#         try:
-#             currenttree.data = float(l)
-#             parent = stack.pop()
-#             currenttree = parent
-#         except ValueError:
-#             raise ValueError("token is not valid", l)
-		
-# tree.print_tree()
-
-	
-
-
-# r = Rational(2)
-# var = Variable('a', r)
-# var.print_value()
-
-# n1 = Node('b',r,'+')
-# print(n1)
-
-# n1.sub_var_node(var)
-
-
-# c = Complex(3,5)
-# r = Rational(2)
-# m = Matrix([[3,4],[4,3]])
-
-# v = Vector([[3,4]])
-# print(v)
-
-# n1 = Node(0,0,'+')
-# print(n1)
-
-# history = {}
-# history['a'] = c
-# history['c'] = 'a'
-
-# n2 = Node(v.T(),m,'**')
-
-# print("Solving... " + str(n2) + " =")
-
-# print(n2.solve_node(history))

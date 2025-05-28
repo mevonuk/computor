@@ -1,10 +1,12 @@
 from rational import Rational
 from complex import Complex
 from matrix import Matrix, Vector
-from function import Term, Polynomial, Function, RationalExpression, plug_in_var
-from lexer import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
+from polynomial import Term, Polynomial, RationalExpression, plug_in_var
+from function import Function
+from lex_base import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
 from lexer import parse_expression, parse_num
-from tree import get_value, Node, get_value2
+from tree import Node
+from tools import get_value, get_value2
 import re
 
 def check_equal_signs(s):
@@ -76,6 +78,40 @@ def count_paren(s):
 		return 1
 	return 0
 
+def split_at_equals(tokens):
+    if '=' in tokens:
+        idx = tokens.index('=')
+        left = tokens[:idx]
+        right = tokens[idx + 1:]
+        return left, right
+    else:
+        raise ValueError("'=' not found in token list")
+
+def define_function_terms(name, var, term):
+
+	terms, _ = parse_expression(term)
+
+	# if not isinstance(terms, Node):
+		# terms = Node(terms, 0, 'FUNC')
+
+	value = Function(name, var, terms)
+	# here parse RHS, and terms[0][2] if necessary
+	# print("key", key, "terms", terms)
+	poly = value.convert_function()
+	value = poly
+	if isinstance(poly, RationalExpression):
+		simplify = poly.simplify()
+		print(simplify.solve(history))
+		value = simplify
+	return value
+
+def define_function(func):
+	var, _ = parse_expression(func[0][2])
+
+	key = func[0][1]
+	value = define_function_terms(func[0][1], var, func[2:])
+	return key, value
+
 def parse_cmd(cmd, history):
 	cmd = cmd.lower()
 
@@ -133,28 +169,51 @@ def parse_cmd(cmd, history):
 
 	# check for solving, FUNC
 	if tokens[len(tokens) - 1] == '?' and func_def == 1:
-		# remove = and ?
-		end = len(tokens)-2
+		# remove ?
+		end = len(tokens)-1
 		tokens = tokens[:end]
-		tokens = parse_tokens(tokens)
 
-		function = get_value(func[0][1], history)
+		# case 1: ending with =
+		if tokens[len(tokens)-1] == '=':
+			# simple solve
+			function = get_value(func[0][1], history)
 
-		if function is None:
-			print("Error: function is not defined")
-			return key, value
+			if function is None:
+				print("Error: function is not defined")
+				return key, value
 
-		# check for variable
-		variable = parse_num(func[0][2][0])
-		if isinstance(function, (Polynomial, RationalExpression)):
-			sol = plug_in_var(function, variable, history)
-			print(sol)
-		elif isinstance(variable, str):
-			print(function, type(function))
-			sol = function.terms.solve_node(history)
-			print(sol)
+			# check for variable
+			variable = parse_num(func[0][2][0])
+			if isinstance(function, (Polynomial, RationalExpression)):
+				sol = plug_in_var(function, variable, history)
+				print(sol)
+			elif isinstance(variable, str):
+				print(function, type(function))
+				sol = function.terms.solve_node(history)
+				print(sol)
+			else:
+				print("function not poly/rational or otherwise")
+
+		# case 2: ending with  a number
 		else:
-			print("function not poly/rational or otherwise")
+			# quadratic solve
+			print("case 2: solve quadratic equation")
+			left, right = split_at_equals(tokens)
+
+			left = parse_tokens(left)
+			right = parse_tokens(right)
+
+			function_left = get_value(left[0][1], history)
+
+			if function_left is None:
+				print("Error: function is not defined")
+				return key, value
+
+			print(function_left)
+			function_right = define_function_terms('dummy_fun', 'dummy_var', right)
+			print(function_right)
+			function = function_left - function_right
+			print(function)
 
 		return key, value
 
@@ -195,22 +254,7 @@ def parse_cmd(cmd, history):
 			if func[0][1] == 'i':
 				print("ERROR: Assignment to i is forbidden")
 				return None, None
-			# print("assigning function", func[0][1], " of ", func[0][2], type(func[0][2]))
-			var, _ = parse_expression(func[0][2])
-			terms, _ = parse_expression(func[2:])
-			if not isinstance(terms, Node):
-				terms = Node(terms, 0, 'FUNC')
-			# print("equal to", terms, type(terms))
-			key =func[0][1]
-			value = Function(func[0][1], var, terms)
-			# here parse RHS, and terms[0][2] if necessary
-			# print("key", key, "terms", terms)
-			poly = value.convert_function()
-			value = poly
-			if isinstance(poly, RationalExpression):
-				simplify = poly.simplify()
-				print(simplify.solve(history))
-				value = simplify
+			key, value = define_function(func)
 			print(value)
 			return key, value
 

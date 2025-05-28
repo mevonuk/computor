@@ -3,10 +3,73 @@ from matrix import Matrix, Vector
 from rational import Rational
 from complex import Complex
 from variable import Variable
-from polynomial import Term, Polynomial
-from function import Function
-from tree import Node
-from lex_base import tokenize, parse_tokens
+
+def tokenize(expr):
+	# Only insert * where it's clearly implied, not between a function name and (
+	# Insert * between number and variable or (
+	expr = re.sub(r'(\d)([a-zA-Z\(])', r'\1*\2', expr)
+	# Insert * between ) and variable or number
+	expr = re.sub(r'(\))([a-zA-Z0-9])', r'\1*\2', expr)
+	# Insert * between variable and another variable (e.g., x y → x*y)
+	expr = re.sub(r'([a-zA-Z])\s+([a-zA-Z])', r'\1*\2', expr)
+	# DO NOT insert * between variable and ( — that breaks function calls
+
+	# Replace unary minus before variables (e.g., -x -> -1*x), but NOT before numbers
+	expr = re.sub(r'(?<![\w\)])-(?=[a-zA-Z_])', r'-1*', expr)
+
+	token_pattern = r'''
+		(\*\*)						# Power operator
+	  | (\^|\+|\-|\*|\/|=|\(|\))	# Operators and parentheses
+	  | (\d+\.\d+|\d+)				# Numbers
+	  | (i)							# Imaginary unit
+	  | ([a-zA-Z_]\w*)				# Variables and function names
+	  | (\?)						# ? mark
+	'''
+	tokens = re.findall(token_pattern, expr, re.VERBOSE)
+	return [t for group in tokens for t in group if t]
+
+def is_number(token):
+	return re.match(r'^\d+(\.\d+)?$', token)
+
+def parse_tokens(tokens):
+	output = []
+	i = 0
+	while i < len(tokens):
+		token = tokens[i]
+		
+		# Handle unary minus before a number: -5 → '-5'
+		if (
+			token == '-' and
+			i + 1 < len(tokens) and is_number(tokens[i + 1]) and
+			(i == 0 or tokens[i - 1] in ('(', '+', '-', '*', '/', '^', '='))
+		):
+			output.append('-' + tokens[i + 1])
+			i += 2
+			continue
+		
+		# Function call: f(x)
+		if token.isalpha() and i + 1 < len(tokens) and tokens[i + 1] == '(':
+			func_name = token
+			depth = 1
+			i += 2
+			group = []
+			while i < len(tokens):
+				if tokens[i] == '(':
+					depth += 1
+				elif tokens[i] == ')':
+					depth -= 1
+					if depth == 0:
+						break
+				group.append(tokens[i])
+				i += 1
+			output.append(('FUNC', func_name, parse_tokens(group)))
+
+		else:
+			output.append(token)
+
+		i += 1
+
+	return output
 
 #if parsing a matix
 def extract_matrix_literal(s):
@@ -78,10 +141,7 @@ def parse_matrix_literal(matrix_str, matrix_type):
 	else:
 		return Vector(matrix_data)
 
-
-def parse_num(token):
-	if isinstance(token, Node) or isinstance(token, Complex) or isinstance(token, Rational):
-		return token
+def parse_num_raw(token):
 	if token == 'i':
 		return Complex(0, 1)
 	if token.isalpha():
@@ -91,58 +151,3 @@ def parse_num(token):
 	else:
 		return Rational(int(token))
 	
-precedence = {
-	'**': 4,
-	'^': 4,
-	'*': 3,
-	'/': 3,
-	'%': 3,
-	'+': 2,
-	'-': 2,
-	'=': 1
-}
-
-right_associative = {'^', '**'}
-
-def parse_expression(tokens, index=0, min_precedence=1):
-	def parse_primary(index):
-		token = tokens[index]
-
-		# Parentheses
-		if token == '(':
-			node, new_index = parse_expression(tokens, index + 1)
-			if tokens[new_index] != ')':
-				raise SyntaxError("Unmatched parenthesis")
-			return node, new_index + 1
-
-		# Function call tuple: ('FUNC', 'f', [['a']])
-		elif isinstance(token, tuple) and token[0] == 'FUNC':
-			func_name = token[1]
-			args_token_lists = token[2]
-
-			if len(args_token_lists) != 1:
-				raise NotImplementedError("Only single-argument functions supported")
-
-			arg_expr, _ = parse_expression(args_token_lists[0])
-			#return Node(func_name, arg_expr, 'FUNC'), index + 1
-			func = f"{func_name}({arg_expr})"
-			return Node(func, None, 'FUNC'), index + 1
-
-		return parse_num(token), index + 1
-
-	lhs, index = parse_primary(index)
-
-	while index < len(tokens):
-		op = tokens[index]
-		if op not in precedence:
-			break
-		prec = precedence[op]
-		if prec < min_precedence:
-			break
-		next_min_prec = prec + (0 if op in right_associative else 1)
-
-		rhs, index = parse_expression(tokens, index + 1, next_min_prec)
-
-		lhs = Node(parse_num(lhs), parse_num(rhs), op)
-
-	return lhs, index
