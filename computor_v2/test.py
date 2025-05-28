@@ -49,12 +49,11 @@ history[key] = value
 # for key in history:
 # 	print(key, history)
 
-
-s = "f(1) = ?"
+s = "g(x) = (x+1)"
 print('>', s)
 key, value = parse_cmd(s, history)
 
-s = "f(x) = 1 ?"
+s = "f(x) = x ?"
 print('>', s)
 key, value = parse_cmd(s, history)
 

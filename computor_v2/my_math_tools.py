@@ -80,7 +80,7 @@ def reduce(b, a, type):
 	return s
 
 def quadratic(a, b, c):
-		print("Solving quadratic equation...")
+		# print("Solving quadratic equation...")
 		discriminant = b * b - 4 * a * c
 		if discriminant > 0:
 			print("\nDiscriminant is positive: two real solutions:")

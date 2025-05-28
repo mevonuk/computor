@@ -1,13 +1,14 @@
 from rational import Rational
 from complex import Complex
 from matrix import Matrix, Vector
-from polynomial import Term, Polynomial, RationalExpression, plug_in_var
+from polynomial import Term, Polynomial, RationalExpression, plug_in_var, sub_exprs
 from function import Function
 from lex_base import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
 from lexer import parse_expression, parse_num
 from tree import Node
 from tools import get_value, get_value2
 import re
+from my_math_tools import quadratic
 
 def check_equal_signs(s):
 	# check number of = signs
@@ -197,7 +198,7 @@ def parse_cmd(cmd, history):
 		# case 2: ending with  a number
 		else:
 			# quadratic solve
-			print("case 2: solve quadratic equation")
+			# print("case 2: solve quadratic equation")
 			left, right = split_at_equals(tokens)
 
 			left = parse_tokens(left)
@@ -209,11 +210,28 @@ def parse_cmd(cmd, history):
 				print("Error: function is not defined")
 				return key, value
 
-			print(function_left)
-			function_right = define_function_terms('dummy_fun', 'dummy_var', right)
-			print(function_right)
-			function = function_left - function_right
-			print(function)
+			# this only works for the case of constant !!!
+			var = next(iter(function_left.terms))[0]
+			function_right = define_function_terms('dummy_function', var, right)
+
+			print(function_left, '=', function_right)
+
+			function = sub_exprs(function_left, function_right)
+
+			degree = function.get_degree()
+			
+			if degree < 3 and degree >= 0:
+				print("solving quadratic equation:", function, '= 0')
+				a, b, c = function.get_coefficients(2)
+				if isinstance(a, Rational):
+					a = a.real
+				if isinstance(b, Rational):
+					b = b.real
+				if isinstance(c, Rational):
+					c = c.real
+				quadratic(a, b, c)
+			else:
+				print("cannot solve equation", function, '= 0')
 
 		return key, value
 
