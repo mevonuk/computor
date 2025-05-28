@@ -8,16 +8,16 @@ def get_value(value, history):
 		if isinstance(result, str):
 			result = get_value(result, history)
 		return result
-	print(value + " is not defined")
+	# print(value + " is not defined")
 	return None
 
 def get_value2(value, history):
 	if value in history:
 		result = history[value]
 		if isinstance(result, str):
-			result = get_value(result, history)
+			result = get_value2(result, history)
 		return result
-	print(value + " is not defined")
+	# print(value + " is not defined")
 	return value
 
 class Node:
@@ -78,7 +78,7 @@ class Node:
 			right_value = get_value(self.right, history)
 
 		if (left_value == None or right_value == None) and self.type != 'FUNC' :
-			#print("Equation cannot be resolved")
+			print("Equation cannot be resolved")
 			return None
 
 		if self.type == '+':
@@ -101,6 +101,7 @@ class Node:
 		if self.type == 'FUNC':
 			func = f"{self.left}"
 			func = self.left
+			print(func)
 			if isinstance(func, str):
 				return get_value(func, history)
 			return func

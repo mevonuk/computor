@@ -32,16 +32,10 @@ def print_instructions():
 
 # print following input should show simplified form: f = 2 + 4 -> f = 6
 
-# need to have a function to solve for a given value of x in f(x) while preserving the original
-# function for use with a different value of x
-
-# need to change the case when taking input so A = a
-
-## simplifying expressions: (x^2 + 3x + 2)/(x + 1) = x + 2 -> use symplify from sympy
-
 # s = '-x-(-4-2*x)'
 # s = 'y = 3'
-s = "f(y) = (y^2 + 4*y +2)/(y+1)"
+# s = "f(Y) = (y^2 + 3*y +2 / 4)/(y+1) + 1"
+s = "f(x) = 2 x "
 # s = "f(x) = 3 *  2x + x^2+1/(x+1)"
 
 # s = "f(x) = (x+1)"
@@ -49,12 +43,21 @@ s = "f(y) = (y^2 + 4*y +2)/(y+1)"
 history = {}
 
 # history['f(a)'] = 5
-history['x'] = 2
-history['y'] = 2
+# history['x'] = 2
+history['s'] = 'y'
 
-
-print(s)
+print('>', s)
 key, value = parse_cmd(s, history)
+history[key] = value
+
+s = "f(1) = ?"
+print('>', s)
+key, value = parse_cmd(s, history)
+
+s = "3 + f(1) = ?"
+print('>', s)
+key, value = parse_cmd(s, history)
+
 
 # if key and value:
 #     history[key] = value

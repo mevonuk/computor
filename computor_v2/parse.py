@@ -1,10 +1,11 @@
 from rational import Rational
 from complex import Complex
 from matrix import Matrix, Vector
-from function import Term, Polynomial, Function
+from function import Term, Polynomial, Function, RationalExpression, plug_in_var
 from lexer import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
 from lexer import parse_expression, parse_num
-from tree import get_value, Node
+from tree import get_value, Node, get_value2
+import re
 
 def check_equal_signs(s):
 	# check number of = signs
@@ -44,6 +45,12 @@ def check_new_term(s):
 							print("Error: Poorly written term")
 							return 1
 	return 0
+
+def insert_mult(s):
+    # Insert * between:
+    # - number or variable and variable or opening parenthesis
+    s = re.sub(r'(?<=[0-9a-zA-Z\)])\s+(?=[a-zA-Z\(])', ' * ', s)
+    return s
 							
 # check user input
 def check_input_chars(s):
@@ -70,6 +77,11 @@ def count_paren(s):
 	return 0
 
 def parse_cmd(cmd, history):
+	cmd = cmd.lower()
+
+	# remove all spaces
+	# cmd = cmd.replace(" ", "")
+
 	if not isinstance(cmd, str):
 		print("Error: Bad input to parcer, not a string")
 		return None, None
@@ -80,6 +92,10 @@ def parse_cmd(cmd, history):
 		return None, None
 	if check_decimals(cmd) == 1:
 		return None, None
+
+	# cmd = insert_mult(cmd)
+	# print(cmd)
+
 	if check_new_term(cmd) == 1:
 		return None, None
 	if count_paren(cmd) == 1:
@@ -97,7 +113,6 @@ def parse_cmd(cmd, history):
 
 	# check for solving, not FUNC
 	if tokens[len(tokens) - 1] == '?' and func_def == 0:
-		print("Solve equation")
 		# remove = and ?
 		end = len(tokens)-2
 		tokens = tokens[:end]
@@ -105,8 +120,10 @@ def parse_cmd(cmd, history):
 
 		tree, _ = parse_expression(tokens)
 		if isinstance(tree, str):
-			sol = get_value(tree, history)
-			if not (isinstance(sol, Rational or isinstance(sol, Complex))):
+			sol = get_value2(tree, history)
+			# if not (isinstance(sol, Rational or isinstance(sol, Complex))):
+			# 	sol = sol.solve_node(history)
+			if isinstance(sol, Node):
 				sol = sol.solve_node(history)
 		else:
 			sol = tree.solve_node(history)
@@ -116,23 +133,28 @@ def parse_cmd(cmd, history):
 
 	# check for solving, FUNC
 	if tokens[len(tokens) - 1] == '?' and func_def == 1:
-		print("Solve equation, func")
 		# remove = and ?
 		end = len(tokens)-2
 		tokens = tokens[:end]
 		tokens = parse_tokens(tokens)
-		print(tokens)
 
 		function = get_value(func[0][1], history)
 
+		if function is None:
+			print("Error: function is not defined")
+			return key, value
+
 		# check for variable
 		variable = parse_num(func[0][2][0])
-		if isinstance(variable, str):
+		if isinstance(function, (Polynomial, RationalExpression)):
+			sol = plug_in_var(function, variable, history)
+			print(sol)
+		elif isinstance(variable, str):
+			print(function, type(function))
 			sol = function.terms.solve_node(history)
 			print(sol)
 		else:
-			sol = function.plug_var(variable, history)
-			print(sol)
+			print("function not poly/rational or otherwise")
 
 		return key, value
 
@@ -173,21 +195,23 @@ def parse_cmd(cmd, history):
 			if func[0][1] == 'i':
 				print("ERROR: Assignment to i is forbidden")
 				return None, None
-			print("assigning function", func[0][1], " of ", func[0][2], type(func[0][2]))
+			# print("assigning function", func[0][1], " of ", func[0][2], type(func[0][2]))
 			var, _ = parse_expression(func[0][2])
 			terms, _ = parse_expression(func[2:])
 			if not isinstance(terms, Node):
 				terms = Node(terms, 0, 'FUNC')
-			print("equal to", terms, type(terms))
+			# print("equal to", terms, type(terms))
 			key =func[0][1]
 			value = Function(func[0][1], var, terms)
 			# here parse RHS, and terms[0][2] if necessary
-			print("key", key, "terms", terms)
+			# print("key", key, "terms", terms)
 			poly = value.convert_function()
-			print(poly, type(poly))
-			simplify = poly.simplify()
-			print(simplify, type(simplify))
-			print(simplify.solve(history))
+			value = poly
+			if isinstance(poly, RationalExpression):
+				simplify = poly.simplify()
+				print(simplify.solve(history))
+				value = simplify
+			print(value)
 			return key, value
 
 	return key, value

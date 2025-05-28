@@ -91,8 +91,20 @@ class Function:
 		#return f"Function {self.name}({self.var}) = {self.terms}"
 		return f"{self.name}({self.var})"
 	
+	# def plug_var(self, value, history):
+	# 	# this needs to be changed to not overwrite x permenently
+	#     var = Variable(self.var, value)
+
+	#     hold = self.terms
+	#     hold.sub_var_node(var)
+
+	#     return hold.solve_node(history)
+	
+
+
+	# here
 	def convert_function(self):
-		# print("Converting function tree to polynomial...")
+		print("Converting function tree to polynomial...")
 		polynomial = self._node_to_polynomial(self.terms)
 		return polynomial
 
@@ -438,14 +450,10 @@ class Polynomial:
 		var = next(iter(self.terms))[0]  # get any variable used
 		# check if var in history
 		value = get_value2(var, history)
-
-		if value == var:
-			return self
-
 		result = Polynomial()
 		if isinstance(value, (int, float, Rational, Complex)):
 			# plug value into polynomial
-			result = plug_in_var(self, value, history)
+			result = plug_in_var(self, value)
 		return result
 
 	def get_degree(self):
@@ -530,26 +538,24 @@ class RationalExpression:
 		return result
 		# print(self.numerator / self.denominator)
 
-def plug_in_var(func, value, history):
-	if isinstance(value, str):
-		value = get_value2(value, history)
-
+def plug_in_var(func, value):
 	# attempt to solve top and bottom
 	if isinstance(func, RationalExpression):
-		# print("plugging in value in rationalexp")
+		print("plugging in value in rationalexp")
 		top = Polynomial()
 		bottom = Polynomial()
 		if isinstance(func.numerator, Polynomial):
-			top = plug_in_var(func.numerator, value, history)
+			top = plug_in_var(func.numerator, value)
 		if isinstance(func.denominator, Polynomial):
-			bottom = plug_in_var(func.denominator, value, history)
+			bottom = plug_in_var(func.denominator, value)
 		result = RationalExpression(top, bottom)
 		return result
 		# print(self.numerator / self.denominator)
 	elif isinstance(func, Polynomial):
+		print("plugging in val in poly")
 		if not isinstance(value, (str, int, float, Rational, Complex)):
 			print("Error: Currently value must be a number or str")
-			return func
+			exit()
 
 		result = Polynomial()
 
@@ -576,5 +582,3 @@ def plug_in_var(func, value, history):
 		return result
 	else:
 		print("not a rational expression or poly, cannot plug_in_var")
-
-	return func
