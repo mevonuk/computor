@@ -1,6 +1,8 @@
 from complex import Complex
 from parse import parse_cmd
 from lexer import tokenize, parse_expression, parse_tokens
+from my_math_tools import quadratic
+from tree import Node
 
 def print_instructions():
     print("Welcome to computor_v2 by mevonuk")
@@ -23,17 +25,36 @@ def print_instructions():
 # solving with variables, functions
 # solving quadratic equations
 
+# need to be able to determine how many undefined variables there are
+# then if 1, check the power, then if 2 or smaller, solve for the variable
+
+# solving has two cases: f = ? and f(x) = 4 ? to solve for x
+
+# print following input should show simplified form: f = 2 + 4 -> f = 6
+
+# need to have a function to solve for a given value of x in f(x) while preserving the original
+# function for use with a different value of x
+
+# need to change the case when taking input so A = a
+
+## simplifying expressions: (x^2 + 3x + 2)/(x + 1) = x + 2 -> use symplify from sympy
+
 # s = '-x-(-4-2*x)'
 # s = 'y = 3'
+s = "f(y) = (y^2 + 4*y +2)/(y+1)"
+# s = "f(x) = 3 *  2x + x^2+1/(x+1)"
 
-# history = {}
+# s = "f(x) = (x+1)"
+
+history = {}
 
 # history['f(a)'] = 5
-# history['x'] = 2
+history['x'] = 2
+history['y'] = 2
 
 
-# print(s)
-# key, value = parse_cmd(s, history)
+print(s)
+key, value = parse_cmd(s, history)
 
 # if key and value:
 #     history[key] = value
@@ -61,7 +82,7 @@ def print_instructions():
 # num = parse_term(s)
 # print("parsed:", num)
 
-# exit()
+exit()
 
 cmd = ""
 history = {}

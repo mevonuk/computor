@@ -11,6 +11,15 @@ def get_value(value, history):
     print(value + " is not defined")
     return None
 
+def get_value2(value, history):
+    if value in history:
+        result = history[value]
+        if isinstance(result, str):
+            result = get_value(result, history)
+        return result
+    print(value + " is not defined")
+    return value
+
 class Node:
 
     def __init__(self, left, right, type):
@@ -87,15 +96,56 @@ class Node:
         if self.type == '**':
             if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
                 return right_value * left_value
+            print("** can only be used with matrix multiplication")
             return None
         if self.type == 'FUNC':
             func = f"{self.left}"
             func = self.left
             if isinstance(func, str):
-	            return get_value(func, history)
+                return get_value(func, history)
             return func
             
 
+    def simplify_node(self, history):
+        left_value = self.left
+        right_value = self.right
+        print("simplify", left_value, right_value, self.type)
+        if isinstance(self.left, Node):
+            left_value = self.left.simplify_node(history)
+        if isinstance(self.right, Node):
+            right_value = self.right.simplify_node(history)
+        if isinstance(self.left, str):
+            left_value = get_value2(self.left, history)
+        if isinstance(self.right, str):
+            right_value = get_value2(self.right, history)
+
+        print("values:", left_value, right_value, self.type)
+        
+        if not (isinstance(self.right, Node) or isinstance(self.left, Node)) and not (isinstance(self.right, str) or isinstance(self.left, str)):
+            if self.type == '+':
+                return left_value + right_value
+            if self.type == '-':
+                return left_value - right_value
+            if self.type == '*':
+                return left_value * right_value
+            if self.type == '/':
+                return left_value / right_value
+            if self.type == '%':
+                return left_value % right_value
+            if self.type == '^':
+                return left_value ** right_value
+            if self.type == '**':
+                if isinstance(left_value, Matrix) and isinstance(right_value, Matrix):
+                    return right_value * left_value
+                print("** can only be used with matrix multiplication")
+                return None
+        if self.type == 'FUNC':
+            func = f"{self.left}"
+            func = self.left
+            if isinstance(func, str):
+                return get_value2(func, history)
+            return func
+        return Node(left_value, right_value, self.type)
 
 
 

@@ -183,6 +183,11 @@ def parse_cmd(cmd, history):
 			value = Function(func[0][1], var, terms)
 			# here parse RHS, and terms[0][2] if necessary
 			print("key", key, "terms", terms)
+			poly = value.convert_function()
+			print(poly, type(poly))
+			simplify = poly.simplify()
+			print(simplify)
+			# print(simplify.solve(history))
 			return key, value
 
 	return key, value

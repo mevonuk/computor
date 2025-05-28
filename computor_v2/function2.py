@@ -3,49 +3,6 @@ from complex import Complex
 from tree import Node
 from variable import Variable
 
-def mul_exprs(a, b):
-    if isinstance(a, Polynomial) and isinstance(b, Polynomial):
-        return a * b
-    elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
-        new_num = a * b.numerator
-        return RationalExpression(new_num, b.denominator)
-    elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
-        new_num = a.numerator * b
-        return RationalExpression(new_num, a.denominator)
-    elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
-        new_num = a.numerator * b.numerator
-        new_den = a.denominator * b.denominator
-        return RationalExpression(new_num, new_den)
-    else:
-        print("Unsupported multiplication combination")
-        exit()
-
-def sub_exprs(a, b):
-    if isinstance(a, Polynomial) and isinstance(b, Polynomial):
-        return a - b
-    elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
-        # Convert a to rational with denom 1
-        a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, 'dummy_var', 0, '+'))
-        return sub_rational_exprs(a_rational, b)
-    elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
-        dummy_poly = Polynomial()
-        dummy_poly.add_term((1, 'dummy_var', 0, '+'))
-        return sub_exprs(a, RationalExpression(b, dummy_poly))
-    elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
-        return sub_rational_exprs(a, b)
-    else:
-        print("Unsupported subtraction combination")
-        exit()
-
-def sub_rational_exprs(r1, r2):
-    # a/b - c/d = (ad - bc) / bd
-    new_num1 = r1.numerator * r2.denominator
-    new_num2 = r2.numerator * r1.denominator
-    new_num = new_num1 - new_num2
-    new_den = r1.denominator * r2.denominator
-    return RationalExpression(new_num, new_den)
-
 
 def add_exprs(a, b):
     if isinstance(a, Polynomial) and isinstance(b, Polynomial):
@@ -70,6 +27,7 @@ def add_rational_exprs(r1, r2):
     new_num = new_num1 + new_num2
     new_den = r1.denominator * r2.denominator
     return RationalExpression(new_num, new_den)
+
 
 class Function:
 
@@ -110,11 +68,13 @@ class Function:
 
     def _node_to_polynomial(self, node):
         if isinstance(node, (int, float, Complex, Rational)):
+            # Constant term
             p = Polynomial()
             p.add_term((node, self.var, 0, '+'))
             return p
 
         if isinstance(node, str):
+            # Variable like 'x'
             p = Polynomial()
             p.add_term((1, node, 1, '+'))
             return p
@@ -129,29 +89,45 @@ class Function:
             right = self._node_to_polynomial(node.right)
 
             if node.type == '+':
-                return add_exprs(left, right)
+                return left + right
             elif node.type == '-':
-                return sub_exprs(left, right)
+                return left - right
             elif node.type == '*':
-                return mul_exprs(left, right)
-            elif node.type == '/':
-                if not isinstance(left, Polynomial) or not isinstance(right, Polynomial):
-                    print("Only polynomial numerator and denominator supported in rational expressions")
-                    exit()
-                return RationalExpression(left, right)
+                return left * right
             elif node.type == '^':
+                # Must be variable or polynomial with 1 term to power
                 if isinstance(node.right, int):
                     power = node.right
                 elif isinstance(node.right, Rational) and node.right.real % 1 == 0:
-                    power = int(node.right.real)
+                    power = node.right.real
+                elif isinstance(node.right, (Node, str)):
+                    right_eval = node.right
+                    if isinstance(right_eval, Node):
+                        right_eval = right_eval.solve_node({})
+                    if not isinstance(right_eval, int) and (isinstance(node.right, Rational) and not node.right.real  % 1 == 0):
+                        print("Exponent must be an integer.")
+                        exit()
+                    power = right_eval
                 else:
-                    print("Exponent must be an integer.")
+                    print("Unsupported exponent type.")
                     exit()
+
+                # Raise polynomial to power (only valid if it's a monomial)
                 base = self._node_to_polynomial(node.left)
                 result = base
                 for _ in range(power - 1):
                     result = result * base
                 return result
+            elif node.type == '/':
+                numerator = self._node_to_polynomial(node.left)
+                denominator = self._node_to_polynomial(node.right)
+
+                # If both are polynomials, return rational expression
+                if isinstance(numerator, Polynomial) and isinstance(denominator, Polynomial):
+                    return RationalExpression(numerator, denominator)
+                else:
+                    print("Unsupported division of non-polynomial expressions")
+                    exit()
             else:
                 print(f"Unsupported operation {node.type}")
                 exit()
@@ -312,57 +288,10 @@ class Polynomial:
                 self.add_term((new_value, 'dummy_var', 0, '+'))
             else:
                 self.add_term((coef, value, key[1], op))
-    
-    def get_coefficients(self, degree):
-        if not self.terms:
-            return [0] * (degree + 1)
-
-        var = next(iter(self.terms))[0]  # get any variable used
-        return [
-            self.terms.get((var, i), (0, '+'))[0]
-            for i in reversed(range(degree + 1))
-        ]
-
-    # factor for cases of var^2
-    def factor(self):
-        a, b, c = self.get_coefficients(2)
-
-        if not a :
-            return [self]  # Not a factorable quadratic or not univariate
-
-        discriminant = b ** 2 - 4 * a * c
-
-        if discriminant.real < 0 or (discriminant.real ** 0.5) % 1 != 0:
-            return [self]  # Can't factor nicely
-
-        sqrt_d = int(discriminant.real ** 0.5)
-        r1 = (-b.real + sqrt_d) // (2 * a.real)
-        r2 = (-b.real - sqrt_d) // (2 * a.real)
-
-        r1 = Rational(r1)
-        r2 = Rational(r2)
-
-        f1 = Polynomial()
-        f2 = Polynomial()
-
-        var = next(iter(self.terms))[0]
-
-        f1.add_term((1, var, 1, '+'))  
-        f1.add_term((-r1, var, 0, '+'))
-
-        f2.add_term((1, var, 1, '+'))
-        f2.add_term((-r2, var, 0, '+'))
-
-        if a != 1:
-            a_term = Polynomial()
-            a_term.add_term((a, var, 0, '+'))
-            return [a_term, f1, f2]
-        else:
-            return [f1, f2]
 
     def __sub__(self, other):
         if not isinstance(other, Polynomial):
-            print("Subtraction only supported between Polynomial instances.")
+            print("Addition only supported between Polynomial instances.")
             return NotImplemented
 
         result = Polynomial()
@@ -433,37 +362,30 @@ class Polynomial:
 
         return result
 
-    @classmethod
-    def from_constant(cls, value, var='dummy_var'):
-        poly = cls()
-        poly.add_term((value, var, 0, '+'))
-        return poly
 
+class RationalFunction:
+    def __init__(self, numerator, denominator):
+        if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
+            print("RationalFunction must be initialized with two Polynomial instances")
+            exit()
+        self.numerator = numerator
+        self.denominator = denominator
 
-# class RationalFunction:
-#     def __init__(self, numerator, denominator):
-#         if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
-#             print("RationalFunction must be initialized with two Polynomial instances")
-#             exit()
-#         self.numerator = numerator
-#         self.denominator = denominator
+    def __repr__(self):
+        return f"({self.numerator}) / ({self.denominator})"
 
-#     def __repr__(self):
-#         return f"({self.numerator}) / ({self.denominator})"
+    def plug_in_var(self, var, value):
+        num = Polynomial()
+        den = Polynomial()
 
-#     def plug_in_var(self, var, value):
-#         num = Polynomial()
-#         den = Polynomial()
+        # Copy then plug in
+        num.terms = self.numerator.terms.copy()
+        den.terms = self.denominator.terms.copy()
 
-#         # Copy then plug in
-#         num.terms = self.numerator.terms.copy()
-#         den.terms = self.denominator.terms.copy()
+        num.plug_in_var(var, value)
+        den.plug_in_var(var, value)
 
-#         num.plug_in_var(var, value)
-#         den.plug_in_var(var, value)
-
-#         return f"{num} / {den}"
-
+        return f"{num} / {den}"
 
 class RationalExpression:
     def __init__(self, numerator, denominator):
@@ -475,47 +397,3 @@ class RationalExpression:
 
     def __repr__(self):
         return f"({self.numerator}) / ({self.denominator})"
-
-    def __add__(self, other):
-        if isinstance(other, Polynomial):
-            other = RationalExpression(other, Polynomial())
-            other.denominator.add_term((1, 'dummy_var', 0, '+'))
-        if isinstance(other, RationalExpression):
-            new_num1 = self.numerator * other.denominator
-            new_num2 = other.numerator * self.denominator
-            new_num = new_num1 + new_num2
-            new_den = self.denominator * other.denominator
-            return RationalExpression(new_num, new_den)
-        print("Unsupported addition with RationalExpression")
-        exit()
-
-# check if there are factors that can be cancelled out
-    def simplify(self):
-        num_factors = self.numerator.factor()
-        den_factors = self.denominator.factor()
-
-        # Cancel common factors
-        i = 0
-        while i < len(num_factors):
-            nf = num_factors[i]
-            for j, df in enumerate(den_factors):
-                if nf.terms == df.terms:
-                    num_factors.pop(i)
-                    den_factors.pop(j)
-                    i -= 1
-                    break
-            i += 1
-
-        new_num = Polynomial.from_constant(1)
-        for f in num_factors:
-            new_num = new_num * f
-
-        new_den = Polynomial.from_constant(1)
-        for f in den_factors:
-            new_den = new_den * f
-
-        var = next(iter(new_den.terms))[0]
-
-        if len(new_den.terms) == 1 and (var, 0) in new_den.terms and new_den.terms[(var, 0)][0] == 1:
-            return new_num  # Simplified to a polynomial
-        return RationalExpression(new_num, new_den)

@@ -190,3 +190,12 @@ class Rational(Complex):
 	def __neg__(self):
 		new_rational = Rational(- self.real)
 		return new_rational
+	
+	def __eq__(self, other):
+		if isinstance(other, (int, float)):
+			other = Rational(other)
+		if not isinstance(other, Rational):
+			return False
+        
+		if self.real == other.real:
+			return True
