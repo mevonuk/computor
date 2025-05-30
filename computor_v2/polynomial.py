@@ -2,6 +2,7 @@ from rational import Rational
 from complex import Complex
 from tools import get_value2
 from variable import Variable
+from node import Node
 
 def mul_exprs(a, b):
 	if isinstance(a, Polynomial) and isinstance(b, Polynomial):
@@ -86,11 +87,16 @@ class Term:
 		else:
 			print("Usage Term: Exponent must be integer >= 0", exp)
 			exit()
-		if isinstance(coefficient, (int, float, Rational, Complex)):
+		if isinstance(coefficient, (int, float, Rational, Complex, Node)):
 			self.coef = coefficient
-
+		elif isinstance(coefficient, str):
+			# print('in term, using ceff str')
+			self.coef = Variable(coefficient, None)
+		elif isinstance(coefficient, Variable):
+			# print('in term, using ceff variable')
+			self.coef = coefficient
 		else:
-			print("Usage Term: Coef must be int, float, rational, or complex", coefficient)
+			print("Usage Term: Coef must be int, float, rational, or complex", coefficient, type(coefficient))
 			exit()
 		if isinstance(var, str):
 			self.var = var
@@ -103,12 +109,18 @@ class Term:
 			self.op = operator
 
 	def __repr__(self):
+		# print('in rep term')
 		varible = f"{self.var}^{self.exp}"
 		if self.exp == 0:
 			varible = ""
 		if self.exp == 1:
 			varible = f"{self.var}"
-		if isinstance(self.coef, Complex) and self.coef.imag != 0:
+		if isinstance(self.coef, Variable):
+			if self.exp == 0:
+				return f"{self.coef}"
+			else:
+				return f"({self.coef}){varible}"
+		elif isinstance(self.coef, Complex) and self.coef.imag != 0:
 			if self.exp == 0:
 				return f"{self.coef}"
 			else:
@@ -145,14 +157,19 @@ class Polynomial:
 		key = (term.var, term.exp)
 		if key in self.terms:
 			existing_coef, _ = self.terms[key]
+			# print('in add term poly', existing_coef, term.coef)
 			if term.op == '+':
-				self.terms[key] = [existing_coef + term.coef, '+']
+				hold = Node(existing_coef, term.coef, '+')
+				self.terms[key] = [hold, '+']
 			elif term.op == '-':
-				self.terms[key] = [existing_coef - term.coef, '+']
+				hold = Node(existing_coef, term.coef, '-')
+				self.terms[key] = [hold, '+']
 			elif term.op == '/':
-				self.terms[key] = [existing_coef / term.coef, '+']
+				hold = Node(existing_coef, term.coef, '/')
+				self.terms[key] = [hold, '+']
 			elif term.op == '*':
-				self.terms[key] = [existing_coef * term.coef, '+']
+				hold = Node(existing_coef, term.coef, '*')
+				self.terms[key] = [hold, '+']
 			elif term.op == '%':
 				if not isinstance(existing_coef, Complex) and not isinstance(term.coef, Complex):
 					self.terms[key] = [existing_coef % term.coef, '+']
@@ -160,7 +177,9 @@ class Polynomial:
 					print("Error: mod operator not allowed with complex numbers")
 					exit()
 		else:
-			if term.coef.real == -1:
+			if isinstance(term.coef, (Variable, Node)):
+				self.terms[key] = [term.coef, term.op]
+			elif term.coef.real == -1:
 				self.terms[key] = [-1, term.op]
 			elif term.coef.real == 1:
 				self.terms[key] = [1, term.op]
@@ -172,24 +191,33 @@ class Polynomial:
 		function_terms = self.terms.items()
 		parts = []
 		for i, ((var, exp), (coef, op)) in enumerate(function_terms):
+
+			# print('in rep poly', var, exp, coef, type(coef))
 			if coef == 0:
 				continue
-			if isinstance(coef, Complex) and coef.imag != 0:
+			if isinstance(coef, Variable):
+				term = Term(coef.name, var, exp, op)
+			elif isinstance(coef, Node):
+				term = coef
+			elif isinstance(coef, Complex) and coef.imag != 0:
 				term = Term(coef, var, exp, op)
 			else:
 				term = Term(abs(coef.real), var, exp, op)
+
+			# print('in rep poly', term, type(term))
+
 			term_str = str(term)
 			if i == 0:
-				# First term: include sign only if negative
-				if not isinstance(coef, Complex) and coef < 0:
+				# # First term: include sign only if negative
+				if not isinstance(coef, (Complex, Variable, Node)) and coef < 0:
 					parts.append(f"-{term_str}")
 				elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
 					parts.append(f"-{term_str}")
 				else:
 					parts.append(f"{term_str}")
 			else:
-				# Subsequent terms: prepend with + or -
-				if not isinstance(coef, Complex) and coef < 0:
+				# # Subsequent terms: prepend with + or -
+				if not isinstance(coef, (Complex, Variable)) and coef < 0:
 					parts.append(f" - {term_str}")
 				elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
 					parts.append(f" - {term_str}")
@@ -206,7 +234,7 @@ class Polynomial:
 			return [0] * (degree + 1)
 
 		var = next(iter(self.terms))[0]  # get any variable used
-		# print("variable is", var)
+		# print("in get_coefficients variable is", var)
 		return [
 			self.terms.get((var, i), (0, '+'))[0]
 			for i in reversed(range(degree + 1))
@@ -301,12 +329,20 @@ class Polynomial:
 
 		result = Polynomial()
 
+		# print('in poly __mul__', self, other)
+
 		for (var1, exp1), (coef1, op1) in self.terms.items():
 			for (var2, exp2), (coef2, op2) in other.terms.items():
+				# print(var1, type(var1), var2, type(var2))
+				# print(exp1, type(exp1), exp2, type(exp2))
+				# print(coef1, type(coef1), coef2, type(coef2))
+				# print(op1, type(op1), op2, type(op2))
 				if var1 == var2:
 					# Combine like variable powers
+					# print(exp1, exp2)
 					new_exp = exp1 + exp2
 					new_var = var1
+					# print('new exponents', new_var, new_exp)
 				elif var1 == "dummy_var":
 					new_var = var2
 					new_exp = exp2
@@ -317,7 +353,20 @@ class Polynomial:
 					print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})", type(var1), type(var2))
 					exit()
 
-				new_coef = coef1 * coef2
+				if isinstance(coef1, Variable):
+					if coef2 == 1:
+						new_coef = coef1
+					else:
+						new_coef = Node(coef1, coef2, '*')
+				elif isinstance(coef2, Variable):
+					if coef1 == 1:
+						new_coef = coef2
+					else:
+						new_coef = Node(coef1, coef2, '*')	
+				else:
+					new_coef = coef1 * coef2
+
+				# print('new values', new_var, new_exp, new_coef)
 				result.add_term((new_coef, new_var, new_exp, '+'))
 
 		return result
@@ -362,7 +411,10 @@ class Polynomial:
 	def solve(self, history):
 		var = next(iter(self.terms))[0]  # get any variable used
 		# check if var in history
-		value = get_value2(var, history)
+		if isinstance(value, str):
+			value = get_value2(value, history)
+		if isinstance(value, Variable):
+			value = get_value2(value.name, history)
 
 		if value == var:
 			return self
@@ -372,6 +424,52 @@ class Polynomial:
 			# plug value into polynomial
 			result = plug_in_var(self, value, history)
 		return result
+
+	def combine_like_terms(self):
+		# print(self)
+		combined = {}
+		for (var, exp), (coef, op) in self.terms.items():
+			key = (var, exp)
+			# print('in combine like terms', key, coef, op)
+			if isinstance(coef, str):
+				coef = float(coef)  # Or use get_value2 if needed
+			if key in combined:
+				combined[key][0] += coef
+			else:
+				combined[key] = [coef, op]
+		self.terms = combined
+
+	def plug_vars(self, variable, history):
+		# print(variable, type(variable))
+
+		result = Polynomial()
+
+		for (var, exp), (coef, op) in self.terms.items():
+			# print('coeff', coef, type(coef))
+
+			# Resolve coefficient
+			if isinstance(coef, str):
+				new_coef = get_value2(coef, history)
+			if isinstance(coef, Variable):
+				new_coef = get_value2(coef.name, history)
+			if isinstance(coef, Node):
+				# print('solving node', coef)
+				new_coef = coef.solve_node(history)
+
+			# print(coef, type(coef))
+			if new_coef is None:
+				new_coef = coef
+
+			key = (var, exp)
+			if key in result.terms:
+				result.terms[key][0] += new_coef
+			else:
+				result.terms[key] = [new_coef, op]
+
+		# print('result', result)
+
+		return result
+
 
 	def get_degree(self):
 		max_exp = 0
@@ -458,6 +556,11 @@ class RationalExpression:
 def plug_in_var(func, value, history):
 	if isinstance(value, str):
 		value = get_value2(value, history)
+	if isinstance(value, Variable):
+		# print('in plug_in_var', value, value.name, type(value), value.value)
+		value = get_value2(value.name, history)
+
+	# print('in plug_in_var', value, type(value))
 
 	# attempt to solve top and bottom
 	if isinstance(func, RationalExpression):
@@ -473,6 +576,7 @@ def plug_in_var(func, value, history):
 		# print(self.numerator / self.denominator)
 	elif isinstance(func, Polynomial):
 		if not isinstance(value, (str, int, float, Rational, Complex)):
+			# print('in plug_in_var', value, type(value), value.value)
 			print("Error: Currently value must be a number or str")
 			return func
 

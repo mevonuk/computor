@@ -2,6 +2,7 @@ import sys
 from complex import Complex
 from matrix import Matrix
 from variable import Variable
+from node import Node
 
 class Rational(Complex):
 	def __init__(self, value):
@@ -38,8 +39,11 @@ class Rational(Complex):
 		elif isinstance(o, Complex):
 			new_complex = Complex(self.real + o.real, o.imag)
 			return new_complex
+		elif isinstance(o, Node):
+			new_node = Node(self, o, '+')
+			return new_node
 		else:
-			print("Bad input in r radd function")
+			print("Bad input in r radd function", self, type(self), o, type(o))
 			return None
 
 	def __sub__(self, o):
@@ -103,8 +107,7 @@ class Rational(Complex):
 		elif isinstance(o, Variable):
 			return o.value * self
 		else:
-			print(o, type(o))
-			print("Bad input in r rmul function")
+			print("Bad input in r rmul function", o, type(o))
 			return None
 
 	def __truediv__(self, o):

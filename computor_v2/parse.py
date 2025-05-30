@@ -1,11 +1,12 @@
 from rational import Rational
+from variable import Variable
 from complex import Complex
 from matrix import Matrix, Vector
 from polynomial import Term, Polynomial, RationalExpression, plug_in_var, sub_exprs
 from function import Function
-from lex_base import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
+from lex_base import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal, parse_num_raw
 from lexer import parse_expression, parse_num
-from tree import Node
+from tree import Tree
 from tools import get_value, get_value2
 import re
 from my_math_tools import quadratic
@@ -94,16 +95,21 @@ def define_function_terms(name, var, term, history):
 
 	terms, _ = parse_expression(term)
 
-	# if not isinstance(terms, Node):
-		# terms = Node(terms, 0, 'FUNC')
+	# if not isinstance(terms, Tree):
+		# terms = Tree(terms, 0, 'FUNC')
 
-	# print(terms, type(terms))
+	# print('in define_function_terms', name, var, terms, type(terms))
 
 	value = Function(name, var, terms)
-	# here parse RHS, and terms[0][2] if necessary
-	# print("key", key, "terms", terms)
+
+	# print('in define_function_terms', value, type(value), value.terms)
+
 	poly = value.convert_function()
+
+	# print('in define_function_terms', poly, type(poly))
+
 	value = poly
+	# print('in define_function_terms',value, type(value))
 	if isinstance(poly, RationalExpression):
 		simplify = poly.simplify()
 		print(simplify.solve(history))
@@ -113,9 +119,10 @@ def define_function_terms(name, var, term, history):
 def define_function(func, history):
 	var, _ = parse_expression(func[0][2])
 
-	# print("var in define_function", var)
-
 	key = func[0][1]
+
+	# print("in define_function", var, type(var), key, type(key))
+
 	value = define_function_terms(func[0][1], var, func[2:], history)
 	return key, value
 
@@ -164,9 +171,11 @@ def parse_cmd(cmd, history):
 		tree, _ = parse_expression(tokens)
 		if isinstance(tree, str):
 			sol = get_value2(tree, history)
-			# if not (isinstance(sol, Rational or isinstance(sol, Complex))):
-			# 	sol = sol.solve_node(history)
-			if isinstance(sol, Node):
+			if isinstance(sol, Tree):
+				sol = sol.solve_node(history)
+		elif isinstance(tree, Variable):
+			sol = get_value2(tree.name, history)
+			if isinstance(sol, Tree):
 				sol = sol.solve_node(history)
 		else:
 			sol = tree.solve_node(history)
@@ -191,17 +200,23 @@ def parse_cmd(cmd, history):
 
 			# check for variable
 			variable = parse_num(func[0][2][0])
-			if isinstance(function, (Polynomial, RationalExpression)):
-				sol = plug_in_var(function, variable, history)
-				print(sol)
-			elif isinstance(variable, str):
-				print(function, type(function))
+
+
+			# print('in parse cmd', function, type(function), variable, type(variable))
+
+			if isinstance(variable, str):
+				# print('instance 1')
 				sol = function.terms.solve_node(history)
+				print(sol)
+			elif isinstance(function, (Polynomial, RationalExpression)):
+				# print('instance 2')
+				function = function.plug_vars(variable, history)
+				sol = plug_in_var(function, variable, history)
 				print(sol)
 			else:
 				print("function not poly/rational or otherwise")
 
-		# case 2: ending with  a number
+		# case 2: ending with something
 		else:
 			# quadratic solve
 			# print("case 2: solve quadratic equation")
@@ -216,9 +231,6 @@ def parse_cmd(cmd, history):
 				print("Error: function is not defined")
 				return key, value
 
-			# this only works for the case of constant !!!
-			var = next(iter(function_left.terms))[0]
-
 			var = parse_num(func[0][2][0])
 
 			# print("var in parse_cmd", var)
@@ -226,14 +238,24 @@ def parse_cmd(cmd, history):
 
 			print(function_left, '=', function_right)
 
+
+			if isinstance(function_left, (Polynomial, RationalExpression)):
+				function_left = function_left.plug_vars(var, history)
+
+			if isinstance(function_right, (Polynomial, RationalExpression)):
+				function_right = function_right.plug_vars(var, history)
+
 			function = sub_exprs(function_left, function_right)
 
 			degree = function.get_degree()
 			
-			# !!! this is only good for degree == 2, need seperate cases for 1 and 0
 			if degree < 3 and degree >= 0:
 				print("solving equation:", function, '= 0')
-				a, b, c = function.get_coefficients(2)
+				# need to plug in non-function variables !!!
+				# print("var in parse_cmd", var)
+				function2 = function.plug_vars(var, history)
+				# print('in parse_cmd', function2)
+				a, b, c = function2.get_coefficients(2)
 				# print(a,b,c,type(a), type(b), type(c))
 				if isinstance(a, Rational):
 					a = a.real
@@ -276,7 +298,10 @@ def parse_cmd(cmd, history):
 			key = tokens[0]
 			tokens = parse_tokens(tokens[2:])
 			tree, _ = parse_expression(tokens)
-			return key, tree
+			value = tree.solve_node(history) 
+			var = Variable(key, value)
+			# print('in parse_cmd', key, type(key), var, type(var), var.name, var.value, type(var.value))
+			return key, var
 
 	# next check for functions
 	if func_def:

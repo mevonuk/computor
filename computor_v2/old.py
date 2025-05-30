@@ -5,7 +5,6 @@ from rational import Rational
 from complex import Complex
 from variable import Variable
 from function import Term, Polynomial, Function
-from tree import Node
 
 def tokenize2(expr):
 	import re

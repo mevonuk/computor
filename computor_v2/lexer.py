@@ -5,7 +5,7 @@ from complex import Complex
 from variable import Variable
 from polynomial import Term, Polynomial
 from function import Function
-from tree import Node
+from tree import Tree
 from lex_base import tokenize, parse_tokens
 
 #if parsing a matix
@@ -80,7 +80,7 @@ def parse_matrix_literal(matrix_str, matrix_type):
 
 
 def parse_num(token):
-	if isinstance(token, (Node, Complex, Rational, Variable)):
+	if isinstance(token, (Tree, Complex, Rational, Variable)):
 		return token
 	if token == 'i':
 		return Complex(0, 1)
@@ -110,10 +110,10 @@ def parse_expression(tokens, index=0, min_precedence=1):
 
 		# Parentheses
 		if token == '(':
-			node, new_index = parse_expression(tokens, index + 1)
+			tree, new_index = parse_expression(tokens, index + 1)
 			if tokens[new_index] != ')':
 				raise SyntaxError("Unmatched parenthesis")
-			return node, new_index + 1
+			return tree, new_index + 1
 
 		# Function call tuple: ('FUNC', 'f', [['a']])
 		elif isinstance(token, tuple) and token[0] == 'FUNC':
@@ -124,11 +124,11 @@ def parse_expression(tokens, index=0, min_precedence=1):
 				raise NotImplementedError("Only single-argument functions supported")
 
 			arg_expr, _ = parse_expression(args_token_lists[0])
-			#return Node(func_name, arg_expr, 'FUNC'), index + 1
+			#return Tree(func_name, arg_expr, 'FUNC'), index + 1
 			func = f"{func_name}({arg_expr})"
-			return Node(func, None, 'FUNC'), index + 1
+			return Tree(func, None, 'FUNC'), index + 1
 
-		return Node(parse_num(token), None, 'VAR'), index + 1
+		return Tree(parse_num(token), None, 'VAR'), index + 1
 
 	lhs, index = parse_primary(index)
 
@@ -143,6 +143,6 @@ def parse_expression(tokens, index=0, min_precedence=1):
 
 		rhs, index = parse_expression(tokens, index + 1, next_min_prec)
 
-		lhs = Node(parse_num(lhs), parse_num(rhs), op)
+		lhs = Tree(parse_num(lhs), parse_num(rhs), op)
 
 	return lhs, index

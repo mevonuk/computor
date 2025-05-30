@@ -80,7 +80,7 @@ def reduce(b, a, type):
 	return s
 
 def quadratic(a, b, c):
-		# print(a,b,c,type(a),type(b),type(c))
+		# print('in quadratic', a,b,c,type(a),type(b),type(c))
 		if a != 0:
 			print("Solving quadratic equation...")
 			discriminant = b * b - 4 * a * c

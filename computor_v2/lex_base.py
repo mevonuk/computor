@@ -142,6 +142,7 @@ def parse_matrix_literal(matrix_str, matrix_type):
 		return Vector(matrix_data)
 
 def parse_num_raw(token):
+	# print("in parse_num_raw", token, type(token))
 	if token == 'i':
 		return Complex(0, 1)
 	if token.isalpha():

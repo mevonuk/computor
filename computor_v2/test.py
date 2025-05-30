@@ -25,36 +25,49 @@ def print_instructions():
 # need to be able to determine how many undefined variables there are
 # then if 1, check the power, then if 2 or smaller, solve for the variable
 
-# solving has two cases: f = ? and f(x) = 4 ? to solve for x
 
 # s = '-x-(-4-2*x)'
 # s = 'y = 3'
 # s = "f(Y) = (y^2 + 3*y +2 / 4)/(y+1) + 1"
-s = "f(x) = 2x + 1"#x^2 + 2x + 6 "
+s = "f(x) = a^2 * x"#x^2 + 2x + 6 "
 # s = "f(x) = 3 *  2x + x^2+1/(x+1)"
 
 # s = "g(x) = (x+1)"
 
 history = {}
 
-# history['f(a)'] = 5
-# history['x'] = 2
-# history['s'] = 'y'
 
 print('>', s)
 key, value = parse_cmd(s, history)
 history[key] = value
-
 
 # for key in history:
-# 	print(key, history)
+# 	print('history', key, history[key])
 
-s = "g(x) = (x+1)"
+s = "f(x) = ?"
+print('>', s)
+key, value = parse_cmd(s, history)
+
+s = "a = 3"
 print('>', s)
 key, value = parse_cmd(s, history)
 history[key] = value
 
-s = "f(x) = 2x+2 ?"
+# for key in history:
+# 	print('history', key, history[key])
+
+s = "a = ?"
+print('>', s)
+key, value = parse_cmd(s, history)
+history[key] = value
+
+s = "f(x) = ?"
+print('>', s)
+key, value = parse_cmd(s, history)
+
+exit()
+
+s = "f(x) = 2 ?"
 print('>', s)
 key, value = parse_cmd(s, history)
 

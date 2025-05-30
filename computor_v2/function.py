@@ -1,11 +1,12 @@
 from rational import Rational
 from complex import Complex
-from tree import Node
+from tree import Tree
 from variable import Variable
 from polynomial import Polynomial, RationalExpression
 
 def mul_exprs(a, b):
 	if isinstance(a, Polynomial) and isinstance(b, Polynomial):
+		# print('mul_exprs polynomials')
 		return a * b
 	elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
 		new_num = a * b.numerator
@@ -75,16 +76,16 @@ def add_rational_exprs(r1, r2):
 class Function:
 
 	def __init__(self, name, variable, terms):
-		if not isinstance(variable, (str, Node, Variable)):
-			print("Error: variable name should be a string or node")
+		if not isinstance(variable, (str, Tree, Variable)):
+			print("Error: variable name should be a string or Tree")
 			exit()
 		if not isinstance(name, str):
 			print("Error: function name should be a string")
 			exit()
-		if not isinstance(terms, (Node, Complex, Rational, Variable)):
-			print("Error: function terms should be a node type")
+		if not isinstance(terms, (Tree, Complex, Rational, Variable)):
+			print("Error: function terms should be a Tree type")
 			exit()
-		if isinstance(variable, Node):
+		if isinstance(variable, Tree):
 			# print("convert variable type")
 			variable = variable.left
 			# print(variable, type(variable))
@@ -100,6 +101,7 @@ class Function:
 		# print("Converting function tree to polynomial...")
 		# print('in convert function', self.terms, type(self.terms))
 		polynomial = self._node_to_polynomial(self.terms)
+		# print('in function convert_function', polynomial)
 		return polynomial
 
 	def _node_to_polynomial(self, node):
@@ -109,25 +111,37 @@ class Function:
 			p = Polynomial()
 			# print('in case rational', node, self.var)
 			p.add_term((node, self.var, 0, '+'))
+			# print(p)
 			return p
 
-		if isinstance(node, str):
+		# here need to make sure using only variable name !!!
+		if isinstance(node, (str, Variable)):
 			p = Polynomial()
-			p.add_term((1, node, 1, '+'))
+			# print('in case variable', node.name, self.var)
+			if node.name != self.var.name:
+				# print('in node to poly for variable', node, self.var)
+				p.add_term((node, self.var, 0, '+'))
+			else:
+				# print('in node to poly for var', self.var)
+				p.add_term((1, self.var, 1, '+'))
+			# print('in node to poly, retuning poly', p)
 			return p
 
-		if isinstance(node, Variable):
-			p = Polynomial()
-			p.add_term((1, node.name, 1, '+'))
-			return p
+		# if isinstance(node, Variable):
+		# 	p = Polynomial()
+		# 	p.add_term((1, node.name, 1, '+'))
+		# 	return p
 		
 		if node is None:
 			# print("in node to polynomial: node is none")
 			return
 
-		if isinstance(node, Node):
+		if isinstance(node, Tree):
 			left = self._node_to_polynomial(node.left)
 			right = self._node_to_polynomial(node.right)
+
+
+			# print('in node to poly, left, right', left, right)
 
 			if node.type == 'VAR':
 				# print('deeper in node to polynomial', left, type(left))
@@ -138,6 +152,7 @@ class Function:
 			elif node.type == '-':
 				return sub_exprs(left, right)
 			elif node.type == '*':
+				# print('multiplying', left, right, type(left), type(right))
 				return mul_exprs(left, right)
 			elif node.type == '/':
 				if not isinstance(left, Polynomial) or not isinstance(right, Polynomial):
@@ -149,8 +164,12 @@ class Function:
 					power = node.right
 				elif isinstance(node.right, Rational) and node.right.real % 1 == 0:
 					power = int(node.right.real)
+				elif isinstance(node.right, Tree):
+					hold = node.right.left
+					if isinstance(hold, int) or (isinstance(hold, Rational) and hold.real % 1 == 0):
+						power = hold.real
 				else:
-					print("Exponent must be an integer.")
+					print("Exponent must be an integer.", node.right, type(node.right))
 					exit()
 				base = self._node_to_polynomial(node.left)
 				result = base
