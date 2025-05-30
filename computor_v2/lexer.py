@@ -80,12 +80,12 @@ def parse_matrix_literal(matrix_str, matrix_type):
 
 
 def parse_num(token):
-	if isinstance(token, Node) or isinstance(token, Complex) or isinstance(token, Rational):
+	if isinstance(token, (Node, Complex, Rational, Variable)):
 		return token
 	if token == 'i':
 		return Complex(0, 1)
 	if token.isalpha():
-		return token #Variable(token, None)
+		return Variable(token, None)
 	if '.' in token:
 		return Rational(float(token))
 	else:
@@ -128,7 +128,7 @@ def parse_expression(tokens, index=0, min_precedence=1):
 			func = f"{func_name}({arg_expr})"
 			return Node(func, None, 'FUNC'), index + 1
 
-		return parse_num(token), index + 1
+		return Node(parse_num(token), None, 'VAR'), index + 1
 
 	lhs, index = parse_primary(index)
 

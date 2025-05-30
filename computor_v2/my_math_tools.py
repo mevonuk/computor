@@ -80,26 +80,36 @@ def reduce(b, a, type):
 	return s
 
 def quadratic(a, b, c):
-		# print("Solving quadratic equation...")
-		discriminant = b * b - 4 * a * c
-		if discriminant > 0:
-			print("\nDiscriminant is positive: two real solutions:")
-			top = -b + sqrt(discriminant)
-			top = int(top) if top.is_integer() else top
-			print(reduce(top, 2 * a, 0))
-			top = -b - sqrt(discriminant)
-			top = int(top) if top.is_integer() else top
-			print(reduce(top, 2 * a, 0))
-		elif discriminant == 0:
-			print("\nDiscriminant is zero: one real solution:")
-			print(f"{reduce(-b, 2 * a, 0)}")
+		# print(a,b,c,type(a),type(b),type(c))
+		if a != 0:
+			print("Solving quadratic equation...")
+			discriminant = b * b - 4 * a * c
+			if discriminant > 0:
+				print("\nDiscriminant is positive: two real solutions:")
+				top = -b + sqrt(discriminant)
+				top = int(top) if top.is_integer() else top
+				print(reduce(top, 2 * a, 0))
+				top = -b - sqrt(discriminant)
+				top = int(top) if top.is_integer() else top
+				print(reduce(top, 2 * a, 0))
+			elif discriminant == 0:
+				print("\nDiscriminant is zero: one real solution:")
+				print(f"{reduce(-b, 2 * a, 0)}")
+			else:
+				print("\nDiscriminant is negative: two complex solutions:")
+				reduced_realterm = reduce(-b, 2 * a, 0)
+				sqrtd = sqrt(abs(discriminant))
+				sd = int(sqrtd) if sqrtd.is_integer() else sqrtd
+				reduced_imagterm = reduce(sd, 2 * a, 1)
+				if reduced_imagterm and reduced_imagterm[0] == '-':
+					reduced_imagterm = reduced_imagterm[1:]
+				print(f"{reduced_realterm} + {reduced_imagterm}")
+				print(f"{reduced_realterm} - {reduced_imagterm}")
+		elif a == 0 and b != 0 and c != 0:
+			print("Solving linear equation...")
+			# print('in quadratic', b, c, type(b), type(c))
+			print("\nSolution:", reduce(-b, c, 0))
+		elif a == 0 and b == 0 and c != 0:
+			print("No solution for equation.")
 		else:
-			print("\nDiscriminant is negative: two complex solutions:")
-			reduced_realterm = reduce(-b, 2 * a, 0)
-			sqrtd = sqrt(abs(discriminant))
-			sd = int(sqrtd) if sqrtd.is_integer() else sqrtd
-			reduced_imagterm = reduce(sd, 2 * a, 1)
-			if reduced_imagterm and reduced_imagterm[0] == '-':
-				reduced_imagterm = reduced_imagterm[1:]
-			print(f"{reduced_realterm} + {reduced_imagterm}")
-			print(f"{reduced_realterm} - {reduced_imagterm}")
+			print("Solution given.")

@@ -1,9 +1,8 @@
 from rational import Rational
 from complex import Complex
 from tree import Node
-from tools import get_value2
 from variable import Variable
-from polynomial import Polynomial, RationalExpression, Term
+from polynomial import Polynomial, RationalExpression
 
 def mul_exprs(a, b):
 	if isinstance(a, Polynomial) and isinstance(b, Polynomial):
@@ -76,15 +75,19 @@ def add_rational_exprs(r1, r2):
 class Function:
 
 	def __init__(self, name, variable, terms):
-		if not (isinstance(variable, str) or isinstance(variable, Node)):
+		if not isinstance(variable, (str, Node, Variable)):
 			print("Error: variable name should be a string or node")
 			exit()
 		if not isinstance(name, str):
 			print("Error: function name should be a string")
 			exit()
-		if not (isinstance(terms, Node) or isinstance(terms, Complex) or isinstance(terms, Rational)):
+		if not isinstance(terms, (Node, Complex, Rational, Variable)):
 			print("Error: function terms should be a node type")
 			exit()
+		if isinstance(variable, Node):
+			# print("convert variable type")
+			variable = variable.left
+			# print(variable, type(variable))
 		self.terms = terms
 		self.var = variable
 		self.name = name
@@ -95,12 +98,16 @@ class Function:
 	
 	def convert_function(self):
 		# print("Converting function tree to polynomial...")
+		# print('in convert function', self.terms, type(self.terms))
 		polynomial = self._node_to_polynomial(self.terms)
 		return polynomial
 
 	def _node_to_polynomial(self, node):
+
+		# print('in conversion', node, type(node))
 		if isinstance(node, (int, float, Complex, Rational)):
 			p = Polynomial()
+			# print('in case rational', node, self.var)
 			p.add_term((node, self.var, 0, '+'))
 			return p
 
@@ -113,10 +120,18 @@ class Function:
 			p = Polynomial()
 			p.add_term((1, node.name, 1, '+'))
 			return p
+		
+		if node is None:
+			# print("in node to polynomial: node is none")
+			return
 
 		if isinstance(node, Node):
 			left = self._node_to_polynomial(node.left)
 			right = self._node_to_polynomial(node.right)
+
+			if node.type == 'VAR':
+				# print('deeper in node to polynomial', left, type(left))
+				return left
 
 			if node.type == '+':
 				return add_exprs(left, right)

@@ -94,8 +94,10 @@ class Term:
 			exit()
 		if isinstance(var, str):
 			self.var = var
+		elif isinstance(var, Variable):
+			self.var = var.name
 		else:
-			print("Usage Term: Variable must be a string", var)
+			print("Usage Term: Variable must be a string", var, type(var))
 			exit()
 		if operator in ('+', '-', '*', '%', '/'):
 			self.op = operator
@@ -204,6 +206,7 @@ class Polynomial:
 			return [0] * (degree + 1)
 
 		var = next(iter(self.terms))[0]  # get any variable used
+		# print("variable is", var)
 		return [
 			self.terms.get((var, i), (0, '+'))[0]
 			for i in reversed(range(degree + 1))
@@ -311,7 +314,7 @@ class Polynomial:
 					new_var = var1
 					new_exp = exp1
 				else:
-					print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})")
+					print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})", type(var1), type(var2))
 					exit()
 
 				new_coef = coef1 * coef2

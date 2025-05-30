@@ -31,6 +31,8 @@ class Node:
 			o = f"{self.type}"
 		if self.type == 'FUNC':
 			return f"{l}"
+		if self.type == 'VAR':
+			return f"{l}"
 		return l + o + r
 	
 	def sub_var_node(self, variable):

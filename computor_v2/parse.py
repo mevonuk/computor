@@ -88,12 +88,16 @@ def split_at_equals(tokens):
     else:
         raise ValueError("'=' not found in token list")
 
-def define_function_terms(name, var, term):
+def define_function_terms(name, var, term, history):
+
+	# print('var in define_function_terms', var, type(var))
 
 	terms, _ = parse_expression(term)
 
 	# if not isinstance(terms, Node):
 		# terms = Node(terms, 0, 'FUNC')
+
+	# print(terms, type(terms))
 
 	value = Function(name, var, terms)
 	# here parse RHS, and terms[0][2] if necessary
@@ -106,11 +110,13 @@ def define_function_terms(name, var, term):
 		value = simplify
 	return value
 
-def define_function(func):
+def define_function(func, history):
 	var, _ = parse_expression(func[0][2])
 
+	# print("var in define_function", var)
+
 	key = func[0][1]
-	value = define_function_terms(func[0][1], var, func[2:])
+	value = define_function_terms(func[0][1], var, func[2:], history)
 	return key, value
 
 def parse_cmd(cmd, history):
@@ -212,7 +218,11 @@ def parse_cmd(cmd, history):
 
 			# this only works for the case of constant !!!
 			var = next(iter(function_left.terms))[0]
-			function_right = define_function_terms('dummy_function', var, right)
+
+			var = parse_num(func[0][2][0])
+
+			# print("var in parse_cmd", var)
+			function_right = define_function_terms('dummy_function', var, right, history)
 
 			print(function_left, '=', function_right)
 
@@ -220,9 +230,11 @@ def parse_cmd(cmd, history):
 
 			degree = function.get_degree()
 			
+			# !!! this is only good for degree == 2, need seperate cases for 1 and 0
 			if degree < 3 and degree >= 0:
-				print("solving quadratic equation:", function, '= 0')
+				print("solving equation:", function, '= 0')
 				a, b, c = function.get_coefficients(2)
+				# print(a,b,c,type(a), type(b), type(c))
 				if isinstance(a, Rational):
 					a = a.real
 				if isinstance(b, Rational):
@@ -272,7 +284,7 @@ def parse_cmd(cmd, history):
 			if func[0][1] == 'i':
 				print("ERROR: Assignment to i is forbidden")
 				return None, None
-			key, value = define_function(func)
+			key, value = define_function(func, history)
 			print(value)
 			return key, value
 
