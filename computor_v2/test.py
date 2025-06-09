@@ -1,6 +1,7 @@
 from complex import Complex
 from parse import parse_cmd
 
+
 def print_instructions():
 	print("Welcome to computor_v2 by mevonuk")
 	print("This calculator supports rational and complex numbers,")
@@ -29,7 +30,7 @@ def print_instructions():
 # s = '-x-(-4-2*x)'
 # s = 'y = 3'
 # s = "f(Y) = (y^2 + 3*y +2 / 4)/(y+1) + 1"
-s = "f(x) = a^2 * x"#x^2 + 2x + 6 "
+s = "f(x) = x "
 # s = "f(x) = 3 *  2x + x^2+1/(x+1)"
 
 # s = "g(x) = (x+1)"
@@ -44,7 +45,7 @@ history[key] = value
 # for key in history:
 # 	print('history', key, history[key])
 
-s = "f(x) = ?"
+s = "f(1) = ?"
 print('>', s)
 key, value = parse_cmd(s, history)
 
@@ -61,13 +62,13 @@ print('>', s)
 key, value = parse_cmd(s, history)
 history[key] = value
 
-s = "f(x) = ?"
+s = "g(x) = a "#+ f(1)"
 print('>', s)
 key, value = parse_cmd(s, history)
 
 exit()
 
-s = "f(x) = 2 ?"
+s = "g(x) = ?"
 print('>', s)
 key, value = parse_cmd(s, history)
 

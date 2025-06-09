@@ -29,9 +29,9 @@ def reduce(b: int | float, a: int | float, mode: int) -> str:
     mode = 1 indicates number is complex
     returns string with reduced fraction"""
     if not isinstance(b, (int, float)):
-        raise TypeError("for reduce, b must be int")
+        raise TypeError("for reduce, b must be int/float")
     if not isinstance(a, (int, float)):
-        raise TypeError("for reduce, a must be int")
+        raise TypeError("for reduce, a must be int/float")
     if not isinstance(mode, int):
         raise TypeError("for reduce, mode must be int")
     if mode not in {0, 1}:
