@@ -1,5 +1,6 @@
 from complex import Complex
 from parse import parse_cmd
+from variable import Variable
 
 
 def print_instructions():
@@ -37,40 +38,51 @@ s = "f(x) = x "
 
 history = {}
 
+r = Variable('a', 33)
+history[r.name] = r
+
 
 print('>', s)
 key, value = parse_cmd(s, history)
-history[key] = value
-
-# for key in history:
-# 	print('history', key, history[key])
+if key is not None and value is not None:
+	history[key] = value
 
 s = "f(1) = ?"
 print('>', s)
 key, value = parse_cmd(s, history)
+if key is not None and value is not None:
+	history[key] = value
 
-s = "a = 3"
+# s = "a = 3"
+# print('>', s)
+# key, value = parse_cmd(s, history)
+# if key is not None and value is not None:
+# 	history[key] = value
+
+s = "b = f(1)"
 print('>', s)
 key, value = parse_cmd(s, history)
-history[key] = value
+if key is not None and value is not None:
+	history[key] = value
+
+
+s = "1 + b = ?"
+print('>', s)
+key, value = parse_cmd(s, history)
+if key is not None and value is not None:
+	history[key] = value
 
 # for key in history:
-# 	print('history', key, history[key])
+# 	print('history', key, history[key], type(history[key]))
 
-s = "a = ?"
+s = "g(x) = a + b * x"#+ f(1)"
 print('>', s)
 key, value = parse_cmd(s, history)
-history[key] = value
+if key is not None and value is not None:
+	history[key] = value
+if key is not None and value is not None:
+	history[key] = value
 
-s = "g(x) = a "#+ f(1)"
-print('>', s)
-key, value = parse_cmd(s, history)
-
-exit()
-
-s = "g(x) = ?"
-print('>', s)
-key, value = parse_cmd(s, history)
 
 
 

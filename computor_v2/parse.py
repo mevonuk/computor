@@ -8,7 +8,9 @@ from node import Node
 from tools import get_value, get_value2
 from my_math_tools import quadratic
 from check_input import check_user_input
-from tree_functions import solve_node
+from tree_functions2 import solve_node, solve_node_var
+from function_tools import get_function_value
+from tree_functions import sub_var_node
 
 
 def split_at_equals(tokens: str):
@@ -26,7 +28,30 @@ def define_function_terms(name, var, term, history):
     """Define function terms and return RHS of function
     in terms of a polynomial or rational function"""
     terms, _ = parse_expression(term)
+    # print("terms are", terms, type(terms))
+    if isinstance(var, Node):
+        safe_var = var.left.name
+    elif isinstance(var, Variable):
+        safe_var = var.name
+    else:
+        safe_var = var
+    # print("solve terms with safe_var", terms, safe_var, type(safe_var))
+    simp = solve_node_var(terms, safe_var, history)
+    # print("simp is", simp)
+    if simp is not None:
+        terms = simp
+    for key in history:
+        # print("key", key, safe_var)
+        if key != safe_var and isinstance(history[key], Variable):
+            sub_var_node(terms, history[key])
+    # new_terms = terms
+    # for key in history:
+    #     print("try to sub", key, type(key), var.left.name, type(var.left.name))
+    #     if key != var.left.name:
+    #         new_terms = sub_var_node(terms, key)
+    # print("new_terms", new_terms)
     value = Function(name, var, terms)
+    # print("function value", value, name, var, terms, type(terms))
     poly = value.convert_function()
     value = poly
     if isinstance(poly, RationalExpression):
@@ -61,16 +86,22 @@ def parse_cmd(cmd, history):
     tokens = tokenize(cmd)
     func = parse_tokens(tokens)
 
+    # is a function being defined?
     func_def = 0
-    if func and func[0] and func[0][0] == 'FUNC':
+    if func and func[0] and func[0][0] == 'FUNC' and func[1] == '=':
         func_def = 1
 
-    # check for solving, not FUNC
-    if tokens[len(tokens) - 1] == '?' and func_def == 0:
-        print("parse: parse_cmd: Solving in case func_def == 0")
-        # remove ?
+    # does the input end with a question mark?
+    solve = 0
+    if tokens[len(tokens) - 1] == '?':
+        solve = 1
+        # remove '?'
         end = len(tokens)-1
         tokens = tokens[:end]
+
+    # solving, not FUNC
+    if solve == 1 and func_def == 0:
+        # print("parse: parse_cmd: Solving in case func_def == 0")
 
         # case 1: ending with =
         if tokens[len(tokens)-1] == '=':
@@ -80,7 +111,6 @@ def parse_cmd(cmd, history):
             tokens = parse_tokens(tokens)
 
             tree, _ = parse_expression(tokens)
-            print("parse_cmd: tree", tree, type(tree))
             if isinstance(tree, str):
                 sol = get_value2(tree, history)
                 if isinstance(sol, Node):
@@ -100,38 +130,18 @@ def parse_cmd(cmd, history):
         return key, value
 
     # check for solving, FUNC
-    if tokens[len(tokens) - 1] == '?' and func_def == 1:
-        # remove ?
-        end = len(tokens)-1
-        tokens = tokens[:end]
+    if solve == 1 and func_def == 1:
 
         # case 1: ending with =
         if tokens[len(tokens)-1] == '=':
-            # simple solve
-            function = get_value(func[0][1], history)
+            # function name
+            func_name = func[0][1]
 
-            if function is None:
-                print("Error: function is not defined")
-                return key, value
+            # function variable
+            func_var = parse_num(func[0][2][0])
 
-            # check for variable
-            variable = parse_num(func[0][2][0])
-
-            # print('in parse cmd', function, type(function), variable, type(variable))
-
-            if isinstance(variable, str):
-                # print('instance 1')
-                sol = function.terms.solve_node(history)
-                print(sol)
-            elif isinstance(function, (Polynomial, RationalExpression)):
-                # print('instance 2')
-                # print("to plug vars", function)
-                function = function.plug_vars(variable, history)
-                # print("to plug in var", function, variable)
-                sol = plug_in_var(function, variable, history)
-                print(sol)
-            else:
-                print("function not poly/rational or otherwise")
+            result = get_function_value(func_name, func_var, history)
+            print(result)
 
         # case 2: ending with something
         else:
@@ -201,6 +211,7 @@ def parse_cmd(cmd, history):
         
     # next check for regular variables
     if not func_def and tokens[0].isalpha() and tokens[1] == '=':
+        # print("assigning a variable")
         if tokens[len(tokens) - 1] != '=':
             if tokens[0] == 'i':
                 print("ERROR: Assignment to i is forbidden")
@@ -217,7 +228,7 @@ def parse_cmd(cmd, history):
             tree, _ = parse_expression(tokens)
             value = solve_node(tree, history) 
             var = Variable(key, value)
-            # print('in parse_cmd', key, type(key), var, type(var), var.name, var.value, type(var.value))
+            print(value)
             return key, var
 
     # next check for functions

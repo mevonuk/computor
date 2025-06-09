@@ -32,7 +32,7 @@ class Rational(Complex):
             new_complex = Complex(self.real + o.real, o.imag)
             return new_complex
         else:
-            print("Bad input in r add function rational")
+            print("Bad input in add function rational", o, type(o))
             return None
 
     def __radd__(self, o):
@@ -50,7 +50,7 @@ class Rational(Complex):
             new_node = Node(self, o, '+')
             return new_node
         else:
-            print("Bad input in r radd function rational")
+            print("Bad input in r radd function rational", o, type(o))
             return None
 
     def __sub__(self, o):
@@ -118,7 +118,7 @@ class Rational(Complex):
         elif isinstance(o, Variable):
             return o.value * self
         else:
-            print("Bad input in r rmul function rational")
+            print("Bad input in r rmul function rational", o, type(o))
             return None
 
     def __truediv__(self, o):

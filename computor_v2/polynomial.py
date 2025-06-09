@@ -3,7 +3,7 @@ from complex import Complex
 from tools import get_value2
 from variable import Variable
 from node import Node
-from tree_functions import solve_node
+from tree_functions import simplify_node
 
 def mul_exprs(a, b):
 	if isinstance(a, Polynomial) and isinstance(b, Polynomial):
@@ -462,7 +462,8 @@ class Polynomial:
 				new_coef = get_value2(coef.name, history)
 			elif isinstance(coef, Node):
 				# print('solving node', coef)
-				new_coef = solve_node(coef, history)
+				new_coef = simplify_node(coef, history)
+				# new_coef = solve_node(coef, history)
 			else:
 				new_coef = None
 
@@ -586,6 +587,7 @@ def plug_in_var(func, value, history):
 		# print(self.numerator / self.denominator)
 	elif isinstance(func, Polynomial):
 		# print("plug in var polynomial")
+		# print("in plug in var", value, type(value))
 		if not isinstance(value, (str, int, float, Rational, Complex)):
 			# print('in plug_in_var', value, type(value), value.value)
 			print("Error: Currently value must be a number or str")
