@@ -3,6 +3,7 @@ from complex import Complex
 from tools import get_value2
 from variable import Variable
 from node import Node
+from tree_functions import solve_node
 
 def mul_exprs(a, b):
 	if isinstance(a, Polynomial) and isinstance(b, Polynomial):
@@ -461,7 +462,7 @@ class Polynomial:
 				new_coef = get_value2(coef.name, history)
 			elif isinstance(coef, Node):
 				# print('solving node', coef)
-				new_coef = coef.solve_node(history)
+				new_coef = solve_node(coef, history)
 			else:
 				new_coef = None
 

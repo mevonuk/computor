@@ -3,11 +3,11 @@
 from rational import Rational
 from complex import Complex
 from variable import Variable
-from tree import Tree
+from node import Node
 
 
 def parse_num(token):
-    if isinstance(token, (Tree, Complex, Rational, Variable)):
+    if isinstance(token, (Node, Complex, Rational, Variable)):
         return token
     if token == 'i':
         return Complex(0, 1)
@@ -52,14 +52,14 @@ def parse_expression(tokens, index=0, min_precedence=1):
                 raise NotImplementedError("Only one-arg functions supported")
 
             arg_expr, _ = parse_expression(args_token_lists[0])
-            # return Tree(func_name, arg_expr, 'FUNC'), index + 1
+            # return Node(func_name, arg_expr, 'FUNC'), index + 1
             func = f"{func_name}({arg_expr})"
             # need to save here a function class?
             print("lexer:parse_expression:parse_primary: func", func, func_name, arg_expr)
-            return Tree(func_name, arg_expr, 'FUNC'), index + 1
-            # return Tree(func, None, 'FUNC'), index + 1
+            return Node(func_name, arg_expr, 'FUNC'), index + 1
+            # return Node(func, None, 'FUNC'), index + 1
 
-        return Tree(parse_num(token), None, 'VAR'), index + 1
+        return Node(parse_num(token), None, 'VAR'), index + 1
 
     lhs, index = parse_primary(index)
 
@@ -74,6 +74,6 @@ def parse_expression(tokens, index=0, min_precedence=1):
 
         rhs, index = parse_expression(tokens, index + 1, next_min_prec)
 
-        lhs = Tree(parse_num(lhs), parse_num(rhs), op)
+        lhs = Node(parse_num(lhs), parse_num(rhs), op)
 
     return lhs, index

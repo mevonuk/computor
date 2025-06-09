@@ -4,7 +4,7 @@
 
 from rational import Rational
 from complex import Complex
-from tree import Tree
+from node import Node
 from variable import Variable
 from polynomial import Polynomial, RationalExpression
 
@@ -95,13 +95,13 @@ class Function:
 
     def __init__(self, name, variable, terms):
         """Initializes function"""
-        if not isinstance(variable, (str, Tree, Variable)):
-            raise TypeError("Error: variable name should be a string or Tree")
+        if not isinstance(variable, (str, Node, Variable)):
+            raise TypeError("Error: variable name should be a string or Node")
         if not isinstance(name, str):
             raise TypeError("Error: function name should be a string")
-        if not isinstance(terms, (Tree, Complex, Rational, Variable)):
-            raise TypeError("Error: function terms should be a Tree type")
-        if isinstance(variable, Tree):
+        if not isinstance(terms, (Node, Complex, Rational, Variable)):
+            raise TypeError("Error: function terms should be a Node type")
+        if isinstance(variable, Node):
             # print("convert variable type")
             variable = variable.left
             # print(variable, type(variable))
@@ -116,7 +116,7 @@ class Function:
 
     def convert_function(self):
         """Convert function to polynomial"""
-        # print("Converting function tree to polynomial...")
+        # print("Converting function node to polynomial...")
         # print('in convert function', self.terms, type(self.terms))
         polynomial = self._node_to_polynomial(self.terms)
         # print('in function convert_function', polynomial)
@@ -154,7 +154,7 @@ class Function:
             # print("in node to polynomial: node is none")
             return
 
-        if isinstance(node, Tree):
+        if isinstance(node, Node):
             left = self._node_to_polynomial(node.left)
             right = self._node_to_polynomial(node.right)
 
@@ -183,7 +183,7 @@ class Function:
                     power = nr
                 elif isinstance(nr, Rational) and nr.real % 1 == 0:
                     power = int(nr.real)
-                elif isinstance(nr, Tree):
+                elif isinstance(nr, Node):
                     hold = nr.left
                     if isinstance(hold, int):
                         power = hold
