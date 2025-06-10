@@ -29,10 +29,12 @@ def solve_node(node: Node, history: dict):
     if isinstance(node.right, Variable):
         right_value = get_value2(node.right.name, history)
 
+    print(left_value, type(left_value), right_value, type(right_value))
+
     if left_value is None or right_value is None:
-        # print("node: solve_node, None value", left_value, right_value, node.type)
         if node.type != 'FUNC' and node.type != 'VAR':
-            print("Equation cannot be resolved")
+            # print("node: solve_node, None value", left_value, right_value, node.type)
+            # print("Equation cannot be resolved")
             return None
 
     if isinstance(left_value, str) or isinstance(right_value, str):
@@ -42,18 +44,19 @@ def solve_node(node: Node, history: dict):
     if node.type == 'VAR' and right_value is None:
         return left_value
 
-    if node.type == '+':
-        return left_value + right_value
-    if node.type == '-':
-        return left_value - right_value
-    if node.type == '*':
-        return left_value * right_value
-    if node.type == '/':
-        return left_value / right_value
-    if node.type == '%':
-        return left_value % right_value
-    if node.type == '^':
-        return left_value ** right_value
+    if not isinstance(left_value, (str, Node)) and not isinstance(right_value, (str, Node)):
+        if node.type == '+':
+            return left_value + right_value
+        if node.type == '-':
+            return left_value - right_value
+        if node.type == '*':
+            return left_value * right_value
+        if node.type == '/':
+            return left_value / right_value
+        if node.type == '%':
+            return left_value % right_value
+        if node.type == '^':
+            return left_value ** right_value
     if node.type == '**':
         if isinstance(left_value, Matrix):
             if isinstance(right_value, Matrix):

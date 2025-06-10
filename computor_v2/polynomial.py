@@ -141,6 +141,7 @@ class Term:
 class Polynomial:
 	def __init__(self):
 		self.terms = {}  # key = exponent, var, value = coefficient, operator
+		self.var = None
 
 	def add_term(self, *args):
 		# print("in add_term", args)
@@ -157,6 +158,7 @@ class Polynomial:
 			exit()
 
 		key = (term.var, term.exp)
+		self.var = term.var
 		if key in self.terms:
 			existing_coef, _ = self.terms[key]
 			# print('in add term poly', existing_coef, term.coef)
@@ -568,14 +570,10 @@ def plug_in_var(func, value, history):
 	if isinstance(value, str):
 		value = get_value2(value, history)
 	if isinstance(value, Variable):
-		# print('in plug_in_var', value, value.name, type(value), value.value)
 		value = get_value2(value.name, history)
-
-	# print('in plug_in_var', value, type(value))
 
 	# attempt to solve top and bottom
 	if isinstance(func, RationalExpression):
-		# print("plugging in value in rationalexp")
 		top = Polynomial()
 		bottom = Polynomial()
 		if isinstance(func.numerator, Polynomial):
@@ -584,13 +582,13 @@ def plug_in_var(func, value, history):
 			bottom = plug_in_var(func.denominator, value, history)
 		result = RationalExpression(top, bottom)
 		return result
-		# print(self.numerator / self.denominator)
 	elif isinstance(func, Polynomial):
-		# print("plug in var polynomial")
-		# print("in plug in var", value, type(value))
 		if not isinstance(value, (str, int, float, Rational, Complex)):
-			# print('in plug_in_var', value, type(value), value.value)
 			print("Error: Currently value must be a number or str")
+			return func
+
+		one = Rational(1)
+		if value == 1 or value == one:
 			return func
 
 		result = Polynomial()
@@ -599,18 +597,12 @@ def plug_in_var(func, value, history):
 		for (var, exp), (coef, op) in func.terms.items():
 			result.terms[(var, exp)] = [coef, op]
 
-
 		var = next(iter(result.terms))[0]
-
-		# print("value of var", var, type(var))
-		# print("value of value", value, type(value))
 
 		keys_to_replace = []
 		for (v, exp) in result.terms:
 			if v == var:
 				keys_to_replace.append((v, exp))
-
-		# print("keys to replace", keys_to_replace)
 
 		for key in keys_to_replace:
 			coef, op = result.terms.pop(key)
@@ -620,7 +612,6 @@ def plug_in_var(func, value, history):
 					new_value = coef * (value ** key[1])
 				else:
 					new_value = Node(coef, value ** key[1], '*')
-				# print("new_value", new_value, type(new_value))
 				result.add_term((new_value, 'dummy_var', 0, '+'))
 			else:
 				result.add_term((coef, value, key[1], op))

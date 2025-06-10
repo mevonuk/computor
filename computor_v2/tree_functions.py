@@ -34,11 +34,11 @@ def simplify_node(node, history):
     """Simplifies a node if possible"""
     left_value = node.left
     right_value = node.right
-    print("simplify", left_value, right_value, node.type)
+
     if isinstance(node.left, Node):
-        left_value = node.left.simplify_node(history)
+        left_value = simplify_node(node.left, history)
     if isinstance(node.right, Node):
-        right_value = node.right.simplify_node(history)
+        right_value = simplify_node(node.right, history)
     if isinstance(node.left, str):
         left_value = get_value2(node.left, history)
     if isinstance(node.right, str):
@@ -48,9 +48,7 @@ def simplify_node(node, history):
     if isinstance(node.right, Variable):
         right_value = get_value2(node.right.name, history)
 
-    print("in simplify node values:", left_value, right_value, node.type)
-
-    if not (isinstance(node.right, Node) or isinstance(node.left, Node)) and not (isinstance(node.right, str) or isinstance(node.left, str)):
+    if not isinstance(right_value, (str, Node)) and not isinstance(left_value, (str, Node)):
         if node.type == '+':
             return left_value + right_value
         if node.type == '-':

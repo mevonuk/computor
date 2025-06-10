@@ -5,6 +5,7 @@ from polynomial import Polynomial, RationalExpression, plug_in_var
 from complex import Complex
 from rational import Rational
 from tools import get_value
+from node import Node
 
 
 def get_function_value(func_name, func_var, history):
@@ -26,6 +27,9 @@ def get_function_value(func_name, func_var, history):
             variable = Rational(float(variable))
         else:
             variable = Rational(int(variable))
+    if isinstance(variable, Node):
+        if variable.type == 'VAR':
+            variable = variable.left
 
     if isinstance(variable, str):
         sol = function.terms.solve_node(history)

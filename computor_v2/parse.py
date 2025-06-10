@@ -9,9 +9,10 @@ from tools import get_value, get_value2
 from my_math_tools import quadratic
 from check_input import check_user_input
 from tree_functions2 import solve_node, solve_node_var
+from tree_functions import simplify_node
 from function_tools import get_function_value
 from tree_functions import sub_var_node
-
+from lexer2 import parse_expression2, parse_num2
 
 def split_at_equals(tokens: str):
     """Splits string at the equal sign into left and right parts"""
@@ -27,32 +28,14 @@ def split_at_equals(tokens: str):
 def define_function_terms(name, var, term, history):
     """Define function terms and return RHS of function
     in terms of a polynomial or rational function"""
-    terms, _ = parse_expression(term)
-    print("terms are", term, terms, type(terms))
     if isinstance(var, Node):
         safe_var = var.left.name
     elif isinstance(var, Variable):
         safe_var = var.name
     else:
         safe_var = var
-    print("solve terms with safe_var", terms, safe_var, type(safe_var))
-    simp = solve_node_var(terms, safe_var, history)
-    print("simp is", simp)
-    if simp is not None:
-        terms = simp
-
-            
-    for key in history:
-        # print("key", key, safe_var)
-        val = history[key]
-        print("from history", key, val, type(val))
-
-        if key != safe_var and isinstance(history[key], Variable):
-            sub_var_node(terms, history[key])
-
-    print("new_terms", terms)
+    terms, _ = parse_expression2(term, safe_var, history)
     value = Function(name, var, terms)
-    # print("function value", value, name, var, terms, type(terms))
     poly = value.convert_function()
     value = poly
     if isinstance(poly, RationalExpression):
@@ -100,6 +83,10 @@ def parse_cmd(cmd, history):
         end = len(tokens)-1
         tokens = tokens[:end]
 
+    # print("tokens", tokens)
+    # print("func", func)
+    print("Case:", solve, func_def)
+
     # solving, not FUNC
     if solve == 1 and func_def == 0:
         # print("parse: parse_cmd: Solving in case func_def == 0")
@@ -112,6 +99,7 @@ def parse_cmd(cmd, history):
             tokens = parse_tokens(tokens)
 
             tree, _ = parse_expression(tokens)
+            print(tree, type(tree))
             if isinstance(tree, str):
                 sol = get_value2(tree, history)
                 if isinstance(sol, Node):
@@ -122,6 +110,7 @@ def parse_cmd(cmd, history):
                     sol = solve_node(sol, history)
             else:
                 sol = solve_node(tree, history)
+                print(sol, type(sol))
             if sol != None:
                 print(sol)
         
@@ -226,11 +215,16 @@ def parse_cmd(cmd, history):
             # here parse RHS
             key = tokens[0]
             tokens = parse_tokens(tokens[2:])
-            tree, _ = parse_expression(tokens)
-            value = solve_node(tree, history) 
+            tree, _ = parse_expression2(tokens, None, history)
+            value = solve_node(tree, history)
             var = Variable(key, value)
-            print(value)
-            return key, var
+            if value is not None:
+                print(value)
+                return key, var
+            else:
+                tree = simplify_node(tree, history)
+                print(tree)
+                return key, tree
 
     # next check for functions
     if func_def:
