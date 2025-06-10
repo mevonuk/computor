@@ -136,8 +136,10 @@ class Function:
         if isinstance(node, (str, Variable)):
             p = Polynomial()
             # print('in case variable', node.name, self.var)
-            if node.name != self.var.name:
+            if isinstance(node, Variable) and node.name != self.var.name:
                 # print('in node to poly for variable', node, self.var)
+                p.add_term((node, self.var, 0, '+'))
+            elif isinstance(node, str) and node != self.var.name:
                 p.add_term((node, self.var, 0, '+'))
             else:
                 # print('in node to poly for var', self.var)

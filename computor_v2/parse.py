@@ -28,28 +28,29 @@ def define_function_terms(name, var, term, history):
     """Define function terms and return RHS of function
     in terms of a polynomial or rational function"""
     terms, _ = parse_expression(term)
-    # print("terms are", terms, type(terms))
+    print("terms are", term, terms, type(terms))
     if isinstance(var, Node):
         safe_var = var.left.name
     elif isinstance(var, Variable):
         safe_var = var.name
     else:
         safe_var = var
-    # print("solve terms with safe_var", terms, safe_var, type(safe_var))
+    print("solve terms with safe_var", terms, safe_var, type(safe_var))
     simp = solve_node_var(terms, safe_var, history)
-    # print("simp is", simp)
+    print("simp is", simp)
     if simp is not None:
         terms = simp
+
+            
     for key in history:
         # print("key", key, safe_var)
+        val = history[key]
+        print("from history", key, val, type(val))
+
         if key != safe_var and isinstance(history[key], Variable):
             sub_var_node(terms, history[key])
-    # new_terms = terms
-    # for key in history:
-    #     print("try to sub", key, type(key), var.left.name, type(var.left.name))
-    #     if key != var.left.name:
-    #         new_terms = sub_var_node(terms, key)
-    # print("new_terms", new_terms)
+
+    print("new_terms", terms)
     value = Function(name, var, terms)
     # print("function value", value, name, var, terms, type(terms))
     poly = value.convert_function()

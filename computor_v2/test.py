@@ -41,7 +41,6 @@ history = {}
 r = Variable('a', 33)
 history[r.name] = r
 
-
 print('>', s)
 key, value = parse_cmd(s, history)
 if key is not None and value is not None:
@@ -53,18 +52,11 @@ key, value = parse_cmd(s, history)
 if key is not None and value is not None:
 	history[key] = value
 
-# s = "a = 3"
-# print('>', s)
-# key, value = parse_cmd(s, history)
-# if key is not None and value is not None:
-# 	history[key] = value
-
-s = "b = f(1)"
+s = "b = a+ 2*f(1) "
 print('>', s)
 key, value = parse_cmd(s, history)
 if key is not None and value is not None:
 	history[key] = value
-
 
 s = "1 + b = ?"
 print('>', s)
@@ -75,16 +67,11 @@ if key is not None and value is not None:
 # for key in history:
 # 	print('history', key, history[key], type(history[key]))
 
-s = "g(x) = a + b * x"#+ f(1)"
+s = "g(x) = a + b + f(1) * x"#+ f(1)"
 print('>', s)
 key, value = parse_cmd(s, history)
 if key is not None and value is not None:
 	history[key] = value
-if key is not None and value is not None:
-	history[key] = value
-
-
-
 
 
 

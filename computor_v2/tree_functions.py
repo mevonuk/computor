@@ -12,8 +12,8 @@ def sub_var_node(node, variable):
     if not isinstance(node, Node):
         return node
     
-    # print("in sub_var_node", node, type(node), variable, type(variable))
-    # print("in sub_var_node::", node.left, type(node.left))
+    print("in sub_var_node", node, type(node), variable, type(variable))
+    print("in sub_var_node::", node.left, type(node.left))
 
     if isinstance(node.left, Variable) and node.left.name == variable.name:
         node.left = variable.value
