@@ -181,3 +181,13 @@ class Complex:
         """Overload for complex negation function"""
         new_complex = Complex(- self.real, - self.imag)
         return new_complex
+
+    def __mod__(self):
+        """Overload for complex modulo function"""
+        print("Modulo not defined for complex numbers")
+        return None
+
+    def __rmod__(self):
+        """Overload for complex r modulo function"""
+        print("Modulo not defined for complex numbers")
+        return None

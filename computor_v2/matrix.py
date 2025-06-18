@@ -49,12 +49,11 @@ class Matrix:
     def __str__(self):
         """Returns string of matrix"""
         if self.data is not None:
-            output = "["
+            output = ""
             for i in range(self.shape[0]):
-                output += "[" + ", ".join([str(e) for e in self.data[i]]) + "]"
+                output += "[ " + " , ".join([str(e) for e in self.data[i]]) + " ]"
                 if i < self.shape[0] - 1:
-                    output += ", "
-            output += "]"
+                    output += "\n"
             return output
         else:
             return ("Matrix is empty")

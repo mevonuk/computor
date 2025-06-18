@@ -144,7 +144,7 @@ class Rational(Complex):
             else:
                 return Node(self, o, '*')
         else:
-            print("Bad input in r rmul function rational", o, type(o))
+            print("Bad input in r rmul function rational", self, o, type(o))
             return None
 
     def __truediv__(self, o):

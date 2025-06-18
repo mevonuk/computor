@@ -21,10 +21,10 @@ def parse_num(token):
 
 def parse_expression(tokens, index=0, min_precedence=1):
     precedence = {
-        '**': 4,
-        '^': 4,
-        '*': 3,
-        '/': 3,
+        '**': 5,
+        '^': 5,
+        '*': 4,
+        '/': 4,
         '%': 3,
         '+': 2,
         '-': 2,

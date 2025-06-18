@@ -25,7 +25,7 @@ def tokenize(expr):
 
     token_pattern = r'''
         (\*\*)						# Power operator
-      | (\^|\+|\-|\*|\/|=|\(|\))	# Operators and parentheses
+      | (\^|\+|\-|\*|\/|=|\(|\)|\%)	# Operators and parentheses
       | (\d+\.\d+|\d+)				# Numbers
       | (i)							# Imaginary unit
       | ([a-zA-Z_]\w*)				# Variables and function names
@@ -51,7 +51,7 @@ def parse_tokens(tokens):
         if (
             token == '-' and
             i + 1 < len(tokens) and is_number(tokens[i + 1]) and
-            (i == 0 or tokens[i - 1] in ('(', '+', '-', '*', '/', '^', '='))
+            (i == 0 or tokens[i - 1] in ('(', '+', '-', '*', '/', '%', '^', '='))
         ):
             output.append('-' + tokens[i + 1])
             i += 2
