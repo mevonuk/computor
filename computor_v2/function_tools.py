@@ -35,8 +35,10 @@ def get_function_value(func_name, func_var, history):
         sol = function.terms.solve_node(history)
         return sol
     elif isinstance(function, (Polynomial, RationalExpression)):
-        function = function.plug_vars(variable, history)
+        function = function.plug_vars(history)
+        print("after plug vars", function)
         sol = plug_in_var(function, variable, history)
+        print("after plug in var", variable, sol, type(sol))
         if isinstance(sol, Polynomial):
             if sol.get_degree() == 0:
                 sol = sol.get_coefficients(0)[0]

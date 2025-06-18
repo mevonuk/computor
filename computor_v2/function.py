@@ -99,8 +99,8 @@ class Function:
             raise TypeError("Error: variable name should be a string or Node")
         if not isinstance(name, str):
             raise TypeError("Error: function name should be a string")
-        if not isinstance(terms, (Node, Complex, Rational, Variable)):
-            raise TypeError("Error: function terms should be a Node type")
+        if not isinstance(terms, (int, float, Node, Complex, Rational, Variable)):
+            raise TypeError("Error: function terms in bad type")
         if isinstance(variable, Node):
             # print("convert variable type")
             variable = variable.left

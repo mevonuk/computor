@@ -31,15 +31,15 @@ def print_instructions():
 # s = '-x-(-4-2*x)'
 # s = 'y = 3'
 # s = "f(Y) = (y^2 + 3*y +2 / 4)/(y+1) + 1"
-s = "f(x) = a "
+s = "f(x) = a * x "
 # s = "f(x) = 3 *  2x + x^2+1/(x+1)"
 
 # s = "g(x) = (x+1)"
 
 history = {}
 
-# r = Variable('a', 33)
-# history[r.name] = r
+r = Variable('a', 33)
+history[r.name] = r
 
 print('>', s)
 key, value = parse_cmd(s, history)
@@ -63,8 +63,6 @@ print('>', s)
 key, value = parse_cmd(s, history)
 if key is not None and value is not None:
 	history[key] = value
-
-exit()
 
 # for key in history:
 # 	print('history', key, history[key], type(history[key]))

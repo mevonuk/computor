@@ -9,8 +9,7 @@ from function_tools import get_function_value
 
 
 def parse_num2(token, var, history):
-    if isinstance(token, (Node, Complex, Rational, Variable)):
-        # print("returning token", token, type(token))
+    if not isinstance(token, str):
         return token
     if token == 'i':
         return Complex(0, 1)

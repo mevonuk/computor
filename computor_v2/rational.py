@@ -31,6 +31,11 @@ class Rational(Complex):
         elif isinstance(o, Complex):
             new_complex = Complex(self.real + o.real, o.imag)
             return new_complex
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return o.value + self
+            else:
+                return Node(self, o, '+')
         else:
             print("Bad input in add function rational", o, type(o))
             return None
@@ -49,6 +54,11 @@ class Rational(Complex):
         elif isinstance(o, Node):
             new_node = Node(self, o, '+')
             return new_node
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return o.value + self
+            else:
+                return Node(self, o, '+')
         else:
             print("Bad input in r radd function rational", o, type(o))
             return None
@@ -64,6 +74,11 @@ class Rational(Complex):
         elif isinstance(o, Complex):
             new_complex = Complex(self.real - o.real, -o.imag)
             return new_complex
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return self - o.value
+            else:
+                return Node(self, o, '-')
         else:
             print("Bad input in r sub function rational")
             return None
@@ -79,6 +94,11 @@ class Rational(Complex):
         elif isinstance(o, Complex):
             new_complex = Complex(-self.real + o.real, o.imag)
             return new_complex
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return o.value - self
+            else:
+                return Node(o, self, '-')
         else:
             print("Bad input in r rsub function rational")
             return None
@@ -98,7 +118,10 @@ class Rational(Complex):
         elif isinstance(o, Matrix):
             return o * self
         elif isinstance(o, Variable):
-            return o.value * self
+            if o.value is not None:
+                return o.value * self
+            else:
+                return Node(self, o, '*')
         else:
             print("Bad input in r mul function rational")
             return None
@@ -116,7 +139,10 @@ class Rational(Complex):
             new_complex = convert * o
             return new_complex
         elif isinstance(o, Variable):
-            return o.value * self
+            if o.value is not None:
+                return o.value * self
+            else:
+                return Node(self, o, '*')
         else:
             print("Bad input in r rmul function rational", o, type(o))
             return None
@@ -133,6 +159,11 @@ class Rational(Complex):
             convert = Complex(self.real, 0)
             new_complex = convert / o
             return new_complex
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return self / o.value
+            else:
+                return Node(self, o, '/')
         else:
             print("Bad input in truediv function rational")
             return None
@@ -149,6 +180,11 @@ class Rational(Complex):
             convert = Complex(self.real, 0)
             new_complex = o / convert
             return new_complex
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return o.value / self
+            else:
+                return Node(o, self, '/')
         else:
             print("Bad input in r rtruediv function rational")
             return None
@@ -164,6 +200,11 @@ class Rational(Complex):
         elif isinstance(o, Complex) and o.imag == 0:
             new_rational = Rational(self.real % o.real)
             return new_rational
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return self % o.value
+            else:
+                return Node(o, self, '%')
         else:
             print("Bad input in mod function rational")
             return None
@@ -179,6 +220,11 @@ class Rational(Complex):
         elif isinstance(o, Complex) and o.imag == 0:
             new_rational = Rational(o.real % self.real)
             return new_rational
+        elif isinstance(o, Variable):
+            if o.value is not None:
+                return o.value % self
+            else:
+                return Node(o, self, '%')
         else:
             print("Bad input in r rmod function rational")
             return None
@@ -194,6 +240,11 @@ class Rational(Complex):
         elif isinstance(n, Complex) and n.imag == 0:
             new_rational = Rational(self.real ** n.real)
             return new_rational
+        elif isinstance(n, Variable):
+            if n.value is not None and isinstance(n.value, int):
+                return self ** n.value
+            else:
+                return Node(self, n, '^')
         else:
             print("Bad input in pow function rational")
             return None
@@ -209,6 +260,11 @@ class Rational(Complex):
         elif isinstance(n, Complex) and n.imag == 0:
             new_rational = Rational(n.real ** self.real)
             return new_rational
+        elif isinstance(n, Variable):
+            if n.value is not None:
+                return n.value ** self
+            else:
+                return Node(n, self, '^')
         else:
             print("Bad input in r rpow function rational")
             return None

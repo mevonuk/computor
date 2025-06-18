@@ -449,8 +449,7 @@ class Polynomial:
 				combined[key] = [coef, op]
 		self.terms = combined
 
-	def plug_vars(self, variable, history):
-		# print(variable, type(variable))
+	def plug_vars(self, history):
 
 		result = Polynomial()
 
@@ -587,9 +586,9 @@ def plug_in_var(func, value, history):
 			print("Error: Currently value must be a number or str")
 			return func
 
-		one = Rational(1)
-		if value == 1 or value == one:
-			return func
+		# one = Rational(1)
+		# if value == 1 or value == one:
+		# 	return func
 
 		result = Polynomial()
 

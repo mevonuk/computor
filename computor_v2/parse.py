@@ -99,7 +99,7 @@ def parse_cmd(cmd, history):
             tokens = parse_tokens(tokens)
 
             tree, _ = parse_expression(tokens)
-            print(tree, type(tree))
+            # print("before", tree, type(tree))
             if isinstance(tree, str):
                 sol = get_value2(tree, history)
                 if isinstance(sol, Node):
@@ -110,7 +110,7 @@ def parse_cmd(cmd, history):
                     sol = solve_node(sol, history)
             else:
                 sol = solve_node(tree, history)
-                print(sol, type(sol))
+                # print("after", sol, type(sol))
             if sol != None:
                 print(sol)
         
@@ -216,7 +216,9 @@ def parse_cmd(cmd, history):
             key = tokens[0]
             tokens = parse_tokens(tokens[2:])
             tree, _ = parse_expression2(tokens, None, history)
-            value = solve_node(tree, history)
+            value = tree
+            if isinstance(tree, Node):
+                value = solve_node(tree, history)
             var = Variable(key, value)
             if value is not None:
                 print(value)

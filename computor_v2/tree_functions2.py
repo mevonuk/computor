@@ -13,33 +13,48 @@ def solve_node(node: Node, history: dict):
     history dictionary as appropriate"""
     if not isinstance(node, Node):
         raise TypeError("only node can be solved in solve_node")
+    
+    # print("Entering solve_node")
 
     left_value = node.left
     right_value = node.right
-    if isinstance(node.left, Node):
-        left_value = solve_node(node.left, history)
-    if isinstance(node.right, Node):
-        right_value = solve_node(node.right, history)
-    if isinstance(node.left, str):
-        left_value = get_value2(node.left, history)
-    if isinstance(node.right, str):
-        right_value = get_value2(node.right, history)
-    if isinstance(node.left, Variable):
-        left_value = get_value2(node.left.name, history)
-    if isinstance(node.right, Variable):
-        right_value = get_value2(node.right.name, history)
 
-    print(left_value, type(left_value), right_value, type(right_value))
+    # print(left_value, type(left_value), right_value, type(right_value))
 
-    if left_value is None or right_value is None:
-        if node.type != 'FUNC' and node.type != 'VAR':
-            # print("node: solve_node, None value", left_value, right_value, node.type)
-            # print("Equation cannot be resolved")
-            return None
+    if isinstance(left_value, str):
+        left_value = get_value2(left_value, history)
+    if isinstance(right_value, str):
+        right_value = get_value2(right_value, history)
+    if isinstance(left_value, Variable):
+        left_value = get_value2(left_value.name, history)
+    if isinstance(right_value, Variable):
+        right_value = get_value2(right_value.name, history)
 
-    if isinstance(left_value, str) or isinstance(right_value, str):
-        # print("node: solve_node: string", left_value, right_value, node.type)
-        return None
+    if isinstance(left_value, Node):
+        left_value = solve_node(left_value, history)
+    if isinstance(right_value, Node):
+        right_value = solve_node(right_value, history)
+
+    # if isinstance(left_value, Variable):
+    #     left_value = get_value2(left_value.name, history)
+    # if isinstance(right_value, Variable):
+    #     right_value = get_value2(right_value.name, history)
+
+    # print(left_value, type(left_value), right_value, type(right_value))
+
+    if left_value is not None and right_value is None:
+        # if node.type != 'FUNC' and node.type != 'VAR':
+        return left_value
+
+    # if left_value is None or right_value is None:
+    #     if node.type != 'FUNC' and node.type != 'VAR':
+    #         # print("node: solve_node, None value", left_value, right_value, node.type)
+    #         # print("Equation cannot be resolved")
+    #         return None
+
+    # if isinstance(left_value, str) or isinstance(right_value, str):
+    #     # print("node: solve_node: string", left_value, right_value, node.type)
+    #     return None
 
     if node.type == 'VAR' and right_value is None:
         return left_value
@@ -69,8 +84,8 @@ def solve_node(node: Node, history: dict):
         result = get_function_value(function_name, function_var, history)
         return result
 
-    print("not caught in solve_node")
-    return None
+    # print("Equation cannot be solved")
+    return node
 
 
 def solve_node_var(node: Node, var, history: dict):
