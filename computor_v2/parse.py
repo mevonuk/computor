@@ -85,7 +85,7 @@ def parse_cmd(cmd, history):
 
     # print("tokens", tokens)
     # print("func", func)
-    print("Case:", solve, func_def)
+    # print("Case:", solve, func_def)
 
     # solving, not FUNC
     if solve == 1 and func_def == 0:
@@ -130,6 +130,7 @@ def parse_cmd(cmd, history):
             # function variable
             func_var = parse_num(func[0][2][0])
 
+            print("in parse solving function", func_name, func_var)
             result = get_function_value(func_name, func_var, history)
             print(result)
 
@@ -190,10 +191,11 @@ def parse_cmd(cmd, history):
     mat, mat_type = extract_matrix_literal(cmd)
     if mat and mat_type != 0:
         if not func_def:
-            print("Found matrix, parsing...")
+            # print("Found matrix, parsing...")
             key = tokens[0]
             matrix_input = parse_matrix_literal(mat[0], mat_type)
             value = matrix_input
+            print(value)
             return key, value
         else:
             print("ERROR: assigning matrix/vector to function")
@@ -201,7 +203,7 @@ def parse_cmd(cmd, history):
         
     # next check for regular variables
     if not func_def and tokens[0].isalpha() and tokens[1] == '=':
-        # print("assigning a variable")
+        print("assigning a variable")
         if tokens[len(tokens) - 1] != '=':
             if tokens[0] == 'i':
                 print("ERROR: Assignment to i is forbidden")
@@ -215,8 +217,10 @@ def parse_cmd(cmd, history):
             # here parse RHS
             key = tokens[0]
             tokens = parse_tokens(tokens[2:])
+            print("after parse tokens", tokens)
             tree, _ = parse_expression2(tokens, None, history)
             value = tree
+            print("after parse expression", value)
             if isinstance(tree, Node):
                 value = solve_node(tree, history)
             var = Variable(key, value)

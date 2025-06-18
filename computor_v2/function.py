@@ -6,9 +6,9 @@ from rational import Rational
 from complex import Complex
 from node import Node
 from variable import Variable
-from polynomial import Polynomial, RationalExpression
+from polynomial import Polynomial, RationalExpression, Term
 
-
+# !!!! changed out dummy var
 def mul_exprs(a, b):
     """method for multiplying polynomials and rational expressions"""
     if isinstance(a, Polynomial) and isinstance(b, Polynomial):
@@ -25,7 +25,7 @@ def mul_exprs(a, b):
             new_num = a.numerator * b.numerator
             new_den = a.denominator * b.denominator
             return RationalExpression(new_num, new_den)
-    print("Unsupported multiplication combination")
+    print("Unsupported multiplication combination", a, b, type(a), type(b))
     exit()
 
 
@@ -36,12 +36,12 @@ def sub_exprs(a, b):
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
         # Convert a to rational with denom 1
         a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, 'dummy_var', 0, '+'))
+        a_rational.denominator.add_term((1, a.var, 0, '+'))
         return sub_rational_exprs(a_rational, b)
     elif isinstance(a, RationalExpression):
         if isinstance(b, Polynomial):
             dummy_poly = Polynomial()
-            dummy_poly.add_term((1, 'dummy_var', 0, '+'))
+            dummy_poly.add_term((1, a.var, 0, '+'))
             return sub_exprs(a, RationalExpression(b, dummy_poly))
         elif isinstance(b, RationalExpression):
             return sub_rational_exprs(a, b)
@@ -66,7 +66,7 @@ def add_exprs(a, b):
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
         # Convert a to rational with denom 1
         a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, 'dummy_var', 0, '+'))
+        a_rational.denominator.add_term((1, a.var, 0, '+'))
         return add_rational_exprs(a_rational, b)
     elif isinstance(a, RationalExpression):
         if isinstance(b, Polynomial):
@@ -174,10 +174,10 @@ class Function:
                 # print('multiplying', left, right, type(left), type(right))
                 return mul_exprs(left, right)
             elif node.type == '/':
-                if not isinstance(left, Polynomial):
-                    if not isinstance(right, Polynomial):
-                        print("Polynomials only in rational expressions")
-                        exit()
+                if not isinstance(left, Polynomial) or not isinstance(right, Polynomial):
+                    print("Polynomials only in rational expressions")
+                    exit()
+                # print("calling rational", left, type(left), right, type(right))
                 return RationalExpression(left, right)
             elif node.type == '^':
                 nr = node.right
@@ -198,6 +198,12 @@ class Function:
                 result = base
                 for _ in range(power - 1):
                     result = result * base
+                return result
+            elif node.type == '%':
+				# !!!! added this for mod
+                # print("type mod", left, right, node.type)
+                result = Polynomial()
+                result.add_term(Term(Node(left,right,'%'), self.var, 0, '+'))
                 return result
             else:
                 print(f"Unsupported operation {node.type}")
