@@ -79,6 +79,8 @@ class Rational(Complex):
                 return self - o.value
             else:
                 return Node(self, o, '-')
+        elif isinstance(o, Node):
+            return Node(self, o, '-')
         else:
             print("Bad input in r sub function rational")
             return None
@@ -99,8 +101,10 @@ class Rational(Complex):
                 return o.value - self
             else:
                 return Node(o, self, '-')
+        elif isinstance(o, Node):
+            return Node(o, self, '-')
         else:
-            print("Bad input in r rsub function rational")
+            print("Bad input in r rsub function rational", self, ", ", o, type(o))
             return None
 
     def __mul__(self, o):
@@ -186,7 +190,7 @@ class Rational(Complex):
             else:
                 return Node(o, self, '/')
         else:
-            print("Bad input in r rtruediv function rational")
+            print("Bad input in r rtruediv function rational", self, o)
             return None
 
     def __mod__(self, o):

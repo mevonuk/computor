@@ -9,6 +9,7 @@ from function_tools import get_function_value
 
 
 def parse_num2(token, var, history):
+    # print("in parse_num2", token, var)
     if not isinstance(token, str):
         return token
     if token == 'i':
@@ -58,16 +59,25 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
             func_name = token[1]
             args_token_lists = token[2]
 
+            # print(func_name, args_token_lists[0])
+
             if len(args_token_lists) != 1:
                 raise NotImplementedError("Only one-arg functions supported")
 
-            arg_expr, _ = parse_expression2(args_token_lists[0], var, history)
+            arg_expr = args_token_lists[0]
+            # print(arg_expr, type(arg_expr))
+            if isinstance(args_token_lists[0], list) and len(args_token_lists[0]) > 1:
+                arg_expr, _ = parse_expression2(args_token_lists[0], var, history)
             # return Node(func_name, arg_expr, 'FUNC'), index + 1
-            func = f"{func_name}({arg_expr})"
+            # print(arg_expr, type(arg_expr))
+            # func = f"{func_name}({arg_expr})"
 
             # need to check here in history !!!
             value = get_value(func_name, history)
+            # print("in parse_primary2 value, arg, var:", value, arg_expr, var)
             value2 = parse_num2(arg_expr, var, history)
+
+            # print("in parse_primary2 value2:", value2)
             result = None
             if value is not None and value2 != var:
                 result = get_function_value(func_name, value2, history)

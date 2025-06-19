@@ -1,5 +1,5 @@
 # functions to manipulate tree
-# contains solve_node, sub_var_node, simplify_node
+# contains solve_node, simplify_node
 
 from variable import Variable
 from tools import get_value2
@@ -80,7 +80,11 @@ def solve_node(node: Node, history: dict):
         return None
     if node.type == 'FUNC':
         function_name = node.left
-        function_var = node.right.left
+        function_var = None
+        if isinstance(node.right, Node):
+            function_var = node.right.left
+        else:
+            function_var = node.right
         result = get_function_value(function_name, function_var, history)
         return result
 

@@ -6,6 +6,7 @@ from complex import Complex
 from rational import Rational
 from tools import get_value
 from node import Node
+from tree_functions import simplify_node
 
 # !!!! big modifications for modulo
 def get_function_value(func_name, func_var, history):
@@ -36,15 +37,15 @@ def get_function_value(func_name, func_var, history):
         if variable.type == 'VAR':
             variable = variable.left
 
-    print("1234", variable, function, type(function))
+    # print("1234", variable, function, type(function))
 
     if isinstance(variable, str):
         sol = function.terms.solve_node(history_copy)
         return sol
     elif isinstance(function, (Polynomial, RationalExpression)):
-        print("before plug vars")
+        # print("before plug vars")
         function = function.plug_vars(history_copy)
-        print("after plug vars", function, function.var)
+        # print("after plug vars", function, function.var)
         # check for division by zero
         if isinstance(function, RationalExpression):
             dem = function.denominator
@@ -53,18 +54,37 @@ def get_function_value(func_name, func_var, history):
                 if dem.get_degree() == 0:
                     dem = dem.get_coefficients(0)[0]
                     if dem == 0:
-                        print("division by zero")
+                        print("Error: division by zero")
                         return None
                     elif not isinstance(dem, Polynomial):
                         ex = 1
                 else:
                     ex = 1
-        print("before plug in var", function, variable)
+        # print("before plug in var", function, variable)
         sol = plug_in_var(function, variable, history_copy)
-        print("after plug in var", variable, sol, type(sol), sol.var)
+        # print("after plug in var", variable, sol, type(sol), sol.var)
         if isinstance(sol, Polynomial):
             if sol.get_degree() == 0:
                 sol = sol.get_coefficients(0)[0]
+            # print("simplify expression", sol, type(sol))
+            if isinstance(sol, Node):
+                sol = simplify_node(sol, history)
+        if isinstance(sol, RationalExpression):
+            sol_top = sol.numerator
+            sol_bot = sol.denominator
+            if sol_top.get_degree() == 0:
+                sol_top = sol_top.get_coefficients(0)[0]
+            if sol_bot.get_degree() == 0:
+                sol_bot = sol_bot.get_coefficients(0)[0]
+            # print("simplify rational expression", sol_top, type(sol_top), sol_bot, type(sol_bot))
+            if isinstance(sol_top, Node):
+                sol_top = simplify_node(sol_top, history)
+            if isinstance(sol_bot, Node):
+                sol_bot = simplify_node(sol_bot, history)
+            if sol_bot == 0:
+                print("Erro: division by zero")
+                return None
+            sol = sol_top / sol_bot
         return sol
     elif isinstance(function, Node):
         if isinstance(function.left, (Polynomial, RationalExpression)):

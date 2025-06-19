@@ -30,13 +30,33 @@ def print_instructions():
 
 history = {}
 
-s = "f(y) = 4*2%y"
+
+s = "funA(x) = 2 * 4 + x "
 print('>', s)
 key, value = parse_cmd(s, history)
 if key is not None and value is not None:
 	history[key] = value
 
-s = "f(3) = ?"
+s = "funB(x) = 4 -5 + (x + 2)^2 - 4 "
+print('>', s)
+key, value = parse_cmd(s, history)
+if key is not None and value is not None:
+	history[key] = value
+
+s = "funC(x) = 4x + 5 - 2 "
+print('>', s)
+key, value = parse_cmd(s, history)
+if key is not None and value is not None:
+	history[key] = value
+
+
+s = "funA(2) + funB(4) = ? "
+print('>', s)
+key, value = parse_cmd(s, history)
+if key is not None and value is not None:
+	history[key] = value
+
+s = "funC(3) = ? "
 print('>', s)
 key, value = parse_cmd(s, history)
 if key is not None and value is not None:

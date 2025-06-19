@@ -30,7 +30,7 @@ class Node:
         if self.type in set('+-') or self.type == '**':
             o = f" {self.type} "
         if self.type in set('*/%^'):
-            o = f"{self.type}"
+            o = f" {self.type} "
         if self.type == 'FUNC':
             return f"{ln}"
         if self.type == 'VAR':
