@@ -1,17 +1,23 @@
+# contains: split_at_equals, define_function_terms, define_function, parse_cmd
+
 from rational import Rational
 from variable import Variable
-from polynomial import Polynomial, RationalExpression, sub_exprs
+from polynomial import Polynomial, RationalExpression
 from function import Function
-from lex_base import tokenize, parse_tokens, extract_matrix_literal, parse_matrix_literal
-from lexer import parse_expression, parse_num
 from node import Node
+
+from polynomial import sub_exprs
+from lex_base import tokenize, parse_tokens
+from lex_base import extract_matrix_literal, parse_matrix_literal
+from lexer import parse_expression, parse_num
 from tools import get_value, get_value2
 from my_math_tools import quadratic
 from check_input import check_user_input
 from tree_functions2 import solve_node
-from tree_functions import simplify_node, organize_node_constants_left
+from tree_functions import simplify_node, resolve
 from function_tools import get_function_value
 from lexer2 import parse_expression2
+
 
 def split_at_equals(tokens: str):
     """Splits string at the equal sign into left and right parts"""
@@ -35,20 +41,18 @@ def define_function_terms(name, var, term, history):
         safe_var = var
     terms, _ = parse_expression2(term, safe_var, history)
     value = Function(name, var, terms)
-    # print("in define function terms:", value.terms)
     poly = value.convert_function()
     value = poly
     if isinstance(poly, RationalExpression):
         simplify = poly.simplify()
         value = simplify
-    # print("in define function value:", value)
     if isinstance(value, (Polynomial, RationalExpression)):
         value.combine_like_terms()
     return value
 
 
 def define_function(func, history):
-    """parses tokens of function definition and returns the 
+    """parses tokens of function definition and returns the
     fuction name as key, and the function expression as value"""
     var, _ = parse_expression(func[0][2])
     key = func[0][1]
@@ -85,13 +89,8 @@ def parse_cmd(cmd, history):
         end = len(tokens)-1
         tokens = tokens[:end]
 
-    # print("tokens", tokens)
-    # print("func", func)
-    # print("Case:", solve, func_def)
-
     # solving, not FUNC
     if solve == 1 and func_def == 0:
-        # print("parse: parse_cmd: Solving in case func_def == 0")
 
         # case 1: ending with =
         if tokens[len(tokens)-1] == '=':
@@ -101,21 +100,11 @@ def parse_cmd(cmd, history):
             tokens = parse_tokens(tokens)
 
             tree, _ = parse_expression(tokens)
-            # print("before", tree, type(tree))
-            if isinstance(tree, str):
-                sol = get_value2(tree, history)
-                if isinstance(sol, Node):
-                    sol = solve_node(sol, history)
-            elif isinstance(tree, Variable):
-                sol = get_value2(tree.name, history)
-                if isinstance(sol, Node):
-                    sol = solve_node(sol, history)
-            else:
-                sol = solve_node(tree, history)
-                # print("after", sol, type(sol))
-            if sol != None:
+            # recursive search for value in history
+            sol = resolve(tree, history)
+            if sol is not None:
                 print(sol)
-        
+
         else:
             print("Please define function before trying to solve")
 
@@ -132,14 +121,12 @@ def parse_cmd(cmd, history):
             # function variable
             func_var = parse_num(func[0][2][0])
 
-            # print("in parse solving function", func_name, func_var)
             result = get_function_value(func_name, func_var, history)
             print(result)
 
         # case 2: ending with something
         else:
             # quadratic solve
-            # print("case 2: solve quadratic equation")
             left, right = split_at_equals(tokens)
 
             left = parse_tokens(left)
@@ -153,11 +140,11 @@ def parse_cmd(cmd, history):
 
             var = parse_num(func[0][2][0])
 
-            # print("var in parse_cmd", var)
-            function_right = define_function_terms('dummy_function', var, right, history)
+            function_right = define_function_terms(
+                'dummy_function', var, right, history
+            )
 
             print(function_left, '=', function_right)
-
 
             if isinstance(function_left, (Polynomial, RationalExpression)):
                 function_left = function_left.plug_vars(history)
@@ -168,15 +155,12 @@ def parse_cmd(cmd, history):
             function = sub_exprs(function_left, function_right)
 
             degree = function.get_degree()
-            
+
             if degree < 3 and degree >= 0:
                 print("solving equation:", function, '= 0')
                 # need to plug in non-function variables !!!
-                # print("var in parse_cmd", var)
                 function2 = function.plug_vars(history)
-                # print('in parse_cmd', function2)
                 a, b, c = function2.get_coefficients(2)
-                # print(a,b,c,type(a), type(b), type(c))
                 if isinstance(a, Rational):
                     a = a.real
                 if isinstance(b, Rational):
@@ -193,7 +177,6 @@ def parse_cmd(cmd, history):
     mat, mat_type = extract_matrix_literal(cmd)
     if mat and mat_type != 0:
         if not func_def:
-            # print("Found matrix, parsing...")
             key = tokens[0]
             matrix_input = parse_matrix_literal(mat[0], mat_type)
             value = matrix_input
@@ -202,16 +185,15 @@ def parse_cmd(cmd, history):
         else:
             print("ERROR: assigning matrix/vector to function")
             return None, None
-        
+
     # next check for regular variables
     if not func_def and tokens[0].isalpha() and tokens[1] == '=':
-        # print("assigning a variable")
         if tokens[len(tokens) - 1] != '=':
             if tokens[0] == 'i':
                 print("ERROR: Assignment to i is forbidden")
                 return None, None
 
-            # need to check for case where variable is set to itself plus something
+            # case where variable is set to itself plus something
             if tokens[0] in tokens[2:]:
                 print("attempt to make variable recursive forbidden")
                 return None, None
@@ -219,10 +201,8 @@ def parse_cmd(cmd, history):
             # here parse RHS
             key = tokens[0]
             tokens = parse_tokens(tokens[2:])
-            # print("after parse tokens", tokens)
             tree, _ = parse_expression2(tokens, None, history)
             value = tree
-            # print("after parse expression", value)
             if isinstance(tree, Node):
                 value = solve_node(tree, history)
             var = Variable(key, value)
@@ -230,22 +210,17 @@ def parse_cmd(cmd, history):
                 print(value)
                 return key, var
             else:
-                print("in parse", tree)
-                # tree = organize_node_constants_left(tree)
-                # print("organized", tree)
                 tree = simplify_node(tree, history)
                 print(tree)
                 return key, tree
 
     # next check for functions
     if func_def:
-        # print("defining function")
         if func[len(func) - 1] != '=':
             if func[0][1] == 'i':
                 print("ERROR: Assignment to i is forbidden")
                 return None, None
             key, value = define_function(func, history)
-            # print("in parse_cmd", key, value)
             if isinstance(value, (Polynomial, RationalExpression)):
                 value.combine_like_terms()
             print(value)

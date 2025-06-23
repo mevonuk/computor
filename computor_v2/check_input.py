@@ -24,7 +24,6 @@ def check_user_input(s: str) -> int:
 
 def check_equal_signs(s: str):
     """checks the number of equal signs in the input"""
-    # check number of = signs
     count = s.count('=')
     if count != 1:
         print("Error: Equation should have 1 equal sign.")
@@ -34,7 +33,6 @@ def check_equal_signs(s: str):
 
 def check_decimals(s: str):
     """checks the number of decimals in a single term"""
-    # check multiple . in one term
     s_list = list(s)
     for i, c in enumerate(s_list):
         if c == '.':
@@ -51,7 +49,6 @@ def check_decimals(s: str):
 
 def check_new_term(s: str):
     """Checks to see if a new term starts after certain characters"""
-    # check spaces to see if a new term starts
     s_list = list(s)
     c_new_term = set('+-=(*/%')
     for i, c in enumerate(s_list):
@@ -71,18 +68,15 @@ def check_new_term(s: str):
 
 def insert_mult(s: str) -> str:
     """Inserts a multiplication sign between certain characters"""
-    # Insert * between:
-    # - number or variable and variable or opening parenthesis
     s = re.sub(r'(?<=[0-9a-zA-Z\)])\s+(?=[a-zA-Z\(])', ' * ', s)
     return s
 
 
 def check_input_chars(s: str):
     """Checks allowed characters"""
-    # check for allowed characters
-    c_allowed = set('+-/*^% ()=?.;[],')
+    CHAR_ALLOWED = set('+-/*^% ()=?.;[],')
     for c in s:
-        if not c.isalpha() and not c.isdigit() and c not in c_allowed:
+        if not c.isalpha() and not c.isdigit() and c not in CHAR_ALLOWED:
             print("Error: Not an allowed char:", c)
             return 1
     return 0

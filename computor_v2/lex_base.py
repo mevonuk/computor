@@ -2,6 +2,7 @@
 # extract_matrix_literal, split_terms, parse_number, parse_num_raw
 
 import re
+
 from matrix import Matrix, Vector
 from rational import Rational
 from complex import Complex
@@ -43,6 +44,7 @@ def is_number(token):
 def parse_tokens(tokens):
     """Parse tokens detecting functions"""
     output = []
+    SPECIAL_TOKENS = ('(', '+', '-', '*', '/', '%', '^', '=')
     i = 0
     while i < len(tokens):
         token = tokens[i]
@@ -51,7 +53,7 @@ def parse_tokens(tokens):
         if (
             token == '-' and
             i + 1 < len(tokens) and is_number(tokens[i + 1]) and
-            (i == 0 or tokens[i - 1] in ('(', '+', '-', '*', '/', '%', '^', '='))
+            (i == 0 or tokens[i - 1] in SPECIAL_TOKENS)
         ):
             output.append('-' + tokens[i + 1])
             i += 2
@@ -170,4 +172,3 @@ def parse_num_raw(token):
         return Rational(float(token))
     else:
         return Rational(int(token))
-

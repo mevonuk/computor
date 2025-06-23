@@ -12,7 +12,6 @@ def get_value(value, history):
         if isinstance(result, Variable):
             result = result.value
         return result
-    # print(value + " is not defined")
     return None
 
 
@@ -25,5 +24,4 @@ def get_value2(value, history):
         if isinstance(result, Variable):
             result = result.value
         return result
-    # print(value + " is not defined")
     return value

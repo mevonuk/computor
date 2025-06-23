@@ -1,19 +1,16 @@
 from complex import Complex
 from parse import parse_cmd
-from variable import Variable
 
 
 def print_instructions():
-	print("Welcome to computor_v2 by mevonuk")
-	print("This calculator supports rational and complex numbers,")
-	print("matrices, vectors, and simple functions.")
-	print("\nAcceptible input:")
-	print("\tvariable_name = expression (to assign a value to a variable)")
-	print("\tExpression = ? (to solve expression)\n")
-	print("To exit the program, enter 'exit'\n")
-
-
-# print_instructions()
+    """Prints out instructions for user at start of program"""
+    print("Welcome to computor_v2 by mevonuk")
+    print("This calculator supports rational and complex numbers,")
+    print("matrices, vectors, and simple functions.")
+    print("\nAcceptible input:")
+    print("\tvariable_name = expression (to assign a value to a variable)")
+    print("\tExpression = ? (to solve expression)\n")
+    print("To exit the program, enter 'exit'\n")
 
 # tests:
 # assigning matrix
@@ -27,9 +24,7 @@ def print_instructions():
 # need to be able to determine how many undefined variables there are
 # then if 1, check the power, then if 2 or smaller, solve for the variable
 
-
 # history = {}
-
 
 # s = " funA(x) = x^2 + 2x + 1"
 # print('>', s)
@@ -51,20 +46,31 @@ def print_instructions():
 
 # exit()
 
-cmd = ""
-history = {}
 
-history['i'] = Complex(0, 1)
+def main():
+    """main control for computor_v2, a code to serve as
+    a simple calculator for functions and matrices"""
+    # print_instructions()
 
-while(1):
-	cmd = input("> ")
-	if cmd == 'exit':
-		exit()
+    try:
+        cmd = ""
+        history = {}
 
-	if cmd:
-		# print(cmd)
-		key, value = parse_cmd(cmd, history)
-		if key and value:
-			history[key] = value
+        history['i'] = Complex(0, 1)
 
-	# print(history)
+        while (1):
+            cmd = input("> ")
+            if cmd == 'exit':
+                exit()
+
+            if cmd:
+                key, value = parse_cmd(cmd, history)
+                if key and value:
+                    history[key] = value
+
+    except (TypeError, Exception) as e:
+        print(e)
+
+
+if __name__ == "__main__":
+    main()

@@ -2,14 +2,18 @@
 # program specifications,
 # modify string to standardize,
 # and perform final checks
+# contains: check_chars, check_equals, check_multple_decimals, 
+#			check_spaces, check_input_chars, modify_exp,
+#			check_exp, check_sign, check_decimals, check_mult,
+#			check_input
 
 def check_chars(s: str):
     """check for allowed characters"""
     if not isinstance(s, str):
         raise TypeError("Input not a string")
-    allowed_chars = set('0123456789.+-=* ^xX')
+    CHAR_ALLOWED = set('0123456789.+-=* ^xX')
     for c in s:
-        if c not in allowed_chars:
+        if c not in CHAR_ALLOWED:
             raise Exception(f"Error: Not an allowed char: {c}")
 
 

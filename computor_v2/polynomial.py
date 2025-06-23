@@ -1,11 +1,18 @@
+# definition of Term, Polynomial, and RationalExpression classes
+# contains routines: mul_exprs, sub_exprs, sub_rational_exprs,
+#                    add_exprs, add_rational_exprs, plug_in_var
+
 from rational import Rational
 from complex import Complex
-from tools import get_value2
 from variable import Variable
 from node import Node
-from tree_functions import simplify_node, organize_node_constants_left
+
+from tools import get_value2
+from tree_functions import simplify_node
+
 
 def mul_exprs(a, b):
+    """Rules for multiplying Polynominals and Rational Expressions"""
     if isinstance(a, Polynomial) and isinstance(b, Polynomial):
         return a * b
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
@@ -14,15 +21,18 @@ def mul_exprs(a, b):
     elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
         new_num = a.numerator * b
         return RationalExpression(new_num, a.denominator)
-    elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
+    elif (isinstance(a, RationalExpression) and
+            isinstance(b, RationalExpression)):
         new_num = a.numerator * b.numerator
         new_den = a.denominator * b.denominator
         return RationalExpression(new_num, new_den)
     else:
         print("Unsupported multiplication combination")
-        exit()
+        return None
+
 
 def sub_exprs(a, b):
+    """Rules for subtracting Polynominals and Rational Expressions"""
     if isinstance(a, Polynomial) and isinstance(b, Polynomial):
         return a - b
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
@@ -34,13 +44,16 @@ def sub_exprs(a, b):
         dummy_poly = Polynomial()
         dummy_poly.add_term((1, a.var, 0, '+'))
         return sub_exprs(a, RationalExpression(b, dummy_poly))
-    elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
+    elif (isinstance(a, RationalExpression) and
+            isinstance(b, RationalExpression)):
         return sub_rational_exprs(a, b)
     else:
         print("Unsupported subtraction combination")
-        exit()
+        return None
+
 
 def sub_rational_exprs(r1, r2):
+    """Rule for subtracting Rational Expressions"""
     # a/b - c/d = (ad - bc) / bd
     new_num1 = r1.numerator * r2.denominator
     new_num2 = r2.numerator * r1.denominator
@@ -50,6 +63,7 @@ def sub_rational_exprs(r1, r2):
 
 
 def add_exprs(a, b):
+    """Rules for adding Polynominals and Rational Expressions"""
     if isinstance(a, Polynomial) and isinstance(b, Polynomial):
         return a + b
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
@@ -59,13 +73,16 @@ def add_exprs(a, b):
         return add_rational_exprs(a_rational, b)
     elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
         return add_exprs(b, a)
-    elif isinstance(a, RationalExpression) and isinstance(b, RationalExpression):
+    elif (isinstance(a, RationalExpression) and
+            isinstance(b, RationalExpression)):
         return add_rational_exprs(a, b)
     else:
         print("Unsupported addition combination")
-        exit()
+        return None
+
 
 def add_rational_exprs(r1, r2):
+    """Rule for adding Rational Expressions"""
     # a/b + c/d = (ad + bc) / bd
     new_num1 = r1.numerator * r2.denominator
     new_num2 = r2.numerator * r1.denominator
@@ -74,43 +91,35 @@ def add_rational_exprs(r1, r2):
     return RationalExpression(new_num, new_den)
 
 
-# Note: polynomial can only have one var, when solving for that var, 
-# otherwise it should be possible (for plugging in the value)
-
-# Modulo (%) is not allowed for Complex numbers
-
-# each term of a polynomial is a coefficient multiplied by a variable to an exp
 class Term:
+    """each term of a polynomial is a coefficient
+    multiplied by a variable to an exp"""
 
     def __init__(self, coefficient, var, exp, operator):
+        """Initialize a Term with a 4-tuple"""
         if isinstance(exp, int) and exp >= 0:
             self.exp = exp
         else:
-            print("Usage Term: Exponent must be integer >= 0", exp)
-            exit()
+            raise TypeError("Usage Term: Exponent must be integer >= 0", exp)
         if isinstance(coefficient, (int, float, Rational, Complex, Node)):
             self.coef = coefficient
         elif isinstance(coefficient, str):
-            # print('in term, using ceff str')
             self.coef = Variable(coefficient, None)
         elif isinstance(coefficient, Variable):
-            # print('in term, using ceff variable')
             self.coef = coefficient
         else:
-            print("Usage Term: Coef must be int, float, rational, or complex", coefficient, type(coefficient))
-            exit()
+            raise TypeError("Usage Term: Problem with Coef type")
         if isinstance(var, str):
             self.var = var
         elif isinstance(var, Variable):
             self.var = var.name
         else:
-            print("Usage Term: Variable must be a string", var, type(var))
-            exit()
+            raise TypeError("Usage Term: Variable must be a string")
         if operator in ('+', '-', '*', '%', '/'):
             self.op = operator
 
     def __repr__(self):
-        # print('in rep term', self.coef, type(self.coef))
+        """How to represent a Term in a string"""
         varible = f"{self.var}^{self.exp}"
         if self.exp == 0:
             varible = ""
@@ -143,30 +152,32 @@ class Term:
             else:
                 return f"{self.coef}{varible}"
 
+
 class Polynomial:
+    """Class to define a Polynomial consisting of Terms"""
+
     def __init__(self):
+        """Terms are empty by default and var set to dummy_var"""
         self.terms = {}  # key = exponent, var, value = coefficient, operator
         self.var = "dummy_var"
 
     def add_term(self, *args):
-        # print("in add_term", args, type(args))
+        """Add a Term to the Polynomial via Term or 4-tuple"""
         largs = list(args)
         if len(largs) != 1:
-            print("Usage: add term with Term or 4-tuple")
-            exit()
+            raise TypeError("Usage: add term with Term or 4-tuple")
         if isinstance(largs[0], Term):
             term = largs[0]
         elif isinstance(largs[0], tuple):
             term = Term(*largs[0])
         else:
-            print("Usage: add Term with Term or 4-tuple")
-            exit()
+            raise TypeError("Usage: add Term with Term or 4-tuple")
 
+        # keys correspond to the exponent and the variable
         key = (term.var, term.exp)
         self.var = term.var
         if key in self.terms:
             existing_coef, _ = self.terms[key]
-            # print('in add term poly', existing_coef, term.coef)
             if term.op == '+':
                 hold = Node(existing_coef, term.coef, '+')
                 self.terms[key] = [hold, '+']
@@ -180,11 +191,18 @@ class Polynomial:
                 hold = Node(existing_coef, term.coef, '*')
                 self.terms[key] = [hold, '+']
             elif term.op == '%':
-                if isinstance(term.coef, (int, float, Rational)) and isinstance(term.var, str):
-                    mod_result = term.coef % get_value2(term.var, {}) if callable(get_value2) else term.coef % 1  # use dummy value or handle properly
-                elif isinstance(term.coef, (int, float, Rational)) and isinstance(term.var, Variable):
+                if (isinstance(term.coef, (int, float, Rational)) and
+                        isinstance(term.var, str)):
+                    mod_result = (
+                        term.coef % get_value2(term.var, {})
+                        if callable(get_value2)
+                        else term.coef % 1
+                    )
+                elif (isinstance(term.coef, (int, float, Rational)) and
+                        isinstance(term.var, Variable)):
                     mod_result = Node(term.coef, term.var, '%')
-                elif isinstance(term.coef, Variable) and isinstance(term.var, (int, float, Rational)):
+                elif (isinstance(term.coef, Variable) and
+                        isinstance(term.var, (int, float, Rational))):
                     mod_result = Node(term.coef, term.var, '%')
                 else:
                     mod_result = Node(term.coef, term.var, '%')
@@ -198,9 +216,8 @@ class Polynomial:
                 self.terms[key] = [1, term.op]
             self.terms[key] = [term.coef, term.op]
 
-    # !!!! modified for zero value
     def __repr__(self):
-        # print("in repr poly")
+        """How to represent a Polymonial in string"""
         if not self.terms:
             return "0"
         function_terms = self.terms.items()
@@ -211,11 +228,9 @@ class Polynomial:
 
         parts = []
         for i, ((var, exp), (coef, op)) in enumerate(function_terms):
-
-            # print('in rep poly', var, exp, coef, type(coef))
             if coef == 0 or coef is None:
                 continue
-            # print("printing coef", coef, type(coef))
+
             if isinstance(coef, Variable):
                 term = Term(coef.name, var, exp, op)
             elif isinstance(coef, Node):
@@ -237,22 +252,25 @@ class Polynomial:
             else:
                 term = Term(abs(coef.real), var, exp, op)
 
-            # print('in rep poly', term, type(term))
-
             term_str = str(term)
             if i == 0:
-                # # First term: include sign only if negative
-                if not isinstance(coef, (Complex, Variable, Node, str)) and coef < 0:
+                # First term: include sign only if negative
+                if (not isinstance(coef, (Complex, Variable, Node, str)) and
+                        coef < 0):
                     parts.append(f"-{term_str}")
-                elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
+                elif (isinstance(coef, Complex) and coef.imag == 0 and
+                        coef.real < 0):
                     parts.append(f"-{term_str}")
                 else:
                     parts.append(f"{term_str}")
             else:
-                # # Subsequent terms: prepend with + or -
-                if not isinstance(coef, (Complex, Variable, Node, str)) and coef < 0:
+                # Subsequent terms: prepend with + or -
+                if (not isinstance(coef, (Complex, Variable, Node, str)) and
+                        coef < 0):
                     parts.append(f" - {term_str}")
-                elif isinstance(coef, Complex) and coef.imag == 0 and coef.real < 0:
+                elif (isinstance(coef, Complex) and
+                        coef.imag == 0 and
+                        coef.real < 0):
                     parts.append(f" - {term_str}")
                 else:
                     parts.append(f" + {term_str}")
@@ -261,8 +279,9 @@ class Polynomial:
             return result
         else:
             return '0'
-    
+
     def get_coefficients(self, degree):
+        """Obtain the coefficient of a given term"""
         if not self.terms:
             return [0] * (degree + 1)
 
@@ -273,11 +292,11 @@ class Polynomial:
             for i in reversed(range(degree + 1))
         ]
 
-    # factor for cases of var^2
     def factor(self):
+        """factor for cases of var^2"""
         a, b, c = self.get_coefficients(2)
 
-        if not a :
+        if not a:
             return [self]  # Not a factorable quadratic or not univariate
 
         discriminant = b ** 2 - 4 * a * c
@@ -297,7 +316,7 @@ class Polynomial:
 
         var = next(iter(self.terms))[0]
 
-        f1.add_term((1, var, 1, '+'))  
+        f1.add_term((1, var, 1, '+'))
         f1.add_term((-r1, var, 0, '+'))
 
         f2.add_term((1, var, 1, '+'))
@@ -311,6 +330,7 @@ class Polynomial:
             return [f1, f2]
 
     def __sub__(self, other):
+        """Overload to subtract Polynomials"""
         if not isinstance(other, Polynomial):
             print("Subtraction only supported between Polynomial instances.")
             return NotImplemented
@@ -335,8 +355,9 @@ class Polynomial:
                 result.terms[key] = [-coef, op]
 
         return result
-    
+
     def __add__(self, other):
+        """Overload to add Polynomials"""
         if not isinstance(other, Polynomial):
             print("Addition only supported between Polynomial instances.")
             return NotImplemented
@@ -363,32 +384,23 @@ class Polynomial:
         return result
 
     def __mul__(self, other):
+        """Overload to multiply Polynomials"""
         if not isinstance(other, Polynomial):
             return NotImplemented
 
         result = Polynomial()
 
-        # print('in poly __mul__', self, other)
-
         for (var1, exp1), (coef1, op1) in self.terms.items():
             for (var2, exp2), (coef2, op2) in other.terms.items():
-                # print(var1, type(var1), var2, type(var2))
-                # print(exp1, type(exp1), exp2, type(exp2))
-                # print(coef1, type(coef1), coef2, type(coef2))
-                # print(op1, type(op1), op2, type(op2))
                 if var1 == "dummy_var":
                     var1 = var2
                 if var2 == "dummy_var":
                     var2 = var1
                 if var1 == var2:
-                    # Combine like variable powers
-                    # print(exp1, exp2)
                     new_exp = exp1 + exp2
                     new_var = var1
-                    # print('new exponents', new_var, new_exp)
                 else:
-                    print(f"Error: Cannot multiply polynomials with different variables ({var1}, {var2})", type(var1), type(var2))
-                    exit()
+                    raise TypeError("Polynomials have different variables")
 
                 if isinstance(coef1, (Variable, Node)):
                     if coef2 == 1:
@@ -399,16 +411,16 @@ class Polynomial:
                     if coef1 == 1:
                         new_coef = coef2
                     else:
-                        new_coef = Node(coef1, coef2, '*')	
+                        new_coef = Node(coef1, coef2, '*')
                 else:
                     new_coef = coef1 * coef2
 
-                # print('new values', new_var, new_exp, new_coef)
                 result.add_term((new_coef, new_var, new_exp, '+'))
 
         return result
 
     def __truediv__(self, other):
+        """Overload to divide Polynomials by non-Polynomials"""
         if not isinstance(other, Polynomial):
             return NotImplemented
 
@@ -417,28 +429,24 @@ class Polynomial:
         for (var1, exp1), (coef1, op1) in self.terms.items():
             for (var2, exp2), (coef2, op2) in other.terms.items():
                 if coef2 == 0:
-                    print("Error: Division by zero coefficient in polynomial term.")
-                    exit()
+                    raise ZeroDivisionError("Division by zero: polynomial.")
 
                 if var1 == var2:
                     # Combine like variable powers (subtract for division)
                     new_exp = exp1 - exp2
                     new_var = var1
                 else:
-                    print(f"Error: Cannot divide polynomials with different variables ({var1}, {var2})")
-                    exit()
+                    raise TypeError("Polynomials have different variables")
 
                 new_coef = coef1 / coef2
                 result.add_term((new_coef, new_var, new_exp, '+'))
 
         return result
 
-    # !!!! added for modulo
     def __mod__(self, other):
+        """Overload to find modulo of const Polynomials by non-Polynomials"""
         if not isinstance(other, Polynomial):
             return NotImplemented
-
-        # print("degrees", self.get_degree(), other.get_degree(), self, other)
 
         if self.get_degree() == 0 and other.get_degree() == 0:
             first = self.get_coefficients(0)[0]
@@ -448,19 +456,20 @@ class Polynomial:
             except TypeError:
                 m = Node(first, second, '%')
             return m
-        
-        else:
-            # print("Modulo for non-constant polynomials not supported.")
-            return None
 
+        else:
+            raise TypeError("Modulo for non-constant polynomials")
+            return None
 
     @classmethod
     def from_constant(cls, value, var='dummy_var'):
+        """Transform a constant into a Polynomial"""
         poly = cls()
         poly.add_term((value, var, 0, '+'))
         return poly
 
     def solve(self, history):
+        """Solve a polynomial by plugging in values from history"""
         value = next(iter(self.terms))[0]  # get any variable used
         # check if var in history
         if isinstance(value, str):
@@ -478,33 +487,26 @@ class Polynomial:
         return result
 
     def combine_like_terms(self):
-        # print("in combine like terms before", self.terms)
+        """Combine terms with same var^exp if possible"""
         combined = {}
         for (var, exp), (coef, op) in self.terms.items():
             key = (var, exp)
-            # print('in combine like terms', key, coef, op, type(coef))
             if isinstance(coef, Node):
-                # print("before", coef)
                 coef = simplify_node(coef, {})
-                # print("after", coef)
             if isinstance(coef, str):
-                coef = float(coef)  # Or use get_value2 if needed
+                coef = float(coef)
             if key in combined:
                 combined[key][0] += coef
             else:
                 combined[key] = [coef, op]
-        # print(combined)
         self.terms = combined
-        # print("in combine like terms after", self.terms)
 
-    # !!!! likely heavily modified
     def plug_vars(self, history):
-
+        """Similar to solve, plug in variables in history"""
         result = Polynomial()
         result.var = self.var
 
         for (var, exp), (coef, op) in self.terms.items():
-            # print('coef', coef, type(coef))
 
             # Resolve coefficient
             if isinstance(coef, str):
@@ -512,13 +514,10 @@ class Polynomial:
             elif isinstance(coef, Variable):
                 new_coef = get_value2(coef.name, history)
             elif isinstance(coef, Node):
-                # print('solving node', coef)
                 new_coef = simplify_node(coef, history)
-                # new_coef = solve_node(coef, history)
             else:
                 new_coef = None
 
-            # print("value of new_coef", new_coef, type(new_coef))
             if new_coef is None:
                 new_coef = coef
 
@@ -528,11 +527,10 @@ class Polynomial:
             else:
                 result.terms[key] = [new_coef, op]
 
-        # print('result', result)
-
         return result
 
     def get_degree(self):
+        """Get maximum degree of Polynomial"""
         max_exp = 0
         for (var, exp), (coef, op) in self.terms.items():
             if exp > max_exp:
@@ -541,28 +539,30 @@ class Polynomial:
 
 
 class RationalExpression:
+    """Class to represent a Polynomial divided by a Polynomial"""
+
     def __init__(self, numerator, denominator):
-        # print(numerator, type(numerator), denominator, type(denominator))
-        if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
-            print("Error: Both numerator and denominator must be Polynomial instances")
-            print(numerator, type(numerator), denominator, type(denominator))
-            exit()
+        """Innitiate class assuming use of Polynomials"""
+        if not isinstance(numerator, Polynomial):
+            raise TypeError("Error: Numerator must be Polynomial")
+        if not isinstance(denominator, Polynomial):
+            raise TypeError("Error: Denominator must be Polynomial")
         self.numerator = numerator
         self.denominator = denominator
         self.var = numerator.var
 
     def __repr__(self):
+        """How to represent RationalExpression as a string"""
         top = f"({self.numerator})"
         bot = f"({self.denominator})"
         if self.numerator.get_degree() == 0:
             top = f"{self.numerator}"
         if self.denominator.get_degree() == 0:
             bot = f"{self.denominator}"
-        # if self.numerator.get_degree() == 0 and self.denominator.get_degree() == 0:
-        #     return f"{self.numerator/self.denominator}"
         return f"{top} / {bot}"
 
     def __add__(self, other):
+        """Instructions to add two RationalExpressions"""
         if isinstance(other, Polynomial):
             other = RationalExpression(other, Polynomial())
             other.denominator.add_term((1, self.var, 0, '+'))
@@ -572,14 +572,12 @@ class RationalExpression:
             new_num = new_num1 + new_num2
             new_den = self.denominator * other.denominator
             return RationalExpression(new_num, new_den)
-        print("Unsupported addition with RationalExpression")
-        exit()
+        raise NotImplementedError("Unsupported addition: RationalExpression")
 
-    # check if there are factors that can be cancelled out
     def simplify(self):
+        """Check the rational expression to see if terms can be cancelled"""
         num_factors = self.numerator.factor()
         den_factors = self.denominator.factor()
-        # print("in simplify", num_factors, den_factors)
 
         # Cancel common factors
         i = 0
@@ -603,15 +601,15 @@ class RationalExpression:
 
         var = next(iter(new_den.terms))[0]
 
-        if len(new_den.terms) == 1 and (var, 0) in new_den.terms and new_den.terms[(var, 0)][0] == 1:
+        if (len(new_den.terms) == 1 and
+                (var, 0) in new_den.terms and
+                new_den.terms[(var, 0)][0] == 1):
             return new_num  # Simplified to a polynomial
-
-        # print("in simplify", new_num, new_den, var)
 
         return RationalExpression(new_num, new_den)
 
     def solve(self, history):
-        # attempt to solve top and bottom
+        """attempt to solve top and bottom of RationalExpression"""
         top = Polynomial()
         bottom = Polynomial()
         if isinstance(self.numerator, Polynomial):
@@ -622,7 +620,7 @@ class RationalExpression:
         return result
 
     def plug_vars(self, history):
-        # attempt to solve top and bottom
+        """attempt to plug vaariables into top and bottom"""
         top = Polynomial()
         bottom = Polynomial()
         if isinstance(self.numerator, Polynomial):
@@ -631,17 +629,17 @@ class RationalExpression:
             bottom = self.denominator.plug_vars(history)
         result = RationalExpression(top, bottom)
         return result
-    
+
     def combine_like_terms(self):
-        # attempt to combine like terms
+        """attempt to combine like terms in top and bottom"""
         if isinstance(self.numerator, Polynomial):
             self.numerator.combine_like_terms()
         if isinstance(self.denominator, Polynomial):
             self.denominator.combine_like_terms()
-        # print("in combine like terms re", self)
 
-    # !!!! added for modulo rest is "changed"
+
 def plug_in_var(func, value, history):
+    """Plug in the value of a the function/polynomial variable"""
     if isinstance(value, str):
         value = get_value2(value, history)
     if isinstance(value, Variable):
@@ -657,7 +655,7 @@ def plug_in_var(func, value, history):
     # Polynomial support
     elif isinstance(func, Polynomial):
         if not isinstance(value, (str, int, float, Rational, Complex)):
-            print("Error: Currently value must be a number or str")
+            print("Error: Bad function input")
             return func
 
         result = Polynomial()
@@ -689,7 +687,7 @@ def plug_in_var(func, value, history):
 
         return result
 
-    # NEW: Node support (for things like 3 % y)
+    # Node support (for things like 3 % y)
     elif isinstance(func, Node):
         left = plug_in_var(func.left, value, history)
         right = plug_in_var(func.right, value, history)
@@ -701,5 +699,4 @@ def plug_in_var(func, value, history):
     elif isinstance(func, str) and func == value.name:
         return value
 
-    # print("not a rational expression, polynomial, or node: cannot plug_in_var")
     return func

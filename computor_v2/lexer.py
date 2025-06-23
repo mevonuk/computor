@@ -7,6 +7,9 @@ from node import Node
 
 
 def parse_num(token):
+    """Takens token and converts it if necessary"""
+    if isinstance(token, tuple):
+        return None
     if isinstance(token, (Node, Complex, Rational, Variable)):
         return token
     if token == 'i':
@@ -20,6 +23,7 @@ def parse_num(token):
 
 
 def parse_expression(tokens, index=0, min_precedence=1):
+    """Parses string of tokons into tree"""
     precedence = {
         '**': 5,
         '^': 5,
@@ -52,17 +56,8 @@ def parse_expression(tokens, index=0, min_precedence=1):
                 raise NotImplementedError("Only one-arg functions supported")
 
             arg_expr, _ = parse_expression(args_token_lists[0])
-            # return Node(func_name, arg_expr, 'FUNC'), index + 1
-            func = f"{func_name}({arg_expr})"
-            # need to save here a function class?
-            # print("lexer:parse_expression:parse_primary: func", func, func_name, arg_expr)
             return Node(func_name, arg_expr, 'FUNC'), index + 1
-            # return Node(func, None, 'FUNC'), index + 1
 
-		# val_token = parse_num(token)
-		# if isinstance(val_token, (int, float, Rational, Complex)):
-		# 	return val_token, index + 1
-		# if is
         return parse_num(token), index + 1
 
     lhs, index = parse_primary(index)

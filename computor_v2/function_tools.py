@@ -1,22 +1,22 @@
 # contains get_function_value
 
 from variable import Variable
-from polynomial import Polynomial, RationalExpression, plug_in_var
+from polynomial import Polynomial, RationalExpression
 from complex import Complex
 from rational import Rational
-from tools import get_value
 from node import Node
+
+from polynomial import plug_in_var
+from tools import get_value
 from tree_functions import simplify_node
 
-# !!!! big modifications for modulo
+
 def get_function_value(func_name, func_var, history):
     """get the value of a function at a certain point"""
     function = get_value(func_name, history)
 
     history_copy = history
     history_copy[function.var] = func_var
-
-    # print("in get function value", function)
 
     if function is None:
         print("Error: function is not defined")
@@ -37,15 +37,11 @@ def get_function_value(func_name, func_var, history):
         if variable.type == 'VAR':
             variable = variable.left
 
-    # print("1234", variable, function, type(function))
-
     if isinstance(variable, str):
         sol = function.terms.solve_node(history_copy)
         return sol
     elif isinstance(function, (Polynomial, RationalExpression)):
-        # print("before plug vars")
         function = function.plug_vars(history_copy)
-        # print("after plug vars", function, function.var)
         # check for division by zero
         if isinstance(function, RationalExpression):
             dem = function.denominator
@@ -60,13 +56,10 @@ def get_function_value(func_name, func_var, history):
                         ex = 1
                 else:
                     ex = 1
-        # print("before plug in var", function, variable)
         sol = plug_in_var(function, variable, history_copy)
-        # print("after plug in var", variable, sol, type(sol), sol.var)
         if isinstance(sol, Polynomial):
             if sol.get_degree() == 0:
                 sol = sol.get_coefficients(0)[0]
-            # print("simplify expression", sol, type(sol))
             if isinstance(sol, Node):
                 sol = simplify_node(sol, history)
         if isinstance(sol, RationalExpression):
@@ -76,7 +69,6 @@ def get_function_value(func_name, func_var, history):
                 sol_top = sol_top.get_coefficients(0)[0]
             if sol_bot.get_degree() == 0:
                 sol_bot = sol_bot.get_coefficients(0)[0]
-            # print("simplify rational expression", sol_top, type(sol_top), sol_bot, type(sol_bot))
             if isinstance(sol_top, Node):
                 sol_top = simplify_node(sol_top, history)
             if isinstance(sol_bot, Node):
@@ -108,5 +100,5 @@ def get_function_value(func_name, func_var, history):
         sol = sol_left % sol_right
         return sol
     else:
-        print("function not poly/rational or otherwise", function, type(function))
+        print("function not poly/rational or otherwise")
     return None

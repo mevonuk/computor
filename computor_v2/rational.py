@@ -1,7 +1,8 @@
 # operations with Variable or Matrix not covered everywhere
+
 from complex import Complex
-from matrix import Matrix  # covered only in multiplication
-from variable import Variable  # covered only in multiplication
+from matrix import Matrix
+from variable import Variable
 from node import Node
 
 
@@ -104,7 +105,7 @@ class Rational(Complex):
         elif isinstance(o, Node):
             return Node(o, self, '-')
         else:
-            print("Bad input in r rsub function rational", self, ", ", o, type(o))
+            print("Bad input in r rsub function rational")
             return None
 
     def __mul__(self, o):

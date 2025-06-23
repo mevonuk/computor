@@ -114,7 +114,6 @@ def reduce(b: int | float, a: int | float, mode: int) -> str:
 
 def quadratic(a: float | int, b: float | int, c: float | int):
     """Solves a quadratic equation with coefficients a, b, c"""
-    # print('in quadratic', a,b,c,type(a),type(b),type(c))
     if not isinstance(a, (float, int)):
         raise TypeError("for quadratic, a must be float/int")
     if not isinstance(b, (float, int)):
@@ -147,7 +146,6 @@ def quadratic(a: float | int, b: float | int, c: float | int):
             print(f"{reduced_realterm} - {reduced_imagterm}")
     elif a == 0 and b != 0 and c != 0:
         print("Solving linear equation...")
-        # print('in quadratic', b, c, type(b), type(c))
         print("\nSolution:", reduce(-b, c, 0))
     elif a == 0 and b == 0 and c != 0:
         print("No solution for equation.")

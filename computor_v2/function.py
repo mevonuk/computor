@@ -1,6 +1,4 @@
-# contains Function class with function to convert to polynomial,
-# and intructions for operations with polynomials/rational expressions:
-#   mul_exprs, sub_exprs, sub_rational_exprs, add_exprs, add_rational_exprs
+# contains Function class with routine to convert Function to Polynomial
 
 from rational import Rational
 from complex import Complex
@@ -8,83 +6,7 @@ from node import Node
 from variable import Variable
 from polynomial import Polynomial, RationalExpression, Term
 
-# !!!! changed out dummy var
-def mul_exprs(a, b):
-    """method for multiplying polynomials and rational expressions"""
-    if isinstance(a, Polynomial) and isinstance(b, Polynomial):
-        # print('mul_exprs polynomials')
-        return a * b
-    elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
-        new_num = a * b.numerator
-        return RationalExpression(new_num, b.denominator)
-    elif isinstance(a, RationalExpression):
-        if isinstance(b, Polynomial):
-            new_num = a.numerator * b
-            return RationalExpression(new_num, a.denominator)
-        elif isinstance(b, RationalExpression):
-            new_num = a.numerator * b.numerator
-            new_den = a.denominator * b.denominator
-            return RationalExpression(new_num, new_den)
-    print("Unsupported multiplication combination", a, b, type(a), type(b))
-    exit()
-
-
-def sub_exprs(a, b):
-    """method for subtracting polynomials and rational expressions"""
-    if isinstance(a, Polynomial) and isinstance(b, Polynomial):
-        return a - b
-    elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
-        # Convert a to rational with denom 1
-        a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, a.var, 0, '+'))
-        return sub_rational_exprs(a_rational, b)
-    elif isinstance(a, RationalExpression):
-        if isinstance(b, Polynomial):
-            dummy_poly = Polynomial()
-            dummy_poly.add_term((1, a.var, 0, '+'))
-            return sub_exprs(a, RationalExpression(b, dummy_poly))
-        elif isinstance(b, RationalExpression):
-            return sub_rational_exprs(a, b)
-    print("Unsupported subtraction combination")
-    exit()
-
-
-def sub_rational_exprs(r1, r2):
-    """method for subtracting rational expressions"""
-    # a/b - c/d = (ad - bc) / bd
-    new_num1 = r1.numerator * r2.denominator
-    new_num2 = r2.numerator * r1.denominator
-    new_num = new_num1 - new_num2
-    new_den = r1.denominator * r2.denominator
-    return RationalExpression(new_num, new_den)
-
-
-def add_exprs(a, b):
-    """method for adding polynomials and rational expressions"""
-    if isinstance(a, Polynomial) and isinstance(b, Polynomial):
-        return a + b
-    elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
-        # Convert a to rational with denom 1
-        a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, a.var, 0, '+'))
-        return add_rational_exprs(a_rational, b)
-    elif isinstance(a, RationalExpression):
-        if isinstance(b, Polynomial):
-            return add_exprs(b, a)
-        elif isinstance(b, RationalExpression):
-            return add_rational_exprs(a, b)
-    print("Unsupported addition combination")
-    exit()
-
-
-def add_rational_exprs(r1, r2):
-    """method for adding rational expressions"""
-    # a/b + c/d = (ad + bc) / bd
-    new_num1 = r1.numerator * r2.denominator
-    new_num2 = r2.numerator * r1.denominator
-    new_num = new_num1 + new_num2
-    new_den = r1.denominator * r2.denominator
-    return RationalExpression(new_num, new_den)
+from polynomial import mul_exprs, sub_exprs, add_exprs
 
 
 class Function:
@@ -99,58 +21,41 @@ class Function:
             raise TypeError("Error: variable name should be a string or Node")
         if not isinstance(name, str):
             raise TypeError("Error: function name should be a string")
-        if not isinstance(terms, (int, float, Node, Complex, Rational, Variable)):
+        ALLOWED_TYPES = (int, float, Node, Complex, Rational, Variable)
+        if not isinstance(terms, ALLOWED_TYPES):
             raise TypeError("Error: function terms in bad type")
         if isinstance(variable, Node):
-            # print("convert variable type")
             variable = variable.left
-            # print(variable, type(variable))
         self.terms = terms
         self.var = variable
         self.name = name
 
     def __str__(self):
         """Instruction on how to convert function to string"""
-        # return f"Function {self.name}({self.var}) = {self.terms}"
         return f"{self.name}({self.var})"
 
     def convert_function(self):
         """Convert function to polynomial"""
-        # print("Converting function node to polynomial...")
-        # print('in convert function', self.terms, type(self.terms))
         polynomial = self._node_to_polynomial(self.terms)
-        # print('in function convert_function', polynomial)
         return polynomial
 
     def _node_to_polynomial(self, node):
         """Convert terms to polynomial"""
-        # print('in conversion', node, type(node))
         if isinstance(node, (int, float, Complex, Rational)):
             p = Polynomial()
-            # print('in case rational', node, self.var)
             p.add_term((node, self.var, 0, '+'))
-            # print(p)
             return p
 
         # here need to make sure using only variable name !!!
         if isinstance(node, (str, Variable)):
             p = Polynomial()
-            # print('in case variable', node.name, self.var)
             if isinstance(node, Variable) and node.name != self.var.name:
-                # print('in node to poly for variable', node, self.var)
                 p.add_term((node, self.var, 0, '+'))
             elif isinstance(node, str) and node != self.var.name:
                 p.add_term((node, self.var, 0, '+'))
             else:
-                # print('in node to poly for var', self.var)
                 p.add_term((1, self.var, 1, '+'))
-            # print('in node to poly, retuning poly', p)
             return p
-
-        # if isinstance(node, Variable):
-        # 	p = Polynomial()
-        # 	p.add_term((1, node.name, 1, '+'))
-        # 	return p
 
         if node is None:
             # print("in node to polynomial: node is none")
@@ -160,10 +65,7 @@ class Function:
             left = self._node_to_polynomial(node.left)
             right = self._node_to_polynomial(node.right)
 
-            # print('in node to poly, left, right', left, right)
-
             if node.type == 'VAR':
-                # print('deeper in node to polynomial', left, type(left))
                 return left
 
             if node.type == '+':
@@ -171,13 +73,14 @@ class Function:
             elif node.type == '-':
                 return sub_exprs(left, right)
             elif node.type == '*':
-                # print('multiplying', left, right, type(left), type(right))
                 return mul_exprs(left, right)
             elif node.type == '/':
-                if not isinstance(left, Polynomial) or not isinstance(right, Polynomial):
+                if not isinstance(left, Polynomial):
                     print("Polynomials only in rational expressions")
-                    exit()
-                # print("calling rational", left, type(left), right, type(right))
+                    return self
+                if not isinstance(right, Polynomial):
+                    print("Polynomials only in rational expressions")
+                    return self
                 return RationalExpression(left, right)
             elif node.type == '^':
                 nr = node.right
@@ -193,21 +96,19 @@ class Function:
                         power = hold.real
                 else:
                     print("Exponent must be an integer.", nr, type(nr))
-                    exit()
+                    return self
                 base = self._node_to_polynomial(node.left)
                 result = base
                 for _ in range(power - 1):
                     result = result * base
                 return result
             elif node.type == '%':
-				# !!!! added this for mod
-                # print("type mod", left, right, node.type)
                 result = Polynomial()
-                result.add_term(Term(Node(left,right,'%'), self.var, 0, '+'))
+                result.add_term(Term(Node(left, right, '%'), self.var, 0, '+'))
                 return result
             else:
                 print(f"Unsupported operation {node.type}")
-                exit()
+                return self
 
         print("Unhandled node type in polynomial conversion.")
-        exit()
+        return self
