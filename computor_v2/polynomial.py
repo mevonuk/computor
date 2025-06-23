@@ -478,7 +478,7 @@ class Polynomial:
         return result
 
     def combine_like_terms(self):
-        # print("in combine like terms", self)
+        # print("in combine like terms before", self.terms)
         combined = {}
         for (var, exp), (coef, op) in self.terms.items():
             key = (var, exp)
@@ -495,6 +495,7 @@ class Polynomial:
                 combined[key] = [coef, op]
         # print(combined)
         self.terms = combined
+        # print("in combine like terms after", self.terms)
 
     # !!!! likely heavily modified
     def plug_vars(self, history):
@@ -531,7 +532,6 @@ class Polynomial:
 
         return result
 
-
     def get_degree(self):
         max_exp = 0
         for (var, exp), (coef, op) in self.terms.items():
@@ -539,8 +539,10 @@ class Polynomial:
                 max_exp = exp
         return max_exp
 
+
 class RationalExpression:
     def __init__(self, numerator, denominator):
+        # print(numerator, type(numerator), denominator, type(denominator))
         if not isinstance(numerator, Polynomial) or not isinstance(denominator, Polynomial):
             print("Error: Both numerator and denominator must be Polynomial instances")
             print(numerator, type(numerator), denominator, type(denominator))
@@ -577,6 +579,7 @@ class RationalExpression:
     def simplify(self):
         num_factors = self.numerator.factor()
         den_factors = self.denominator.factor()
+        # print("in simplify", num_factors, den_factors)
 
         # Cancel common factors
         i = 0
@@ -602,6 +605,9 @@ class RationalExpression:
 
         if len(new_den.terms) == 1 and (var, 0) in new_den.terms and new_den.terms[(var, 0)][0] == 1:
             return new_num  # Simplified to a polynomial
+
+        # print("in simplify", new_num, new_den, var)
+
         return RationalExpression(new_num, new_den)
 
     def solve(self, history):
@@ -627,15 +633,12 @@ class RationalExpression:
         return result
     
     def combine_like_terms(self):
-        # attempt to solve top and bottom
-        top = Polynomial()
-        bottom = Polynomial()
+        # attempt to combine like terms
         if isinstance(self.numerator, Polynomial):
-            top = self.numerator.combine_like_terms()
+            self.numerator.combine_like_terms()
         if isinstance(self.denominator, Polynomial):
-            bottom = self.denominator.combine_like_terms()
-        result = RationalExpression(top, bottom)
-        return result
+            self.denominator.combine_like_terms()
+        # print("in combine like terms re", self)
 
     # !!!! added for modulo rest is "changed"
 def plug_in_var(func, value, history):

@@ -28,41 +28,28 @@ def print_instructions():
 # then if 1, check the power, then if 2 or smaller, solve for the variable
 
 
-history = {}
+# history = {}
 
 
-s = "funA(x) = 2 * 4 + x "
-print('>', s)
-key, value = parse_cmd(s, history)
-if key is not None and value is not None:
-	history[key] = value
+# s = " funA(x) = x^2 + 2x + 1"
+# print('>', s)
+# key, value = parse_cmd(s, history)
+# if key is not None and value is not None:
+# 	history[key] = value
 
-s = "funB(x) = 4 -5 + (x + 2)^2 - 4 "
-print('>', s)
-key, value = parse_cmd(s, history)
-if key is not None and value is not None:
-	history[key] = value
+# s = " y = 0"
+# print('>', s)
+# key, value = parse_cmd(s, history)
+# if key is not None and value is not None:
+# 	history[key] = value
 
-s = "funC(x) = 4x + 5 - 2 "
-print('>', s)
-key, value = parse_cmd(s, history)
-if key is not None and value is not None:
-	history[key] = value
+# s = " funA(x) = y ?"
+# print('>', s)
+# key, value = parse_cmd(s, history)
+# if key is not None and value is not None:
+# 	history[key] = value
 
-
-s = "funA(2) + funB(4) = ? "
-print('>', s)
-key, value = parse_cmd(s, history)
-if key is not None and value is not None:
-	history[key] = value
-
-s = "funC(3) = ? "
-print('>', s)
-key, value = parse_cmd(s, history)
-if key is not None and value is not None:
-	history[key] = value
-
-exit()
+# exit()
 
 cmd = ""
 history = {}

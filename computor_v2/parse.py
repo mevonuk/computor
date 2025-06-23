@@ -40,8 +40,8 @@ def define_function_terms(name, var, term, history):
     value = poly
     if isinstance(poly, RationalExpression):
         simplify = poly.simplify()
-        # print(simplify.solve(history))
         value = simplify
+    # print("in define function value:", value)
     if isinstance(value, (Polynomial, RationalExpression)):
         value.combine_like_terms()
     return value
@@ -160,10 +160,10 @@ def parse_cmd(cmd, history):
 
 
             if isinstance(function_left, (Polynomial, RationalExpression)):
-                function_left = function_left.plug_vars(var, history)
+                function_left = function_left.plug_vars(history)
 
             if isinstance(function_right, (Polynomial, RationalExpression)):
-                function_right = function_right.plug_vars(var, history)
+                function_right = function_right.plug_vars(history)
 
             function = sub_exprs(function_left, function_right)
 
@@ -173,7 +173,7 @@ def parse_cmd(cmd, history):
                 print("solving equation:", function, '= 0')
                 # need to plug in non-function variables !!!
                 # print("var in parse_cmd", var)
-                function2 = function.plug_vars(var, history)
+                function2 = function.plug_vars(history)
                 # print('in parse_cmd', function2)
                 a, b, c = function2.get_coefficients(2)
                 # print(a,b,c,type(a), type(b), type(c))
@@ -245,6 +245,7 @@ def parse_cmd(cmd, history):
                 print("ERROR: Assignment to i is forbidden")
                 return None, None
             key, value = define_function(func, history)
+            # print("in parse_cmd", key, value)
             if isinstance(value, (Polynomial, RationalExpression)):
                 value.combine_like_terms()
             print(value)
