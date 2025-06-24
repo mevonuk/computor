@@ -5,18 +5,19 @@ from variable import Variable
 from polynomial import Polynomial, RationalExpression
 from function import Function
 from node import Node
+from matrix import Matrix, Vector
 
 from polynomial import sub_exprs
 from lex_base import tokenize, parse_tokens
-from lex_base import extract_matrix_literal, parse_matrix_literal
-from lexer import parse_expression, parse_num
+from lex_base import extract_matrix_literal, parse_num
+from lexer import parse_expression
 from tools import get_value, get_value2
 from my_math_tools import quadratic
 from check_input import check_user_input
-from tree_functions2 import solve_node
+from tree_tool import solve_node
 from tree_functions import simplify_node, resolve
 from function_tools import get_function_value
-from lexer2 import parse_expression2
+from lexer2 import parse_expression2, parse_matrix_literal
 
 
 def split_at_equals(tokens: str):
@@ -43,6 +44,7 @@ def define_function_terms(name, var, term, history):
     value = Function(name, var, terms)
     poly = value.convert_function()
     value = poly
+    value.var = var.name
     if isinstance(poly, RationalExpression):
         simplify = poly.simplify()
         value = simplify
@@ -102,6 +104,23 @@ def parse_cmd(cmd, history):
             tree, _ = parse_expression(tokens)
             # recursive search for value in history
             sol = resolve(tree, history)
+
+            # recursive search in case of vector/matrix
+            if isinstance(sol, (Matrix, Vector)):
+                new_matrix = []
+                for i in range(sol.shape[0]):
+                    lst = []
+                    for k in range(sol.shape[1]):
+                        value = resolve(sol.data[i][k], history)
+                        if isinstance(value, Polynomial):
+                            value = value.solve(history)
+                        lst.append(value)
+                    new_matrix.append(lst)
+                if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+                    sol = Vector(new_matrix)  # return vector
+                else:
+                    sol = Matrix(new_matrix)  # return matrix
+
             if sol is not None:
                 print(sol)
 
@@ -180,8 +199,7 @@ def parse_cmd(cmd, history):
     if mat and mat_type != 0:
         if not func_def:
             key = tokens[0]
-            # this doesn't account for polynomials in matrix, variables are not substituted
-            matrix_input = parse_matrix_literal(mat[0], mat_type)
+            matrix_input = parse_matrix_literal(mat[0], mat_type, history)
             value = matrix_input
             print(value)
             return key, value
@@ -208,12 +226,46 @@ def parse_cmd(cmd, history):
             value = tree
             if isinstance(tree, Node):
                 value = solve_node(tree, history)
+
+            # simplify in case of vector/matrix
+            if isinstance(value, (Matrix, Vector)):
+                tree = value
+                new_matrix = []
+                for i in range(tree.shape[0]):
+                    lst = []
+                    for k in range(tree.shape[1]):
+                        if isinstance(tree.data[i][k], Node):
+                            value = solve_node(tree.data[i][k], history)
+                            lst.append(value)
+                        else:
+                            lst.append(tree.data[i][k])
+                    new_matrix.append(lst)
+                if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+                    value = Vector(new_matrix)  # return vector
+                else:
+                    value = Matrix(new_matrix)  # return matrix
+
             var = Variable(key, value)
             if value is not None:
                 print(value)
                 return key, var
             else:
                 tree = simplify_node(tree, history)
+
+                # simplify in case of vector/matrix
+                if isinstance(tree, (Matrix, Vector)):
+                    new_matrix = []
+                    for i in range(tree.shape[0]):
+                        lst = []
+                        for k in range(tree.shape[1]):
+                            value = simplify_node(tree.data[i][k], history)
+                            lst.append(value)
+                        new_matrix.append(lst)
+                    if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+                        tree = Vector(new_matrix)  # return vector
+                    else:
+                        tree = Matrix(new_matrix)  # return matrix
+
                 print(tree)
                 return key, tree
 

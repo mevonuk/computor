@@ -1,11 +1,17 @@
-# contains parse_num, parse_expression
+# contains parse_num2, parse_expression2
 
 from rational import Rational
 from complex import Complex
 from variable import Variable
 from node import Node
+
 from tools import get_value
 from function_tools import get_function_value
+
+from matrix import Matrix, Vector
+
+from lex_base import parse_num, tokenize
+from lex_base import parse_tokens
 
 
 def parse_num2(token, var, history):
@@ -107,3 +113,32 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
         lhs = Node(parse_num2(lhs, var, history), parse_num2(rhs, var, history), op)
 
     return lhs, index
+
+
+def parse_matrix_literal(matrix_str, matrix_type, history):
+    """Parse matrix tokens"""
+    # Remove outer brackets
+    rows = matrix_str.split(';')
+    # remove brackets
+    num_col = -1
+    matrix_data = []
+    for row in rows:
+        row = row.replace('[', '')
+        row = row.replace(']', '')
+        new_row = []
+        for term in row.split(','):
+            # parse term here
+            term = tokenize(term)
+            tokens = parse_tokens(term)
+            tree, _ = parse_expression2(tokens, None, history)
+            new_row.append(tree)
+        num_col_old = num_col
+        num_col = len(new_row)
+        if num_col_old != -1 and num_col_old != num_col:
+            print("Error: All cols of a matrix should have the same length")
+            return None
+        matrix_data.append(new_row)
+    if matrix_type == 2:
+        return Matrix(matrix_data)
+    else:
+        return Vector(matrix_data)

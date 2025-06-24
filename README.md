@@ -1,7 +1,7 @@
 # computor
 
 ## Overview
-This project is based on the Ecole 42 computor (v1) and (v2) projects. The goal of computor_v1 is to enter, reduce/simplify, and then solve quadratic and linear equations. Conversely, computer_v2 is a general calculator that can hold the values of variables, functions, and matrices. Functions can be solved as in computor_v1, and matrix operations are possible; however, matrices are not included in functions.
+This project is based on the Ecole 42 computor (v1) and (v2) projects. The goal of computor_v1 is to enter, reduce/simplify, and then solve quadratic and linear equations. Conversely, computer_v2 is a general calculator that can hold the values of variables, functions, and matrices. Functions can be solved as in computor_v1, and matrix operations are possible. Matrices are not included in functions; however, polynomials can appear in the terms of matrices.
 
 ### Contributor
 - M. Evonuk (https://github.com/mevonuk)

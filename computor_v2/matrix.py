@@ -8,7 +8,7 @@
 # Also scalar / matrix is a no no because that doesn't exist:
 #   matrices have inverses
 
-# Inverse Martix
+# Inverse Matrix
 # A^-1 = adj(A) / |A|
 # A is a square matrix
 # adj(A) is the adjoint matrix of A:

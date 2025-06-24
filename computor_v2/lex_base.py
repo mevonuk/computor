@@ -1,9 +1,8 @@
-# contains: tokenize, is_number, parse_tokens, parse_matrix_literal,
+# contains: tokenize, is_number, parse_tokens,
 # extract_matrix_literal, split_terms, parse_number, parse_num_raw
 
 import re
 
-from matrix import Matrix, Vector
 from rational import Rational
 from complex import Complex
 from variable import Variable
@@ -162,34 +161,4 @@ def parse_num(token):
         return Rational(float(token))
     else:
         return Rational(int(token))
-
-
-def parse_matrix_literal(matrix_str, matrix_type):
-    """Parse matrix tokens"""
-    # Remove outer brackets
-    rows = matrix_str.split(';')
-    # remove brackets
-    num_col = -1
-    matrix_data = []
-    for row in rows:
-        row = row.replace('[', '')
-        row = row.replace(']', '')
-        new_row = []
-        for term in row.split(','):
-            term = term.strip()
-            # parse term here
-            # in parse_number is where we need to fix variable problem
-            # term = parse_number(term)
-            term = parse_num(term)
-            new_row.append(term)
-        num_col_old = num_col
-        num_col = len(new_row)
-        if num_col_old != -1 and num_col_old != num_col:
-            print("Error: All cols of a matrix should have the same length")
-            return None
-        matrix_data.append(new_row)
-    if matrix_type == 2:
-        return Matrix(matrix_data)
-    else:
-        return Vector(matrix_data)
 

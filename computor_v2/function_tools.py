@@ -8,7 +8,8 @@ from node import Node
 
 from polynomial import plug_in_var
 from tools import get_value
-from tree_functions import simplify_node
+from tree_functions import simplify_node, resolve
+from tree_tool import solve_node
 
 
 def get_function_value(func_name, func_var, history):
@@ -38,7 +39,12 @@ def get_function_value(func_name, func_var, history):
             variable = variable.left
 
     if isinstance(variable, str):
-        sol = function.terms.solve_node(history_copy)
+        sol = solve_node(function.terms, history_copy)
+        return sol
+    elif isinstance(variable, Variable) and variable.value is None:
+        if variable.name in history_copy.keys():
+            history_copy.pop(variable.name)
+        sol = function.solve(history_copy)
         return sol
     elif isinstance(function, (Polynomial, RationalExpression)):
         function = function.plug_vars(history_copy)

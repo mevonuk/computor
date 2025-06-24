@@ -9,6 +9,7 @@ from node import Node
 
 from tools import get_value2
 from tree_functions import simplify_node
+from tree_tool import solve_node
 
 
 def mul_exprs(a, b):
@@ -217,7 +218,7 @@ class Polynomial:
             self.terms[key] = [term.coef, term.op]
 
     def __repr__(self):
-        """How to represent a Polymonial in string"""
+        """How to represent a Polynomial in string"""
         if not self.terms:
             return "0"
         function_terms = self.terms.items()
@@ -477,7 +478,7 @@ class Polynomial:
         if isinstance(value, Variable):
             value = get_value2(value.name, history)
 
-        if value == self.var:
+        if value == self.var or value is None:
             return self
 
         result = Polynomial()
@@ -654,9 +655,9 @@ def plug_in_var(func, value, history):
 
     # Polynomial support
     elif isinstance(func, Polynomial):
-        if not isinstance(value, (str, int, float, Rational, Complex)):
-            print("Error: Bad function input")
-            return func
+        # if not isinstance(value, (str, int, float, Rational, Complex)):
+        #     print("Error: Bad function input")
+        #     return func
 
         result = Polynomial()
         for (var, exp), (coef, op) in func.terms.items():
@@ -675,6 +676,7 @@ def plug_in_var(func, value, history):
             # if the coefficient is a Node, plug into that Node
             if isinstance(coef, Node):
                 new_coef = plug_in_var(coef, value, history)
+                new_coef = solve_node(new_coef, history)
 
             if not isinstance(value, str):
                 if not isinstance(new_coef, (str, Node)):

@@ -15,40 +15,6 @@ def print_instructions():
     print("\tfunction(var) = expression ? (to solve for var)\n")
     print("To exit the program, enter 'exit'\n")
 
-# tests:
-# assigning matrix
-# solving matrix containing functions and variables
-# assigning functions
-# solving functions, with variables and plugging in value of 'x' in ()
-# assigining variables, setting equal to other variables
-# solving with variables, functions
-# solving quadratic equations
-
-# need to be able to determine how many undefined variables there are
-# then if 1, check the power, then if 2 or smaller, solve for the variable
-
-# history = {}
-
-# s = " funA(x) = x^2 + 2x + 1"
-# print('>', s)
-# key, value = parse_cmd(s, history)
-# if key is not None and value is not None:
-# 	history[key] = value
-
-# s = " y = 0"
-# print('>', s)
-# key, value = parse_cmd(s, history)
-# if key is not None and value is not None:
-# 	history[key] = value
-
-# s = " funA(x) = y ?"
-# print('>', s)
-# key, value = parse_cmd(s, history)
-# if key is not None and value is not None:
-# 	history[key] = value
-
-# exit()
-
 
 def main():
     """main control for computor_v2, a code to serve as

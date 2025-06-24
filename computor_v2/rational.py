@@ -18,7 +18,11 @@ class Rational(Complex):
             raise TypeError("Value is not rational")
 
     def __str__(self):
-        """String prep of Rational"""
+        """String rep of Rational"""
+        return str(self.real)
+
+    def __repr__(self):
+        """String rep of Rational"""
         return str(self.real)
 
     def __add__(self, o):
