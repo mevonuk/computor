@@ -76,7 +76,7 @@ def check_input_chars(s: str):
         check_spaces(s)
     except (TypeError, Exception) as e:
         print(e)
-        exit()
+        return None
 
 
 def modify_exp(s: str):
@@ -202,6 +202,6 @@ def check_input(s):
         check_mult(s)
     except (TypeError, Exception) as e:
         print(e)
-        exit()
+        return None
 
     return s

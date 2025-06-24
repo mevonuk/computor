@@ -8,8 +8,11 @@ def print_instructions():
     print("This calculator supports rational and complex numbers,")
     print("matrices, vectors, and simple functions.")
     print("\nAcceptible input:")
-    print("\tvariable_name = expression (to assign a value to a variable)")
-    print("\tExpression = ? (to solve expression)\n")
+    print("\tvariable = value")
+    print("\tmatrix = [[v1,v2];[v3,v4]]")
+    print("\tfunction(var) = expression")
+    print("\tExpression = ? (to return value of expression)")
+    print("\tfunction(var) = expression ? (to solve for var)\n")
     print("To exit the program, enter 'exit'\n")
 
 # tests:
@@ -52,13 +55,13 @@ def main():
     a simple calculator for functions and matrices"""
     # print_instructions()
 
-    try:
-        cmd = ""
-        history = {}
+    cmd = ""
+    history = {}
 
-        history['i'] = Complex(0, 1)
+    history['i'] = Complex(0, 1)
 
-        while (1):
+    while (1):
+        try:
             cmd = input("> ")
             if cmd == 'exit':
                 exit()
@@ -68,8 +71,12 @@ def main():
                 if key and value:
                     history[key] = value
 
-    except (TypeError, Exception) as e:
-        print(e)
+        except (TypeError, Exception, KeyboardInterrupt) as e:
+            if isinstance(e, KeyboardInterrupt):
+                print("\nInterrupted! Exiting program.")
+                exit()
+            else:
+                print(e)
 
 
 if __name__ == "__main__":

@@ -1,25 +1,11 @@
-# contains parse_num, parse_expression
+# contains parse_expression
 
 from rational import Rational
 from complex import Complex
 from variable import Variable
 from node import Node
 
-
-def parse_num(token):
-    """Takens token and converts it if necessary"""
-    if isinstance(token, tuple):
-        return None
-    if isinstance(token, (Node, Complex, Rational, Variable)):
-        return token
-    if token == 'i':
-        return Complex(0, 1)
-    if token.isalpha():
-        return Variable(token, None)
-    if '.' in token:
-        return Rational(float(token))
-    else:
-        return Rational(int(token))
+from lex_base import parse_num
 
 
 def parse_expression(tokens, index=0, min_precedence=1):

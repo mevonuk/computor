@@ -58,7 +58,7 @@ def parse_side(expr: str) -> dict:
             check_term(coef_str, exp_str, match.group())
         except (TypeError, Exception) as e:
             print(e)
-            exit()
+            return None
 
         # convert coefficient to float
         if coef_str in ("+", "-"):
@@ -108,7 +108,7 @@ def parse_polynomial(equation: str) -> dict:
         db_r = parse_side(right)
     except (TypeError, Exception) as e:
         print(e)
-        exit()
+        return None
 
     # Combine db_l and db_r into a new dictionary db_total
     db_total = db_l.copy()  # Start with left-hand side terms

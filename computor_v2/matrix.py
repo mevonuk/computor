@@ -206,7 +206,7 @@ class Matrix:
             new_matrix = Matrix(new_matrix)
             return new_matrix
         else:
-            print("ERROR: not a valid operation")
+            print("ERROR: check shapes of matrices")
             return None
 
     def __rmul__(self, o):
@@ -255,7 +255,7 @@ class Matrix:
             new_matrix = Matrix(new_matrix)
             return new_matrix
         else:
-            print("ERROR: not a valid operation")
+            print("ERROR: check shapes of matrices")
             return None
 
     def T(self):
@@ -275,9 +275,9 @@ class Vector(Matrix):
 
     def __init__(self, *args):
         """Initialize vector"""
+        super().__init__(*args)
         if self.shape[1] != 1 and self.shape[0] != 1:
             raise TypeError("ERROR: object is not a vector")
-        super().__init__(*args)
 
     def dot(self, o):
         """dot product of two vectors"""

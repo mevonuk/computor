@@ -122,7 +122,9 @@ def parse_cmd(cmd, history):
             func_var = parse_num(func[0][2][0])
 
             result = get_function_value(func_name, func_var, history)
-            print(result)
+
+            if result is not None:
+                print(result)
 
         # case 2: ending with something
         else:
@@ -178,6 +180,7 @@ def parse_cmd(cmd, history):
     if mat and mat_type != 0:
         if not func_def:
             key = tokens[0]
+            # this doesn't account for polynomials in matrix, variables are not substituted
             matrix_input = parse_matrix_literal(mat[0], mat_type)
             value = matrix_input
             print(value)

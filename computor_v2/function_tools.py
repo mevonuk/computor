@@ -15,12 +15,12 @@ def get_function_value(func_name, func_var, history):
     """get the value of a function at a certain point"""
     function = get_value(func_name, history)
 
-    history_copy = history
-    history_copy[function.var] = func_var
-
     if function is None:
         print("Error: function is not defined")
         return None
+
+    history_copy = history
+    history_copy[function.var] = func_var
 
     # check for variable
     variable = func_var

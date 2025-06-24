@@ -6,6 +6,8 @@ import re
 from matrix import Matrix, Vector
 from rational import Rational
 from complex import Complex
+from variable import Variable
+from node import Node
 
 
 def tokenize(expr):
@@ -133,6 +135,35 @@ def parse_number(token):
         return Rational(real)
 
 
+def parse_num_raw(token):
+    """Parse token into Complex, Rational, or string"""
+    # print("in parse_num_raw", token, type(token))
+    if token == 'i':
+        return Complex(0, 1)
+    if token.isalpha():
+        return token
+    if '.' in token:
+        return Rational(float(token))
+    else:
+        return Rational(int(token))
+
+
+def parse_num(token):
+    """Takens token and converts it if necessary"""
+    if isinstance(token, tuple):
+        return None
+    if isinstance(token, (Node, Complex, Rational, Variable)):
+        return token
+    if token == 'i':
+        return Complex(0, 1)
+    if token.isalpha():
+        return Variable(token, None)
+    if '.' in token:
+        return Rational(float(token))
+    else:
+        return Rational(int(token))
+
+
 def parse_matrix_literal(matrix_str, matrix_type):
     """Parse matrix tokens"""
     # Remove outer brackets
@@ -147,7 +178,9 @@ def parse_matrix_literal(matrix_str, matrix_type):
         for term in row.split(','):
             term = term.strip()
             # parse term here
-            term = parse_number(term)
+            # in parse_number is where we need to fix variable problem
+            # term = parse_number(term)
+            term = parse_num(term)
             new_row.append(term)
         num_col_old = num_col
         num_col = len(new_row)
@@ -160,15 +193,3 @@ def parse_matrix_literal(matrix_str, matrix_type):
     else:
         return Vector(matrix_data)
 
-
-def parse_num_raw(token):
-    """Parse token into Complex, Rational, or string"""
-    # print("in parse_num_raw", token, type(token))
-    if token == 'i':
-        return Complex(0, 1)
-    if token.isalpha():
-        return token
-    if '.' in token:
-        return Rational(float(token))
-    else:
-        return Rational(int(token))

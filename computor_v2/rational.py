@@ -37,6 +37,8 @@ class Rational(Complex):
                 return o.value + self
             else:
                 return Node(self, o, '+')
+        elif isinstance(o, Node):
+            return Node(o, self, '+')
         else:
             print("Bad input in add function rational", o, type(o))
             return None
@@ -60,6 +62,8 @@ class Rational(Complex):
                 return o.value + self
             else:
                 return Node(self, o, '+')
+        elif isinstance(o, Node):
+            return Node(o, self, '+')
         else:
             print("Bad input in r radd function rational", o, type(o))
             return None
@@ -127,6 +131,8 @@ class Rational(Complex):
                 return o.value * self
             else:
                 return Node(self, o, '*')
+        elif isinstance(o, Node):
+            return Node(o, self, '*')
         else:
             print("Bad input in r mul function rational")
             return None
@@ -148,6 +154,8 @@ class Rational(Complex):
                 return o.value * self
             else:
                 return Node(self, o, '*')
+        elif isinstance(o, Node):
+            return Node(o, self, '*')
         else:
             print("Bad input in r rmul function rational", self, o, type(o))
             return None
@@ -169,6 +177,8 @@ class Rational(Complex):
                 return self / o.value
             else:
                 return Node(self, o, '/')
+        elif isinstance(o, Node):
+            return Node(self, o, '/')
         else:
             print("Bad input in truediv function rational")
             return None
@@ -190,6 +200,8 @@ class Rational(Complex):
                 return o.value / self
             else:
                 return Node(o, self, '/')
+        elif isinstance(o, Node):
+            return Node(o, self, '/')
         else:
             print("Bad input in r rtruediv function rational", self, o)
             return None
@@ -209,7 +221,9 @@ class Rational(Complex):
             if o.value is not None:
                 return self % o.value
             else:
-                return Node(o, self, '%')
+                return Node(self, o, '%')
+        elif isinstance(o, Node):
+            return Node(self, o, '%')
         else:
             print("Bad input in mod function rational")
             return None
@@ -230,6 +244,8 @@ class Rational(Complex):
                 return o.value % self
             else:
                 return Node(o, self, '%')
+        elif isinstance(o, Node):
+            return Node(o, self, '%')
         else:
             print("Bad input in r rmod function rational")
             return None
@@ -250,6 +266,8 @@ class Rational(Complex):
                 return self ** n.value
             else:
                 return Node(self, n, '^')
+        elif isinstance(n, Node):
+            return Node(self, n, '^')
         else:
             print("Bad input in pow function rational")
             return None
@@ -270,6 +288,8 @@ class Rational(Complex):
                 return n.value ** self
             else:
                 return Node(n, self, '^')
+        elif isinstance(n, Node):
+            return Node(n, self, '^')
         else:
             print("Bad input in r rpow function rational")
             return None
