@@ -90,6 +90,19 @@ def extract_matrix_literal(s):
     pattern = r'\[\[.*?\]\]'  # non-greedy match for matrix
     matches = re.findall(pattern, s)
     matrix_type = 2  # matrix type
+    s = s.replace(" ","")
+    n_s = s.count(';')
+    if n_s > 0:
+        if not s.count("[[") or not s.count("]]"):
+            return matches, -1
+        n1 = s.count('];')
+        n2 = s.count(';[')
+        if n1 != n2:
+            return matches, -1
+    n_c = s.count(',')
+    if n_c > 0:
+        if s.count('],') or s.count(',['):
+            return matches, -1
     if not matches:
         pattern = r'\[.*?\]'  # non-greedy match for matrix
         matches = re.findall(pattern, s)

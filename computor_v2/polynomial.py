@@ -334,7 +334,7 @@ class Polynomial:
         """Overload to subtract Polynomials"""
         if not isinstance(other, Polynomial):
             if isinstance(other, (Rational, int, float)):
-                other = Polynomial.from_constant(other)
+                other = Polynomial.from_constant(other, var=self.var)
             else:
                 print("Subtraction only supported between Polynomial instances.")
                 return NotImplemented
@@ -364,7 +364,7 @@ class Polynomial:
         """Overload to add Polynomials"""
         if not isinstance(other, Polynomial):
             if isinstance(other, (Rational, int, float)):
-                other = Polynomial.from_constant(other)
+                other = Polynomial.from_constant(other, var=self.var)
             else:
                 print("Addition only supported between Polynomial instances.")
                 return NotImplemented
@@ -394,7 +394,7 @@ class Polynomial:
         """Overload to multiply Polynomials"""
         if not isinstance(other, Polynomial):
             if isinstance(other, (Rational, int, float)):
-                other = Polynomial.from_constant(other)
+                other = Polynomial.from_constant(other, var=self.var)
             else:
                 return NotImplemented
 
@@ -433,7 +433,7 @@ class Polynomial:
         """Overload to divide Polynomials by non-Polynomials"""
         if not isinstance(other, Polynomial):
             if isinstance(other, (Rational, int, float)):
-                other = Polynomial.from_constant(other)
+                other = Polynomial.from_constant(other, var=self.var)
             else:
                 return NotImplemented
 
@@ -460,7 +460,7 @@ class Polynomial:
         """Overload to find modulo of const Polynomials by non-Polynomials"""
         if not isinstance(other, Polynomial):
             if isinstance(other, (Rational, int, float)):
-                other = Polynomial.from_constant(other)
+                other = Polynomial.from_constant(other, var=self.var)
             else:
                 return NotImplemented
 
@@ -478,10 +478,10 @@ class Polynomial:
             return None
 
     @classmethod
-    def from_constant(cls, value):
+    def from_constant(cls, value, var = 'dummy_var'):
         """Transform a constant into a Polynomial"""
         poly = cls()
-        poly.add_term((value, self.var, 0, '+'))
+        poly.add_term((value, var, 0, '+'))
         return poly
 
     def solve(self, history):
@@ -607,11 +607,11 @@ class RationalExpression:
                     break
             i += 1
 
-        new_num = Polynomial.from_constant(1)
+        new_num = Polynomial.from_constant(1, var=self.var)
         for f in num_factors:
             new_num = new_num * f
 
-        new_den = Polynomial.from_constant(1)
+        new_den = Polynomial.from_constant(1, var=self.var)
         for f in den_factors:
             new_den = new_den * f
 

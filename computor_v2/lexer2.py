@@ -12,6 +12,7 @@ from matrix import Matrix, Vector
 
 from lex_base import parse_num, tokenize
 from lex_base import parse_tokens
+from tree_tool import solve_node
 
 
 def parse_num2(token, var, history):
@@ -123,7 +124,10 @@ def parse_matrix_literal(matrix_str, matrix_type, history):
             term = tokenize(term)
             tokens = parse_tokens(term)
             tree, _ = parse_expression2(tokens, None, history)
-            new_row.append(tree)
+            value = tree
+            if isinstance(tree, Node):
+                value = solve_node(tree, history)
+            new_row.append(value)
         num_col_old = num_col
         num_col = len(new_row)
         if num_col_old != -1 and num_col_old != num_col:

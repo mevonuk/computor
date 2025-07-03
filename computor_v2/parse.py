@@ -115,13 +115,11 @@ def parse_cmd(cmd, history):
             tokens = tokens[:end]
             tokens = parse_tokens(tokens)
 
-            tree, _ = parse_expression(tokens)
-            # recursive search for value in history
-            sol = resolve(tree, history)
-
+            tree, _ = parse_expression2(tokens, None, history)
             if isinstance(tree, Node):
-                tree, _ = parse_expression2(tokens, None, history)
                 sol = solve_node(tree, history)
+            else:
+                sol = resolve(tree, history)
 
             # recursive search in case of vector/matrix
             if isinstance(sol, (Matrix, Vector)):
@@ -216,6 +214,10 @@ def parse_cmd(cmd, history):
 
     # first check for matrices/vectors
     mat, mat_type = extract_matrix_literal(cmd)
+    if mat_type == -1:
+        print('Error in matrix input')
+        return None, None
+
     if mat and mat_type != 0:
         if not func_def:
             key = tokens[0]

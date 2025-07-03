@@ -194,9 +194,13 @@ class Rational(Complex):
         elif isinstance(o, Rational):
             new_rational = Rational(self.real % o.real)
             return new_rational
-        elif isinstance(o, Complex) and o.imag == 0:
-            new_rational = Rational(self.real % o.real)
-            return new_rational
+        elif isinstance(o, Complex):
+            if o.imag == 0:
+                new_rational = Rational(self.real % o.real)
+                return new_rational
+            else:
+                print("Modulo not defined for complex numbers")
+                return None
         elif isinstance(o, Variable):
             if o.value is not None:
                 return self % o.value
@@ -213,9 +217,13 @@ class Rational(Complex):
         elif isinstance(o, Rational):
             new_rational = Rational(o.real % self.real)
             return new_rational
-        elif isinstance(o, Complex) and o.imag == 0:
-            new_rational = Rational(o.real % self.real)
-            return new_rational
+        elif isinstance(o, Complex):
+            if o.imag == 0:
+                new_rational = Rational(o.real % self.real)
+                return new_rational
+            else:
+                print("Modulo not defined for complex numbers")
+                return None
         elif isinstance(o, Variable):
             if o.value is not None:
                 return o.value % self
