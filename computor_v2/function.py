@@ -18,7 +18,7 @@ class Function:
     def __init__(self, name, variable, terms):
         """Initializes function"""
         if not isinstance(variable, (str, Node, Variable)):
-            raise TypeError("Error: variable name should be a string or Node")
+            raise TypeError("Error: variable name should be a string")
         if not isinstance(name, str):
             raise TypeError("Error: function name should be a string")
         ALLOWED_TYPES = (int, float, Node, Complex, Rational, Variable)

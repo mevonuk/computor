@@ -35,6 +35,9 @@ def define_function_terms(name, var, term, history):
     """Define function terms and return RHS of function
     in terms of a polynomial or rational function"""
     if isinstance(var, Node):
+        if not isinstance(var.left, Variable):
+            print("Error: Unsupported function definition")
+            return None
         safe_var = var.left.name
     elif isinstance(var, Variable):
         safe_var = var.name
@@ -44,6 +47,9 @@ def define_function_terms(name, var, term, history):
     value = Function(name, var, terms)
     poly = value.convert_function()
     value = poly
+    if not isinstance(var, Variable):
+        print("Error: Unsupported function definition")
+        return None
     value.var = var.name
     if isinstance(poly, RationalExpression):
         simplify = poly.simplify()
@@ -56,9 +62,17 @@ def define_function_terms(name, var, term, history):
 def define_function(func, history):
     """parses tokens of function definition and returns the
     fuction name as key, and the function expression as value"""
+    if len(func[0][2]) == 0:
+        print("Error: no variable given")
+        return None, None
     var, _ = parse_expression(func[0][2])
     key = func[0][1]
     value = define_function_terms(func[0][1], var, func[2:], history)
+    if value is None:
+        return None, None
+    if key == var.name:
+        print("Error: function name and variable are the same")
+        return None, None
     return key, value
 
 
@@ -104,6 +118,10 @@ def parse_cmd(cmd, history):
             tree, _ = parse_expression(tokens)
             # recursive search for value in history
             sol = resolve(tree, history)
+
+            if isinstance(tree, Node):
+                tree, _ = parse_expression2(tokens, None, history)
+                sol = solve_node(tree, history)
 
             # recursive search in case of vector/matrix
             if isinstance(sol, (Matrix, Vector)):
@@ -278,7 +296,8 @@ def parse_cmd(cmd, history):
             key, value = define_function(func, history)
             if isinstance(value, (Polynomial, RationalExpression)):
                 value.combine_like_terms()
-            print(value)
+            if value is not None:
+                print(value)
             return key, value
 
     return key, value

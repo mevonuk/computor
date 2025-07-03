@@ -333,8 +333,11 @@ class Polynomial:
     def __sub__(self, other):
         """Overload to subtract Polynomials"""
         if not isinstance(other, Polynomial):
-            print("Subtraction only supported between Polynomial instances.")
-            return NotImplemented
+            if isinstance(other, (Rational, int, float)):
+                other = Polynomial.from_constant(other)
+            else:
+                print("Subtraction only supported between Polynomial instances.")
+                return NotImplemented
 
         result = Polynomial()
 
@@ -360,8 +363,11 @@ class Polynomial:
     def __add__(self, other):
         """Overload to add Polynomials"""
         if not isinstance(other, Polynomial):
-            print("Addition only supported between Polynomial instances.")
-            return NotImplemented
+            if isinstance(other, (Rational, int, float)):
+                other = Polynomial.from_constant(other)
+            else:
+                print("Addition only supported between Polynomial instances.")
+                return NotImplemented
 
         result = Polynomial()
 
@@ -387,7 +393,10 @@ class Polynomial:
     def __mul__(self, other):
         """Overload to multiply Polynomials"""
         if not isinstance(other, Polynomial):
-            return NotImplemented
+            if isinstance(other, (Rational, int, float)):
+                other = Polynomial.from_constant(other)
+            else:
+                return NotImplemented
 
         result = Polynomial()
 
@@ -423,7 +432,10 @@ class Polynomial:
     def __truediv__(self, other):
         """Overload to divide Polynomials by non-Polynomials"""
         if not isinstance(other, Polynomial):
-            return NotImplemented
+            if isinstance(other, (Rational, int, float)):
+                other = Polynomial.from_constant(other)
+            else:
+                return NotImplemented
 
         result = Polynomial()
 
@@ -447,7 +459,10 @@ class Polynomial:
     def __mod__(self, other):
         """Overload to find modulo of const Polynomials by non-Polynomials"""
         if not isinstance(other, Polynomial):
-            return NotImplemented
+            if isinstance(other, (Rational, int, float)):
+                other = Polynomial.from_constant(other)
+            else:
+                return NotImplemented
 
         if self.get_degree() == 0 and other.get_degree() == 0:
             first = self.get_coefficients(0)[0]
@@ -463,10 +478,10 @@ class Polynomial:
             return None
 
     @classmethod
-    def from_constant(cls, value, var='dummy_var'):
+    def from_constant(cls, value):
         """Transform a constant into a Polynomial"""
         poly = cls()
-        poly.add_term((value, var, 0, '+'))
+        poly.add_term((value, self.var, 0, '+'))
         return poly
 
     def solve(self, history):
@@ -592,11 +607,11 @@ class RationalExpression:
                     break
             i += 1
 
-        new_num = Polynomial.from_constant(1, var=self.var)
+        new_num = Polynomial.from_constant(1)
         for f in num_factors:
             new_num = new_num * f
 
-        new_den = Polynomial.from_constant(1, var=self.var)
+        new_den = Polynomial.from_constant(1)
         for f in den_factors:
             new_den = new_den * f
 

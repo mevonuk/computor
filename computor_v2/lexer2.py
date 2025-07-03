@@ -71,29 +71,21 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
                 raise NotImplementedError("Only one-arg functions supported")
 
             arg_expr = args_token_lists[0]
-            # print(arg_expr, type(arg_expr))
             if isinstance(args_token_lists[0], list) and len(args_token_lists[0]) > 1:
                 arg_expr, _ = parse_expression2(args_token_lists[0], var, history)
-            # return Node(func_name, arg_expr, 'FUNC'), index + 1
-            # print(arg_expr, type(arg_expr))
-            # func = f"{func_name}({arg_expr})"
 
             # need to check here in history !!!
             value = get_value(func_name, history)
-            # print("in parse_primary2 value, arg, var:", value, arg_expr, var)
-            value2 = parse_num2(arg_expr, var, history)
 
-            # print("in parse_primary2 value2:", value2)
+            value2 = parse_num2(arg_expr, value.var, history)
+
             result = None
             if value is not None and value2 != var:
                 result = get_function_value(func_name, value2, history)
                 if isinstance(result, Variable):
                     return Node(result, None, 'VAR'), index + 1
                 return result, index + 1
-            # need to save here a function class?
-            # print("lexer:parse_expression:parse_primary: func", func, func_name, arg_expr)
             return Node(func_name, arg_expr, 'FUNC'), index + 1
-            # return Node(func, None, 'FUNC'), index + 1
 
         return parse_num2(token, var, history), index + 1
 

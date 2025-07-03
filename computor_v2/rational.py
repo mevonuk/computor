@@ -41,11 +41,8 @@ class Rational(Complex):
                 return o.value + self
             else:
                 return Node(self, o, '+')
-        elif isinstance(o, Node):
-            return Node(o, self, '+')
         else:
-            print("Bad input in add function rational", o, type(o))
-            return None
+            return Node(o, self, '+')
 
     def __radd__(self, o):
         """Overload of r addition operator Rational"""
@@ -66,11 +63,8 @@ class Rational(Complex):
                 return o.value + self
             else:
                 return Node(self, o, '+')
-        elif isinstance(o, Node):
-            return Node(o, self, '+')
         else:
-            print("Bad input in r radd function rational", o, type(o))
-            return None
+            return Node(o, self, '+')
 
     def __sub__(self, o):
         """Overload of subtraction operator Rational"""
@@ -88,11 +82,8 @@ class Rational(Complex):
                 return self - o.value
             else:
                 return Node(self, o, '-')
-        elif isinstance(o, Node):
-            return Node(self, o, '-')
         else:
-            print("Bad input in r sub function rational")
-            return None
+            return Node(self, o, '-')
 
     def __rsub__(self, o):
         """Overload of r subtraction operator Rational"""
@@ -110,11 +101,8 @@ class Rational(Complex):
                 return o.value - self
             else:
                 return Node(o, self, '-')
-        elif isinstance(o, Node):
-            return Node(o, self, '-')
         else:
-            print("Bad input in r rsub function rational")
-            return None
+            return Node(o, self, '-')
 
     def __mul__(self, o):
         """Overload of multiplication operator Rational"""
@@ -135,11 +123,8 @@ class Rational(Complex):
                 return o.value * self
             else:
                 return Node(self, o, '*')
-        elif isinstance(o, Node):
-            return Node(o, self, '*')
         else:
-            print("Bad input in r mul function rational")
-            return None
+            return Node(o, self, '*')
 
     def __rmul__(self, o):
         """Overload of r multiplication operator Rational"""
@@ -158,11 +143,8 @@ class Rational(Complex):
                 return o.value * self
             else:
                 return Node(self, o, '*')
-        elif isinstance(o, Node):
-            return Node(o, self, '*')
         else:
-            print("Bad input in r rmul function rational", self, o, type(o))
-            return None
+            return Node(o, self, '*')
 
     def __truediv__(self, o):
         """Overload of division operator Rational"""
@@ -181,11 +163,8 @@ class Rational(Complex):
                 return self / o.value
             else:
                 return Node(self, o, '/')
-        elif isinstance(o, Node):
-            return Node(self, o, '/')
         else:
-            print("Bad input in truediv function rational")
-            return None
+            return Node(self, o, '/')
 
     def __rtruediv__(self, o):
         """Overload of r division operator Rational"""
@@ -204,11 +183,8 @@ class Rational(Complex):
                 return o.value / self
             else:
                 return Node(o, self, '/')
-        elif isinstance(o, Node):
-            return Node(o, self, '/')
         else:
-            print("Bad input in r rtruediv function rational", self, o)
-            return None
+            return Node(o, self, '/')
 
     def __mod__(self, o):
         """Overload of modulo operator Rational"""
@@ -226,11 +202,8 @@ class Rational(Complex):
                 return self % o.value
             else:
                 return Node(self, o, '%')
-        elif isinstance(o, Node):
-            return Node(self, o, '%')
         else:
-            print("Bad input in mod function rational")
-            return None
+            return Node(self, o, '%')
 
     def __rmod__(self, o):
         """Overload of modulo operator Rational"""
@@ -248,11 +221,8 @@ class Rational(Complex):
                 return o.value % self
             else:
                 return Node(o, self, '%')
-        elif isinstance(o, Node):
-            return Node(o, self, '%')
         else:
-            print("Bad input in r rmod function rational")
-            return None
+            return Node(o, self, '%')
 
     def __pow__(self, n):
         """Overload of power operator Rational"""
@@ -270,11 +240,8 @@ class Rational(Complex):
                 return self ** n.value
             else:
                 return Node(self, n, '^')
-        elif isinstance(n, Node):
-            return Node(self, n, '^')
         else:
-            print("Bad input in pow function rational")
-            return None
+            return Node(self, n, '^')
 
     def __rpow__(self, n):
         """Overload of r power operator Rational"""
@@ -292,11 +259,8 @@ class Rational(Complex):
                 return n.value ** self
             else:
                 return Node(n, self, '^')
-        elif isinstance(n, Node):
-            return Node(n, self, '^')
         else:
-            print("Bad input in r rpow function rational")
-            return None
+            return Node(n, self, '^')
 
     def __neg__(self):
         """Overload of negation operator Rational"""

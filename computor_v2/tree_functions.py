@@ -122,7 +122,7 @@ def simplify_node(node, history):
                 print("** can only be used with matrix multiplication")
                 return None
         except Exception as e:
-            print("Error simplifying:", e)
+            # print("Error simplifying:", e)
             return Node(left, right, node.type)
 
     if node.type in ('+', '-'):
