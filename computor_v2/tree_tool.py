@@ -58,14 +58,14 @@ def solve_node(node: Node, history: dict):
                 return right_value * left_value
         print("** can only be used with matrix multiplication")
         return None
-    if node.type == 'FUNC':
-        function_name = node.left
-        function_var = None
-        if isinstance(node.right, Node):
-            function_var = node.right.left
-        else:
-            function_var = node.right
-        result = get_function_value(function_name, function_var, history)
-        return result
+    # if node.type == 'FUNC':
+    #     function_name = node.left
+    #     function_var = None
+    #     if isinstance(node.right, Node):
+    #         function_var = node.right.left
+    #     else:
+    #         function_var = node.right
+    #     result = get_function_value(function_name, function_var, history)
+    #     return result
 
     return node

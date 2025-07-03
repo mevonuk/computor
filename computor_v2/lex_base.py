@@ -90,7 +90,7 @@ def extract_matrix_literal(s):
     pattern = r'\[\[.*?\]\]'  # non-greedy match for matrix
     matches = re.findall(pattern, s)
     matrix_type = 2  # matrix type
-    s = s.replace(" ","")
+    s = s.replace(" ", "")
     n_s = s.count(';')
     if n_s > 0:
         if not s.count("[[") or not s.count("]]"):
@@ -174,4 +174,3 @@ def parse_num(token):
         return Rational(float(token))
     else:
         return Rational(int(token))
-

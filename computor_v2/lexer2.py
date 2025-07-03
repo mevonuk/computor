@@ -10,7 +10,7 @@ from function_tools import get_function_value
 
 from matrix import Matrix, Vector
 
-from lex_base import parse_num, tokenize
+from lex_base import tokenize
 from lex_base import parse_tokens
 from tree_tool import solve_node
 
@@ -56,7 +56,9 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
 
         # Parentheses
         if token == '(':
-            tree, new_index = parse_expression2(tokens, var, history, index + 1)
+            tree, new_index = parse_expression2(
+                tokens, var, history, index + 1
+            )
             if tokens[new_index] != ')':
                 raise SyntaxError("Unmatched parenthesis")
             return tree, new_index + 1
@@ -72,8 +74,11 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
                 raise NotImplementedError("Only one-arg functions supported")
 
             arg_expr = args_token_lists[0]
-            if isinstance(args_token_lists[0], list) and len(args_token_lists[0]) > 1:
-                arg_expr, _ = parse_expression2(args_token_lists[0], var, history)
+            if (isinstance(args_token_lists[0], list) and
+                    len(args_token_lists[0]) > 1):
+                arg_expr, _ = parse_expression2(
+                    args_token_lists[0], var, history
+                )
 
             # need to check here in history !!!
             value = get_value(func_name, history)
@@ -101,9 +106,13 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
             break
         next_min_prec = prec + (0 if op in right_associative else 1)
 
-        rhs, index = parse_expression2(tokens, var, history, index + 1, next_min_prec)
+        rhs, index = parse_expression2(
+            tokens, var, history, index + 1, next_min_prec
+        )
 
-        lhs = Node(parse_num2(lhs, var, history), parse_num2(rhs, var, history), op)
+        lhs = Node(
+            parse_num2(lhs, var, history), parse_num2(rhs, var, history), op
+        )
 
     return lhs, index
 

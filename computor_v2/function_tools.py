@@ -8,7 +8,7 @@ from node import Node
 
 from polynomial import plug_in_var
 from tools import get_value
-from tree_functions import simplify_node, resolve
+from tree_functions import simplify_node
 from tree_tool import solve_node
 
 

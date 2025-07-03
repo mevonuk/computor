@@ -1,13 +1,8 @@
-# contains parse_expression, parse_matrix_literal
+# contains parse_expression
 
-from rational import Rational
-from complex import Complex
-from variable import Variable
 from node import Node
-from matrix import Matrix, Vector
 
-from lex_base import parse_num, tokenize
-from lex_base import parse_tokens
+from lex_base import parse_num
 
 
 def parse_expression(tokens, index=0, min_precedence=1):

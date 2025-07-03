@@ -126,7 +126,8 @@ def simplify_node(node, history):
                     return right * left
                 print("** can only be used with matrix multiplication")
                 return None
-        except Exception as e:
+        except Exception:
+            # except Exception as e:
             # print("Error simplifying:", e)
             return Node(left, right, node.type)
 

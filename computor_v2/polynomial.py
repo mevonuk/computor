@@ -336,7 +336,7 @@ class Polynomial:
             if isinstance(other, (Rational, int, float)):
                 other = Polynomial.from_constant(other, var=self.var)
             else:
-                print("Subtraction only supported between Polynomial instances.")
+                print("Subtraction only supported between Polynomials.")
                 return NotImplemented
 
         result = Polynomial()
@@ -478,7 +478,7 @@ class Polynomial:
             return None
 
     @classmethod
-    def from_constant(cls, value, var = 'dummy_var'):
+    def from_constant(cls, value, var='dummy_var'):
         """Transform a constant into a Polynomial"""
         poly = cls()
         poly.add_term((value, var, 0, '+'))

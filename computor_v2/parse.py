@@ -11,7 +11,7 @@ from polynomial import sub_exprs
 from lex_base import tokenize, parse_tokens
 from lex_base import extract_matrix_literal, parse_num
 from lexer import parse_expression
-from tools import get_value, get_value2
+from tools import get_value
 from my_math_tools import quadratic
 from check_input import check_user_input
 from tree_tool import solve_node
