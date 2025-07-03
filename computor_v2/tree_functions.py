@@ -101,6 +101,11 @@ def simplify_node(node, history):
     left = resolve(node.left, history)
     right = resolve(node.right, history)
 
+    one = Rational(1)
+    if node.type == '*':
+        if right == one:
+            return left
+
     # Case: both sides are fully numeric → evaluate
     if all(not isinstance(v, (str, Node, Variable)) for v in (left, right)):
         try:

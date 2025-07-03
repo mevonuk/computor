@@ -161,6 +161,8 @@ def parse_cmd(cmd, history):
             result = get_function_value(func_name, func_var, history)
 
             if result is not None:
+                if isinstance(result, Node):
+                    result = simplify_node(result, history)
                 print(result)
 
         # case 2: ending with something

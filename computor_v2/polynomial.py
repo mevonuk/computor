@@ -670,10 +670,6 @@ def plug_in_var(func, value, history):
 
     # Polynomial support
     elif isinstance(func, Polynomial):
-        # if not isinstance(value, (str, int, float, Rational, Complex)):
-        #     print("Error: Bad function input")
-        #     return func
-
         result = Polynomial()
         for (var, exp), (coef, op) in func.terms.items():
             result.terms[(var, exp)] = [coef, op]
@@ -711,8 +707,10 @@ def plug_in_var(func, value, history):
         return Node(left, right, func.type)
 
     # Variable or variable name
-    elif isinstance(func, Variable) and func.name == value.name:
-        return value
+    elif isinstance(func, Variable):
+        if isinstance(value, Variable) and func.name == value.name:
+            return value
+        return func
     elif isinstance(func, str) and func == value.name:
         return value
 
