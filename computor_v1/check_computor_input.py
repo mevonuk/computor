@@ -2,10 +2,9 @@
 # program specifications,
 # modify string to standardize,
 # and perform final checks
-# contains: check_chars, check_equals, check_multple_decimals, 
-#			check_spaces, check_input_chars, modify_exp,
-#			check_exp, check_sign, check_decimals, check_mult,
-#			check_input
+# contains: check_chars, check_equals, check_multple_decimals,
+# check_spaces, check_input_chars, modify_exp,
+# check_exp, check_sign, check_decimals, check_mult, check_input
 
 def check_chars(s: str):
     """check for allowed characters"""
