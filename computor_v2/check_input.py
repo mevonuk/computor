@@ -19,6 +19,21 @@ def check_user_input(s: str) -> int:
         return 1
     if count_paren(s) == 1:
         return 1
+    if check_i(s) == 1:
+        return 1
+    return 0
+
+
+def check_i(s:str) -> int:
+    """checks if i is followed by a digit"""
+    s_list = list(s)
+    for i, c in enumerate(s_list):
+        if c == 'i':
+            if i + 1 < len(s_list):
+                if s_list[i+1].isdigit():
+                    print("Error: bad format")
+                    return 1
+
     return 0
 
 
@@ -27,6 +42,9 @@ def check_equal_signs(s: str):
     count = s.count('=')
     if count != 1:
         print("Error: Equation should have 1 equal sign.")
+        return 1
+    if s.index('=') == 0:
+        print("Error: leading =")
         return 1
     return 0
 
@@ -50,7 +68,7 @@ def check_decimals(s: str):
 def check_new_term(s: str):
     """Checks to see if a new term starts after certain characters"""
     s_list = list(s)
-    c_new_term = set('+-=(*/%')
+    c_new_term = set('+-=(*/%^i')
     for i, c in enumerate(s_list):
         if c.isdigit() or c == '.' or c.isalpha() or c == ')':
             if i + 1 < len(s_list) and s_list[i + 1] == ' ':

@@ -29,7 +29,7 @@ def tokenize(expr):
         (\*\*)						# Power operator
       | (\^|\+|\-|\*|\/|=|\(|\)|\%)	# Operators and parentheses
       | (\d+\.\d+|\d+)				# Numbers
-      | (i)							# Imaginary unit
+      | (i+^[a-zA-Z_])							# Imaginary unit
       | ([a-zA-Z_]\w*)				# Variables and function names
       | (\?)						# ? mark
     '''

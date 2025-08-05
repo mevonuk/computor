@@ -8,7 +8,7 @@ from node import Node
 
 from polynomial import plug_in_var
 from tools import get_value
-from tree_functions import simplify_node
+from tree_functions import simplify_node, resolve
 from tree_tool import solve_node
 
 
@@ -19,6 +19,16 @@ def get_function_value(func_name, func_var, history):
     if function is None:
         print("Error: function is not defined")
         return None
+
+    hold_val = get_value(function.var, history)
+    hold_key = function.var
+
+    if isinstance(func_var, Variable) and func_var.name == function.var:
+        sol = function.solve(history)
+        return sol
+
+    if isinstance(func_var, Variable) and func_var.name != function.var:
+        func_var = resolve(func_var.name, history)
 
     history_copy = history
     history_copy[function.var] = func_var
@@ -40,11 +50,19 @@ def get_function_value(func_name, func_var, history):
 
     if isinstance(variable, str):
         sol = solve_node(function.terms, history_copy)
+        if hold_val is not None:
+            history[hold_key] = hold_val
+        else:
+            history.pop(hold_key)
         return sol
     elif isinstance(variable, Variable) and variable.value is None:
         if variable.name in history_copy.keys():
             history_copy.pop(variable.name)
         sol = function.solve(history_copy)
+        if hold_val is not None:
+            history[hold_key] = hold_val
+        else:
+            history.pop(hold_key)
         return sol
     elif isinstance(function, (Polynomial, RationalExpression)):
         function = function.plug_vars(history_copy)
@@ -57,6 +75,10 @@ def get_function_value(func_name, func_var, history):
                     dem = dem.get_coefficients(0)[0]
                     if dem == 0:
                         print("Error: division by zero")
+                        if hold_val is not None:
+                            history[hold_key] = hold_val
+                        else:
+                            history.pop(hold_key)
                         return None
                     elif not isinstance(dem, Polynomial):
                         ex = 1
@@ -81,8 +103,16 @@ def get_function_value(func_name, func_var, history):
                 sol_bot = simplify_node(sol_bot, history)
             if sol_bot == 0:
                 print("Erro: division by zero")
+                if hold_val is not None:
+                    history[hold_key] = hold_val
+                else:
+                    history.pop(hold_key)
                 return None
             sol = sol_top / sol_bot
+        if hold_val is not None:
+            history[hold_key] = hold_val
+        else:
+            history.pop(hold_key)
         return sol
     elif isinstance(function, Node):
         if isinstance(function.left, (Polynomial, RationalExpression)):
@@ -93,6 +123,10 @@ def get_function_value(func_name, func_var, history):
                     sol_left = sol_left.get_coefficients(0)[0]
         else:
             print("not a poly left")
+            if hold_val is not None:
+                history[hold_key] = hold_val
+            else:
+                history.pop(hold_key)
             return None
         if isinstance(function.right, (Polynomial, RationalExpression)):
             function.right = function.right.plug_vars(history_copy)
@@ -102,9 +136,21 @@ def get_function_value(func_name, func_var, history):
                     sol_right = sol_right.get_coefficients(0)[0]
         else:
             print("not a poly right")
+            if hold_val is not None:
+                history[hold_key] = hold_val
+            else:
+                history.pop(hold_key)
             return None
         sol = sol_left % sol_right
+        if hold_val is not None:
+            history[hold_key] = hold_val
+        else:
+            history.pop(hold_key)
         return sol
     else:
         print("function not poly/rational or otherwise")
+    if hold_val is not None:
+        history[hold_key] = hold_val
+    else:
+        history.pop(hold_key)
     return None

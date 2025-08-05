@@ -5,7 +5,7 @@ from variable import Variable
 from matrix import Matrix
 from node import Node
 
-from tools import get_value2
+from tools import get_value2, power_node
 from function_tools import get_function_value
 
 
@@ -60,7 +60,7 @@ def solve_node_var(node: Node, var, history: dict):
     if node.type == '%':
         return left_value % right_value
     if node.type == '^':
-        return left_value ** right_value
+        return power_node(left_value, right_value)
     if node.type == '**':
         if isinstance(left_value, Matrix):
             if isinstance(right_value, Matrix):

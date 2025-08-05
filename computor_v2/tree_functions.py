@@ -9,6 +9,7 @@ from rational import Rational
 from complex import Complex
 
 from tools import get_value2
+from tools import power_node
 
 
 def sub_var_node(node, variable):
@@ -120,7 +121,7 @@ def simplify_node(node, history):
             elif node.type == '%':
                 return left % right
             elif node.type == '^':
-                return left ** right
+                return power_node(left, right)
             elif node.type == '**':
                 if isinstance(left, Matrix) and isinstance(right, Matrix):
                     return right * left

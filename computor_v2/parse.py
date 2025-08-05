@@ -83,11 +83,24 @@ def parse_cmd(cmd, history):
         return None, None
 
     cmd = cmd.lower()
+
+    if cmd == 'history':
+        for key in history:
+            key_val = history[key]
+            key_print = key_val
+            if isinstance(key_val, Variable):
+                key_print = key_val.value
+            print(key, key_print, type(history[key]))
+        return None, None
+
     if check_user_input(cmd) == 1:
         return None, None
 
     key = None
     value = None
+
+    # rm excess spaces
+    cmd = cmd.replace(" ", "")
 
     tokens = tokenize(cmd)
     func = parse_tokens(tokens)
@@ -218,6 +231,7 @@ def parse_cmd(cmd, history):
         print('Error in matrix input')
         return None, None
 
+    # !!! here for function with matrix
     if mat and mat_type != 0:
         if not func_def:
             key = tokens[0]
@@ -246,6 +260,12 @@ def parse_cmd(cmd, history):
             tokens = parse_tokens(tokens[2:])
             tree, _ = parse_expression2(tokens, None, history)
             value = tree
+
+            # this works as long as function in polynomial
+            if isinstance(value, Polynomial):
+                print("Error: assigning variable to function")
+                return None, None
+
             if isinstance(tree, Node):
                 value = solve_node(tree, history)
 
@@ -268,7 +288,7 @@ def parse_cmd(cmd, history):
                     value = Matrix(new_matrix)  # return matrix
 
             var = Variable(key, value)
-            if value is not None:
+            if value is not None and not isinstance(value, Node):
                 print(value)
                 return key, var
             else:
