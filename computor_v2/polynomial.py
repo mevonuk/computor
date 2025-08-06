@@ -1,14 +1,15 @@
 # definition of Term, Polynomial, and RationalExpression classes
 # contains routines: mul_exprs, sub_exprs, sub_rational_exprs,
 #                    add_exprs, add_rational_exprs, plug_in_var
-
+from copy import deepcopy
 from rational import Rational
 from complex import Complex
 from variable import Variable
 from node import Node
+from matrix import Matrix, Vector
 
 from tools import get_value2
-from tree_functions import simplify_node
+from tree_functions import simplify_node, resolve
 from tree_tool import solve_node
 
 
@@ -102,7 +103,7 @@ class Term:
             self.exp = exp
         else:
             raise TypeError("Usage Term: Exponent must be integer >= 0", exp)
-        if isinstance(coefficient, (int, float, Rational, Complex, Node)):
+        if isinstance(coefficient, (int, float, Rational, Complex, Node, Matrix)):
             self.coef = coefficient
         elif isinstance(coefficient, str):
             self.coef = Variable(coefficient, None)
@@ -209,7 +210,7 @@ class Polynomial:
                     mod_result = Node(term.coef, term.var, '%')
                 self.terms[(term.var, 0)] = [mod_result, '+']
         else:
-            if isinstance(term.coef, (Variable, Node)):
+            if isinstance(term.coef, (Variable, Node, Matrix)):
                 self.terms[key] = [term.coef, term.op]
             elif term.coef.real == -1:
                 self.terms[key] = [-1, term.op]
@@ -234,14 +235,7 @@ class Polynomial:
 
             if isinstance(coef, Variable):
                 term = Term(coef.name, var, exp, op)
-            elif isinstance(coef, Node):
-                if exp == 0:
-                    term = f'{coef}'
-                elif exp == 1:
-                    term = f'({coef}) * {var}'
-                else:
-                    term = f'{coef} * {var}^{exp}'
-            elif isinstance(coef, (Node, str, Variable)):
+            elif isinstance(coef, (Node, str, Variable, Matrix)):
                 if exp == 0:
                     term = f'{coef}'
                 elif exp == 1:
@@ -256,7 +250,7 @@ class Polynomial:
             term_str = str(term)
             if i == 0:
                 # First term: include sign only if negative
-                if (not isinstance(coef, (Complex, Variable, Node, str)) and
+                if (not isinstance(coef, (Complex, Variable, Node, str, Matrix)) and
                         coef < 0):
                     parts.append(f"-{term_str}")
                 elif (isinstance(coef, Complex) and coef.imag == 0 and
@@ -266,7 +260,7 @@ class Polynomial:
                     parts.append(f"{term_str}")
             else:
                 # Subsequent terms: prepend with + or -
-                if (not isinstance(coef, (Complex, Variable, Node, str)) and
+                if (not isinstance(coef, (Complex, Variable, Node, str, Matrix)) and
                         coef < 0):
                     parts.append(f" - {term_str}")
                 elif (isinstance(coef, Complex) and
@@ -287,7 +281,6 @@ class Polynomial:
             return [0] * (degree + 1)
 
         var = next(iter(self.terms))[0]  # get any variable used
-        # print("in get_coefficients variable is", var)
         return [
             self.terms.get((var, i), (0, '+'))[0]
             for i in reversed(range(degree + 1))
@@ -330,6 +323,14 @@ class Polynomial:
         else:
             return [f1, f2]
 
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
+
     def __sub__(self, other):
         """Overload to subtract Polynomials"""
         if not isinstance(other, Polynomial):
@@ -351,13 +352,12 @@ class Polynomial:
             if key in result.terms:
                 existing_coef, _ = result.terms[key]
                 # Assume + when adding terms from different polynomials
-                if isinstance(existing_coef, Node) or isinstance(coef, Node):
+                if isinstance(existing_coef, (Node, Matrix)) or isinstance(coef, (Node, Matrix)):
                     result.terms[key] = [Node(existing_coef, coef, '-'), '+']
                 else:
                     result.terms[key] = [existing_coef - coef, '+']
             else:
                 result.terms[key] = [-coef, op]
-
         return result
 
     def __add__(self, other):
@@ -381,7 +381,7 @@ class Polynomial:
             if key in result.terms:
                 existing_coef, _ = result.terms[key]
                 # Assume + when adding terms from different polynomials
-                if isinstance(existing_coef, Node) or isinstance(coef, Node):
+                if isinstance(existing_coef, (Node, Matrix)) or isinstance(coef, (Node, Matrix)):
                     result.terms[key] = [Node(existing_coef, coef, '+'), '+']
                 else:
                     result.terms[key] = [existing_coef + coef, '+']
@@ -690,8 +690,23 @@ def plug_in_var(func, value, history):
                 new_coef = solve_node(new_coef, history)
 
             if not isinstance(value, str):
-                if not isinstance(new_coef, (str, Node)):
+                if not isinstance(new_coef, (str, Node, Matrix)):
                     new_value = new_coef * (value ** key[1])
+                elif isinstance(new_coef, Matrix):
+                    # recursive search in case of vector/matrix
+                    new_matrix = []
+                    for i in range(new_coef.shape[0]):
+                        lst = []
+                        for k in range(new_coef.shape[1]):
+                            value = resolve(new_coef.data[i][k], history)
+                            if isinstance(value, Polynomial):
+                                value = value.solve(history)
+                            lst.append(value)
+                        new_matrix.append(lst)
+                    if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+                        new_value = Vector(new_matrix)* (value ** key[1])  # return vector
+                    else:
+                        new_value = Matrix(new_matrix)* (value ** key[1])  # return matrix
                 else:
                     new_value = Node(new_coef, value ** key[1], '*')
                 result.add_term((new_value, func.var, 0, '+'))
@@ -713,5 +728,8 @@ def plug_in_var(func, value, history):
         return func
     elif isinstance(func, str) and func == value.name:
         return value
+    
+    elif isinstance(func, Matrix):
+        print("function is matrix")
 
     return func

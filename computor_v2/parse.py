@@ -1,11 +1,12 @@
 # contains: split_at_equals, define_function_terms, define_function, parse_cmd
-
+from copy import deepcopy
 from rational import Rational
 from variable import Variable
 from polynomial import Polynomial, RationalExpression
 from function import Function
 from node import Node
 from matrix import Matrix, Vector
+from complex import Complex
 
 from polynomial import sub_exprs
 from lex_base import tokenize, parse_tokens
@@ -54,8 +55,11 @@ def define_function_terms(name, var, term, history):
     if isinstance(poly, RationalExpression):
         simplify = poly.simplify()
         value = simplify
+    combined = deepcopy(value)
     if isinstance(value, (Polynomial, RationalExpression)):
-        value.combine_like_terms()
+        combined.combine_like_terms()
+    if str(combined) != "None":
+        value = combined
     return value
 
 
@@ -84,6 +88,7 @@ def parse_cmd(cmd, history):
 
     cmd = cmd.lower()
 
+    # print history to screen
     if cmd == 'history':
         for key in history:
             key_val = history[key]
@@ -91,6 +96,12 @@ def parse_cmd(cmd, history):
             if isinstance(key_val, Variable):
                 key_print = key_val.value
             print(key, key_print, type(history[key]))
+        return None, None
+    
+    # clear history
+    if cmd == 'clear':
+        history.clear()
+        history['i'] = Complex(0, 1)
         return None, None
 
     if check_user_input(cmd) == 1:
@@ -209,7 +220,7 @@ def parse_cmd(cmd, history):
             degree = function.get_degree()
 
             if degree < 3 and degree >= 0:
-                print("solving equation:", function, '= 0')
+                print("solving quadratic equation:", function, '= 0')
                 # need to plug in non-function variables !!!
                 function2 = function.plug_vars(history)
                 a, b, c = function2.get_coefficients(2)
@@ -230,8 +241,9 @@ def parse_cmd(cmd, history):
     if mat_type == -1:
         print('Error in matrix input')
         return None, None
+    
+    print(mat)
 
-    # !!! here for function with matrix
     if mat and mat_type != 0:
         if not func_def:
             key = tokens[0]
@@ -240,6 +252,7 @@ def parse_cmd(cmd, history):
             print(value)
             return key, value
         else:
+            # !!! here for function with matrix
             print("ERROR: assigning matrix/vector to function")
             return None, None
 
@@ -320,7 +333,7 @@ def parse_cmd(cmd, history):
             key, value = define_function(func, history)
             if isinstance(value, (Polynomial, RationalExpression)):
                 value.combine_like_terms()
-            if value is not None:
+            if str(value) != "None":
                 print(value)
             return key, value
 

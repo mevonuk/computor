@@ -117,9 +117,9 @@ def quadratic(a: float | int, b: float | int, c: float | int):
     if not isinstance(a, (float, int)):
         raise TypeError("for quadratic, a must be float/int")
     if not isinstance(b, (float, int)):
-        raise TypeError("for reduce, b must be float/int")
+        raise TypeError("for quadratic, b must be float/int")
     if not isinstance(c, (float, int)):
-        raise TypeError("for reduce, c must be float/int")
+        raise TypeError("for quadratic, c must be float/int")
     if a != 0:
         print("Solving quadratic equation...")
         discriminant = b * b - 4 * a * c

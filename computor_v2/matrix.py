@@ -96,7 +96,7 @@ class Matrix:
     def __add__(self, o):
         """magic addition of matrices, only of the same size"""
         if not isinstance(o, Matrix):
-            print("ERROR: attempt to add non-Matrix obj")
+            print("matrix addtion only allowed for matrices of the same size")
             return None
         if o.shape[0] != self.shape[0] or o.shape[1] != self.shape[1]:
             print("ERROR: addition failed: matrices are not of the same size")
@@ -118,7 +118,7 @@ class Matrix:
     def __sub__(self, o):
         """subtraction only for matrices of the same size"""
         if not isinstance(o, Matrix):
-            print("ERROR: attempt to subtract non-Matrix obj")
+            print("matrix subtraction only allowed for matrices of the same size")
             return None
         if o.shape[0] != self.shape[0] or o.shape[1] != self.shape[1]:
             print("ERROR: subtraction: matrices are not of the same size")

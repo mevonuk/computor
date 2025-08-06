@@ -4,6 +4,7 @@ from rational import Rational
 from complex import Complex
 from node import Node
 from variable import Variable
+from matrix import Matrix
 from polynomial import Polynomial, RationalExpression, Term
 
 from polynomial import mul_exprs, sub_exprs, add_exprs
@@ -21,7 +22,7 @@ class Function:
             raise TypeError("Error: variable name should be a string")
         if not isinstance(name, str):
             raise TypeError("Error: function name should be a string")
-        ALLOWED_TYPES = (int, float, Node, Complex, Rational, Variable)
+        ALLOWED_TYPES = (int, float, Node, Complex, Rational, Variable, Matrix)
         if not isinstance(terms, ALLOWED_TYPES):
             raise TypeError("Error: function terms in bad type")
         if isinstance(variable, Node):
@@ -41,7 +42,7 @@ class Function:
 
     def _node_to_polynomial(self, node):
         """Convert terms to polynomial"""
-        if isinstance(node, (int, float, Complex, Rational)):
+        if isinstance(node, (int, float, Complex, Rational, Matrix)):
             p = Polynomial()
             p.add_term((node, self.var, 0, '+'))
             return p
