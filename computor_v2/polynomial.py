@@ -780,7 +780,7 @@ def plug_in_var(func, var, history):
     # Variable or variable name
     elif isinstance(func, Variable):
         if isinstance(value, Variable) and func.name == value.name:
-            return value
+            return value.value
         return func
     elif isinstance(func, str) and func == value.name:
         return value

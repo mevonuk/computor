@@ -51,7 +51,6 @@ def get_function_value(func_name, func_var, history):
         print("variable type is non-standard")
 
     if isinstance(variable, Variable) and variable.value is None:
-        print('here1')
         if variable.name in history.keys():
             history.pop(variable.name)
         sol = function.solve(history)
