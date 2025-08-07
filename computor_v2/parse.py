@@ -135,7 +135,6 @@ def parse_cmd(cmd, history):
 
     # solving, not FUNC
     if solve == 1 and func_def == 0:
-        print("solving variable")
 
         # case 1: ending with =
         if tokens[len(tokens)-1] == '=':
@@ -247,7 +246,6 @@ def parse_cmd(cmd, history):
         return None, None
 
     if not func_def and tokens[0].isalpha() and tokens[1] == '=':
-        print('here for variable solution')
         if tokens[len(tokens) - 1] != '=':
             if tokens[0] == 'i':
                 print("ERROR: Assignment to i is forbidden")
