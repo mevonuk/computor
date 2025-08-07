@@ -108,7 +108,7 @@ def simplify_node(node, history):
             return left
 
     # Case: both sides are fully numeric → evaluate
-    if all(not isinstance(v, (str, Node, Variable)) for v in (left, right)):
+    if all(not isinstance(v, (str, Node, Variable, Matrix)) for v in (left, right)):
         try:
             if node.type == '+':
                 return left + right

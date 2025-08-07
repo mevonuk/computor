@@ -115,11 +115,11 @@ def reduce(b: int | float, a: int | float, mode: int) -> str:
 def quadratic(a: float | int, b: float | int, c: float | int):
     """Solves a quadratic equation with coefficients a, b, c"""
     if not isinstance(a, (float, int)):
-        raise TypeError("for quadratic, a must be float/int")
+        raise TypeError("ABORT: for quadratic, a must be float/int")
     if not isinstance(b, (float, int)):
-        raise TypeError("for quadratic, b must be float/int")
+        raise TypeError("ABORT: for quadratic, b must be float/int")
     if not isinstance(c, (float, int)):
-        raise TypeError("for quadratic, c must be float/int")
+        raise TypeError("ABORT: for quadratic, c must be float/int")
     if a != 0:
         print("Solving quadratic equation...")
         discriminant = b * b - 4 * a * c

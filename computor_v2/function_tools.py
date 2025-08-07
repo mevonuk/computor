@@ -28,39 +28,31 @@ def get_function_value(func_name, func_var, history):
         sol = function.solve(history)
         return sol
 
-    print('resolve')
-
     if isinstance(func_var, Variable) and func_var.name != function.var:
         func_var = resolve(func_var.name, history)
 
     history[function.var] = func_var
-
-    print('checking var')
     
     # check for variable
     variable = func_var
     if variable == 'i':
-        variable = Complex(0, 1)
-    if isinstance(variable, str):
+        variable = Variable(function.var, Complex(0, 1))
+    elif isinstance(variable, str):
         if variable.isalpha():
             variable = Variable(variable, None)
         elif '.' in variable:
-            variable = Rational(float(variable))
+            variable = Variable(function.var, Rational(float(variable)))
         else:
-            variable = Rational(int(variable))
-    if isinstance(variable, Node):
+            variable = Variable(function.var, Rational(int(variable)))
+    elif isinstance(variable, Node):
         if variable.type == 'VAR':
-            variable = variable.left
+            variable = Variable(function.var, variable.left)
+    elif isinstance(variable, (int, float, Rational, Complex)):
+        variable = Variable(function.var, variable)
+    else:
+        print("variable is other type, maybe matrix")
 
-    if isinstance(variable, str):
-        print('here0')
-        sol = solve_node(function.terms, history)
-        if hold_val is not None:
-            history[hold_key] = hold_val
-        else:
-            history.pop(hold_key)
-        return sol
-    elif isinstance(variable, Variable) and variable.value is None:
+    if isinstance(variable, Variable) and variable.value is None:
         print('here1')
         if variable.name in history.keys():
             history.pop(variable.name)
@@ -71,7 +63,6 @@ def get_function_value(func_name, func_var, history):
             history.pop(hold_key)
         return sol
     elif isinstance(function, (Polynomial, RationalExpression)):
-        print('here2')
         function = function.plug_vars(history)
         # check for division by zero
         if isinstance(function, RationalExpression):
@@ -91,12 +82,15 @@ def get_function_value(func_name, func_var, history):
                         ex = 1
                 else:
                     ex = 1
+
         sol = plug_in_var(function, variable, history)
+
         if isinstance(sol, Polynomial):
             if sol.get_degree() == 0:
                 sol = sol.get_coefficients(0)[0]
             if isinstance(sol, Node):
                 sol = simplify_node(sol, history)
+
         if isinstance(sol, RationalExpression):
             sol_top = sol.numerator
             sol_bot = sol.denominator
@@ -109,7 +103,7 @@ def get_function_value(func_name, func_var, history):
             if isinstance(sol_bot, Node):
                 sol_bot = simplify_node(sol_bot, history)
             if sol_bot == 0:
-                print("Erro: division by zero")
+                print("Error: division by zero")
                 if hold_val is not None:
                     history[hold_key] = hold_val
                 else:
@@ -122,7 +116,6 @@ def get_function_value(func_name, func_var, history):
             history.pop(hold_key)
         return sol
     elif isinstance(function, Node):
-        print('here3')
         if isinstance(function.left, (Polynomial, RationalExpression)):
             function.left = function.left.plug_vars(history)
             sol_left = plug_in_var(function.left, variable, history)

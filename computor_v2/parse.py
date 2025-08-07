@@ -1,4 +1,5 @@
 # contains: split_at_equals, define_function_terms, define_function, parse_cmd
+
 from copy import deepcopy
 from rational import Rational
 from variable import Variable
@@ -10,7 +11,7 @@ from complex import Complex
 
 from polynomial import sub_exprs
 from lex_base import tokenize, parse_tokens
-from lex_base import extract_matrix_literal, parse_num
+from lex_base import parse_num
 from lexer import parse_expression
 from tools import get_value
 from my_math_tools import quadratic
@@ -115,6 +116,9 @@ def parse_cmd(cmd, history):
 
     tokens = tokenize(cmd)
     func = parse_tokens(tokens)
+
+    # uncomment below to see parsing
+    # print(func)
 
     # is a function being defined?
     func_def = 0
@@ -221,7 +225,7 @@ def parse_cmd(cmd, history):
 
             if degree < 3 and degree >= 0:
                 print("solving quadratic equation:", function, '= 0')
-                # need to plug in non-function variables !!!
+                # need to plug in non-function variables
                 function2 = function.plug_vars(history)
                 a, b, c = function2.get_coefficients(2)
                 if isinstance(a, Rational):
@@ -236,27 +240,11 @@ def parse_cmd(cmd, history):
 
         return key, value
 
-    # first check for matrices/vectors
-    mat, mat_type = extract_matrix_literal(cmd)
-    if mat_type == -1:
-        print('Error in matrix input')
+    # check for regular variables - can contain functions and matrices
+    if not func_def and tokens[0].isdigit() and tokens[1] == '=':
+        print("Error: digits cannot be used as variables")
         return None, None
-    
-    print(mat)
 
-    if mat and mat_type != 0:
-        if not func_def:
-            key = tokens[0]
-            matrix_input = parse_matrix_literal(mat[0], mat_type, history)
-            value = matrix_input
-            print(value)
-            return key, value
-        else:
-            # !!! here for function with matrix
-            print("ERROR: assigning matrix/vector to function")
-            return None, None
-
-    # next check for regular variables
     if not func_def and tokens[0].isalpha() and tokens[1] == '=':
         if tokens[len(tokens) - 1] != '=':
             if tokens[0] == 'i':

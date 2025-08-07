@@ -21,6 +21,36 @@ def check_user_input(s: str) -> int:
         return 1
     if check_i(s) == 1:
         return 1
+    if check_matrix(s) == 1:
+        return 1
+    return 0
+
+
+def check_matrix(s:str) -> int:
+    """check if trying to do crazy stuff with a matrix"""
+    # rm excess spaces
+    s2 = s.replace(" ", "")
+    s_list = list(s2)
+    for i, c in enumerate(s_list):
+        if c == '[':
+            if i > 0:
+                if s_list[i-1] in set('%/^'):
+                    print("Error: undefined matrix/vector operation")
+                    return 1
+        if c == ']':
+            if i + 1 < len(s_list):
+                if s_list[i+1] in set('%'):
+                    print("Error: undefined matrix/vector operation")
+                    return 1
+        if c == ';':
+            if i + 1 < len(s_list):
+                if s_list[i+1] != '[':
+                    print("Error: bad format")
+                    return 1
+            if i > 0:
+                if s_list[i-1] != ']':
+                    print("Error: bad format")
+                    return 1
     return 0
 
 
@@ -33,7 +63,6 @@ def check_i(s:str) -> int:
                 if s_list[i+1].isdigit():
                     print("Error: bad format")
                     return 1
-
     return 0
 
 
@@ -57,7 +86,7 @@ def check_decimals(s: str):
             if i + 1 < len(s_list):
                 sub_list = s_list[i + 1:]
                 for cc in sub_list:
-                    if cc == '.':
+                    if cc == '.' or cc.isalpha():
                         print("Error: Bad input, check decimal points.")
                         return 1
                     if not cc.isdigit():

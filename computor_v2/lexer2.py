@@ -56,33 +56,24 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
 
         # Parentheses
         if token == '(':
-            tree, new_index = parse_expression2(
-                tokens, var, history, index + 1
-            )
+            tree, new_index = parse_expression2(tokens, var, history, index + 1)
             if tokens[new_index] != ')':
                 raise SyntaxError("Unmatched parenthesis")
             return tree, new_index + 1
 
-        # Function call tuple: ('FUNC', 'f', [['a']])
+        # Function call
         elif isinstance(token, tuple) and token[0] == 'FUNC':
             func_name = token[1]
             args_token_lists = token[2]
-
-            # print(func_name, args_token_lists[0])
 
             if len(args_token_lists) != 1:
                 raise NotImplementedError("Only one-arg functions supported")
 
             arg_expr = args_token_lists[0]
-            if (isinstance(args_token_lists[0], list) and
-                    len(args_token_lists[0]) > 1):
-                arg_expr, _ = parse_expression2(
-                    args_token_lists[0], var, history
-                )
+            if isinstance(arg_expr, list) and len(arg_expr) > 1:
+                arg_expr, _ = parse_expression2(arg_expr, var, history)
 
-            # need to check here in history !!!
             value = get_value(func_name, history)
-
             value2 = parse_num2(arg_expr, value.var, history)
 
             result = None
@@ -91,9 +82,59 @@ def parse_expression2(tokens, var, history, index=0, min_precedence=1):
                 if isinstance(result, Variable):
                     return Node(result, None, 'VAR'), index + 1
                 return result, index + 1
+
             return Node(func_name, arg_expr, 'FUNC'), index + 1
 
+        # Matrix or Vector literal
+        elif isinstance(token, tuple) and token[0] in ('MATRIX', 'VECTOR'):
+            matrix_type = 2 if token[0] == 'MATRIX' else 1
+            parsed = parse_matrix_literal(token[1], matrix_type, history)
+            return parsed, index + 1
+
+        # Regular number, variable, etc.
         return parse_num2(token, var, history), index + 1
+
+    # def parse_primary2(index, var, history):
+    #     token = tokens[index]
+
+    #     # Parentheses
+    #     if token == '(':
+    #         tree, new_index = parse_expression2(
+    #             tokens, var, history, index + 1
+    #         )
+    #         if tokens[new_index] != ')':
+    #             raise SyntaxError("Unmatched parenthesis")
+    #         return tree, new_index + 1
+
+    #     # Function call tuple: ('FUNC', 'f', [['a']])
+    #     elif isinstance(token, tuple) and token[0] == 'FUNC':
+    #         func_name = token[1]
+    #         args_token_lists = token[2]
+
+    #         if len(args_token_lists) != 1:
+    #             raise NotImplementedError("Only one-arg functions supported")
+
+    #         arg_expr = args_token_lists[0]
+    #         if (isinstance(args_token_lists[0], list) and
+    #                 len(args_token_lists[0]) > 1):
+    #             arg_expr, _ = parse_expression2(
+    #                 args_token_lists[0], var, history
+    #             )
+
+    #         # need to check here in history !!!
+    #         value = get_value(func_name, history)
+
+    #         value2 = parse_num2(arg_expr, value.var, history)
+
+    #         result = None
+    #         if value is not None and value2 != var:
+    #             result = get_function_value(func_name, value2, history)
+    #             if isinstance(result, Variable):
+    #                 return Node(result, None, 'VAR'), index + 1
+    #             return result, index + 1
+    #         return Node(func_name, arg_expr, 'FUNC'), index + 1
+
+    #     return parse_num2(token, var, history), index + 1
 
     lhs, index = parse_primary2(index, var, history)
 

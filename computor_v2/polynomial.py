@@ -489,15 +489,15 @@ class Polynomial:
         value = next(iter(self.terms))[0]  # get any variable used
         # check if var in history
         if isinstance(value, str):
-            value = get_value2(value, history)
+            value = Variable(value, get_value2(value, history))
         if isinstance(value, Variable):
-            value = get_value2(value.name, history)
+            value = Variable(value.name, get_value2(value.name, history))
 
-        if value == self.var or value is None:
+        if value.value == self.var or value.value is None:
             return self
 
         result = Polynomial()
-        if isinstance(value, (int, float, Rational, Complex)):
+        if isinstance(value.value, (int, float, Rational, Complex)):
             # plug value into polynomial
             result = plug_in_var(self, value, history)
         return result
@@ -531,6 +531,20 @@ class Polynomial:
                 new_coef = get_value2(coef.name, history)
             elif isinstance(coef, Node):
                 new_coef = simplify_node(coef, history)
+            elif isinstance(coef, Matrix):
+                new_matrix = []
+                for i in range(coef.shape[0]):
+                    lst = []
+                    for k in range(coef.shape[1]):
+                        value2 = resolve(coef.data[i][k], history)
+                        if isinstance(value2, Polynomial):
+                            value2 = value2.solve(history)
+                        lst.append(value2)
+                    new_matrix.append(lst)
+                if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+                    new_coef = Vector(new_matrix)  # return vector
+                else:
+                    new_coef = Matrix(new_matrix)  # return matrix
             else:
                 new_coef = None
 
@@ -654,12 +668,14 @@ class RationalExpression:
             self.denominator.combine_like_terms()
 
 
-def plug_in_var(func, value, history):
+def plug_in_var(func, var, history):
     """Plug in the value of a the function/polynomial variable"""
-    if isinstance(value, str):
-        value = get_value2(value, history)
-    if isinstance(value, Variable):
-        value = get_value2(value.name, history)
+    value = deepcopy(var)
+    if isinstance(var, str):
+        value = get_value2(var, history)
+        value = Variable(var.name, value)
+    if isinstance(var, Variable) and var.value is None:
+        value = get_value2(var.name, history)
 
     # RationalExpression support
     if isinstance(func, RationalExpression):
@@ -687,31 +703,37 @@ def plug_in_var(func, value, history):
             # if the coefficient is a Node, plug into that Node
             if isinstance(coef, Node):
                 new_coef = plug_in_var(coef, value, history)
-                new_coef = solve_node(new_coef, history)
-
-            if not isinstance(value, str):
+                solved_coef = solve_node(new_coef, history)
+                if solved_coef is not None:
+                    new_coef = solved_coef
+                if key[1] != 0:
+                    new_value = new_coef * (value.value ** key[1])
+                else:
+                    new_value = new_coef
+                result.add_term((new_value, func.var, 0, '+'))
+            elif not isinstance(value.value, str):
                 if not isinstance(new_coef, (str, Node, Matrix)):
-                    new_value = new_coef * (value ** key[1])
+                    new_value = new_coef * (value.value ** key[1])
                 elif isinstance(new_coef, Matrix):
                     # recursive search in case of vector/matrix
                     new_matrix = []
                     for i in range(new_coef.shape[0]):
                         lst = []
                         for k in range(new_coef.shape[1]):
-                            value = resolve(new_coef.data[i][k], history)
-                            if isinstance(value, Polynomial):
-                                value = value.solve(history)
-                            lst.append(value)
+                            value2 = resolve(new_coef.data[i][k], history)
+                            if isinstance(value2, Polynomial):
+                                value2 = value2.solve(history)
+                            lst.append(value2)
                         new_matrix.append(lst)
                     if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
-                        new_value = Vector(new_matrix)* (value ** key[1])  # return vector
+                        new_value = Vector(new_matrix)* (value.value ** key[1])  # return vector
                     else:
-                        new_value = Matrix(new_matrix)* (value ** key[1])  # return matrix
+                        new_value = Matrix(new_matrix)* (value.value ** key[1])  # return matrix
                 else:
-                    new_value = Node(new_coef, value ** key[1], '*')
+                    new_value = Node(new_coef, value.value ** key[1], '*')
                 result.add_term((new_value, func.var, 0, '+'))
             else:
-                result.add_term((new_coef, value, key[1], op))
+                result.add_term((new_coef, value.value, key[1], op))
 
         return result
 
@@ -730,6 +752,18 @@ def plug_in_var(func, value, history):
         return value
     
     elif isinstance(func, Matrix):
-        print("function is matrix")
+        # recursive search in case of vector/matrix
+        new_matrix = []
+        for i in range(func.shape[0]):
+            lst = []
+            for k in range(func.shape[1]):
+                value2 = plug_in_var(func.data[i][k], value, history)
+                lst.append(value2)
+            new_matrix.append(lst)
+        if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
+            result = Vector(new_matrix)  # return vector
+        else:
+            result = Matrix(new_matrix)  # return matrix
+        return result
 
     return func

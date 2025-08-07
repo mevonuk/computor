@@ -93,10 +93,21 @@ class Matrix:
         print("Error: pow not allowed with matrix/vector")
         return None
 
+    def __neg__(self):
+        """magic negation of matrices"""
+        new_matrix = []
+        for i in range(self.shape[0]):
+            lst = []
+            for j in range(self.shape[1]):
+                lst.append(-self.data[i][j])
+            new_matrix.append(lst)
+        new_matrix = Matrix(new_matrix)
+        return new_matrix
+
     def __add__(self, o):
         """magic addition of matrices, only of the same size"""
         if not isinstance(o, Matrix):
-            print("matrix addtion only allowed for matrices of the same size")
+            print("matrix addition only allowed for matrices of the same size")
             return None
         if o.shape[0] != self.shape[0] or o.shape[1] != self.shape[1]:
             print("ERROR: addition failed: matrices are not of the same size")
@@ -159,7 +170,7 @@ class Matrix:
         """reverse Division of matrix by scalar, not valid"""
         print("ERROR: not a valid demand")
         return None
-
+        
     def __mul__(self, o):
         """Multiplication by Matrix or Scalar or Vector"""
         # by matrix
