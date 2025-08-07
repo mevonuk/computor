@@ -356,7 +356,8 @@ class Polynomial:
             if key in result.terms:
                 existing_coef, _ = result.terms[key]
                 # Assume + when adding terms from different polynomials
-                if isinstance(existing_coef, (Node, Matrix)) or isinstance(coef, (Node, Matrix)):
+                if (isinstance(existing_coef, (Node, Matrix)) or
+                        isinstance(coef, (Node, Matrix))):
                     result.terms[key] = [Node(existing_coef, coef, '-'), '+']
                 else:
                     result.terms[key] = [existing_coef - coef, '+']
@@ -389,7 +390,8 @@ class Polynomial:
             if key in result.terms:
                 existing_coef, _ = result.terms[key]
                 # Assume + when adding terms from different polynomials
-                if isinstance(existing_coef, (Node, Matrix)) or isinstance(coef, (Node, Matrix)):
+                if (isinstance(existing_coef, (Node, Matrix)) or
+                        isinstance(coef, (Node, Matrix))):
                     result.terms[key] = [Node(existing_coef, coef, '+'), '+']
                 else:
                     result.terms[key] = [existing_coef + coef, '+']
@@ -586,16 +588,23 @@ class RationalExpression:
     def __init__(self, numerator, denominator):
         """Innitiate class assuming use of Polynomials"""
         if not isinstance(numerator, (Polynomial, RationalExpression)):
-            raise TypeError("Error: Numerator must be Polynomial/RationalExpression")
+            raise TypeError(
+                "Error: Numerator must be Polynomial/RationalExpression"
+            )
         if not isinstance(denominator, (Polynomial, RationalExpression)):
-            raise TypeError("Error: Denominator must be Polynomial/RationalExpression")
-        if isinstance(numerator, RationalExpression) and isinstance(denominator, Polynomial):
+            raise TypeError(
+                "Error: Denominator must be Polynomial/RationalExpression"
+            )
+        if (isinstance(numerator, RationalExpression) and
+                isinstance(denominator, Polynomial)):
             self.numerator = numerator.numerator
             self.denominator = numerator.denominator * denominator
-        elif isinstance(numerator, Polynomial) and isinstance(denominator, RationalExpression):
+        elif (isinstance(numerator, Polynomial) and
+                isinstance(denominator, RationalExpression)):
             self.numerator = numerator * denominator.denominator
             self.denominator = denominator.numerator
-        elif isinstance(numerator, RationalExpression) and isinstance(denominator, RationalExpression):
+        elif (isinstance(numerator, RationalExpression) and
+                isinstance(denominator, RationalExpression)):
             self.numerator = numerator.numerator * denominator.denominator
             self.denominator = denominator.numerator * numerator.denominator
         else:
@@ -751,9 +760,9 @@ def plug_in_var(func, var, history):
                             lst.append(value2)
                         new_matrix.append(lst)
                     if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
-                        new_value = Vector(new_matrix)* (value.value ** key[1])  # return vector
+                        new_value = Vector(new_matrix) * (value.value ** key[1])
                     else:
-                        new_value = Matrix(new_matrix)* (value.value ** key[1])  # return matrix
+                        new_value = Matrix(new_matrix) * (value.value ** key[1])
                 else:
                     new_value = Node(new_coef, value.value ** key[1], '*')
                 result.add_term((new_value, func.var, 0, '+'))
@@ -775,7 +784,7 @@ def plug_in_var(func, var, history):
         return func
     elif isinstance(func, str) and func == value.name:
         return value
-    
+
     elif isinstance(func, Matrix):
         # recursive search in case of vector/matrix
         new_matrix = []

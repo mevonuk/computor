@@ -129,7 +129,7 @@ class Matrix:
     def __sub__(self, o):
         """subtraction only for matrices of the same size"""
         if not isinstance(o, Matrix):
-            print("matrix subtraction only allowed for matrices of the same size")
+            print("ERROR: subtraction: matrices are not of the same size")
             return None
         if o.shape[0] != self.shape[0] or o.shape[1] != self.shape[1]:
             print("ERROR: subtraction: matrices are not of the same size")
@@ -170,7 +170,7 @@ class Matrix:
         """reverse Division of matrix by scalar, not valid"""
         print("ERROR: not a valid demand")
         return None
-        
+
     def __mul__(self, o):
         """Multiplication by Matrix or Scalar or Vector"""
         # by matrix

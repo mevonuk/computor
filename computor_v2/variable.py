@@ -11,7 +11,7 @@ class Variable:
     def __str__(self):
         """Convert variable to string for printing"""
         return self.name
-    
+
     def __neg__(self):
         self.value = -1 * self.value
 

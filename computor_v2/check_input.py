@@ -26,7 +26,7 @@ def check_user_input(s: str) -> int:
     return 0
 
 
-def check_matrix(s:str) -> int:
+def check_matrix(s: str) -> int:
     """check if trying to do crazy stuff with a matrix"""
     # rm excess spaces
     s2 = s.replace(" ", "")
@@ -54,7 +54,7 @@ def check_matrix(s:str) -> int:
     return 0
 
 
-def check_i(s:str) -> int:
+def check_i(s: str) -> int:
     """checks if i is followed by a digit"""
     s_list = list(s)
     for i, c in enumerate(s_list):

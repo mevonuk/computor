@@ -72,6 +72,7 @@ def parse_num(token):
     else:
         return Rational(int(token))
 
+
 def extract_matrix_literals(expr):
     """Extract matrix and vector literals and replace them with placeholders"""
     matrix_vector_pattern = r'\[(?:\[.*?\]|[^\[\]])*?\]'
@@ -171,7 +172,8 @@ def parse_tokens(tokens):
             continue
 
         # Function call detection: f(x)
-        if isinstance(token, str) and token.isalpha() and i + 1 < len(tokens) and tokens[i + 1] == '(':
+        if (isinstance(token, str) and token.isalpha() and
+                i + 1 < len(tokens) and tokens[i + 1] == '('):
             func_name = token
             depth = 1
             i += 2

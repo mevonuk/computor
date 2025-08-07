@@ -19,7 +19,7 @@ from check_input import check_user_input
 from tree_tool import solve_node
 from tree_functions import simplify_node, resolve
 from function_tools import get_function_value
-from lexer2 import parse_expression2, parse_matrix_literal
+from lexer2 import parse_expression2
 
 
 def split_at_equals(tokens: str):
@@ -98,7 +98,7 @@ def parse_cmd(cmd, history):
                 key_print = key_val.value
             print(key, key_print, type(history[key]))
         return None, None
-    
+
     # clear history
     if cmd == 'clear':
         history.clear()

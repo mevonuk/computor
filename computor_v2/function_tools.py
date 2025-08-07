@@ -5,12 +5,10 @@ from polynomial import Polynomial, RationalExpression
 from complex import Complex
 from rational import Rational
 from node import Node
-from matrix import Matrix
 
 from polynomial import plug_in_var
 from tools import get_value
 from tree_functions import simplify_node, resolve
-from tree_tool import solve_node
 
 
 def get_function_value(func_name, func_var, history):
@@ -32,7 +30,7 @@ def get_function_value(func_name, func_var, history):
         func_var = resolve(func_var.name, history)
 
     history[function.var] = func_var
-    
+
     # check for variable
     variable = func_var
     if variable == 'i':
