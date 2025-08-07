@@ -121,7 +121,7 @@ def quadratic(a: float | int, b: float | int, c: float | int):
     if not isinstance(c, (float, int)):
         raise TypeError("ABORT: for quadratic, c must be float/int")
     if a != 0:
-        print("Solving quadratic equation...")
+        # print("Solving quadratic equation...")
         discriminant = b * b - 4 * a * c
         if discriminant > 0:
             print("\nDiscriminant is positive: two real solutions:")

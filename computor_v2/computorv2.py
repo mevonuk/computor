@@ -1,5 +1,6 @@
 from complex import Complex
 from parse import parse_cmd
+import readline
 
 
 def print_instructions():

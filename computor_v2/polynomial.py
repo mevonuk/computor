@@ -40,7 +40,7 @@ def sub_exprs(a, b):
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
         # Convert a to rational with denom 1
         a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, a.var, 0, '+'))
+        a_rational.denominator.add_term((Rational(1), a.var, 0, '+'))
         return sub_rational_exprs(a_rational, b)
     elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
         dummy_poly = Polynomial()
@@ -71,7 +71,7 @@ def add_exprs(a, b):
     elif isinstance(a, Polynomial) and isinstance(b, RationalExpression):
         # Convert a to rational with denom 1
         a_rational = RationalExpression(a, Polynomial())
-        a_rational.denominator.add_term((1, a.var, 0, '+'))
+        a_rational.denominator.add_term((Rational(1), a.var, 0, '+'))
         return add_rational_exprs(a_rational, b)
     elif isinstance(a, RationalExpression) and isinstance(b, Polynomial):
         return add_exprs(b, a)
@@ -290,6 +290,10 @@ class Polynomial:
         """factor for cases of var^2"""
         a, b, c = self.get_coefficients(2)
 
+        # simplifiction not possible for Matrices
+        if any(isinstance(x, (Matrix, Node)) for x in (a, b, c)):
+            return None
+
         if not a:
             return [self]  # Not a factorable quadratic or not univariate
 
@@ -357,7 +361,11 @@ class Polynomial:
                 else:
                     result.terms[key] = [existing_coef - coef, '+']
             else:
-                result.terms[key] = [-coef, op]
+                if isinstance(coef, Matrix):
+                    coef = Rational(-1) * coef
+                    result.terms[key] = [coef, op]
+                else:
+                    result.terms[key] = [-coef, op]
         return result
 
     def __add__(self, other):
@@ -423,6 +431,9 @@ class Polynomial:
                     else:
                         new_coef = Node(coef1, coef2, '*')
                 else:
+                    if isinstance(coef1, Matrix):
+                        if isinstance(coef2, (int, float)):
+                            coef2 = Rational(coef2)
                     new_coef = coef1 * coef2
 
                 result.add_term((new_coef, new_var, new_exp, '+'))
@@ -571,14 +582,25 @@ class Polynomial:
 class RationalExpression:
     """Class to represent a Polynomial divided by a Polynomial"""
 
+    # !!! Can this be written to accept Rationalexpression?
     def __init__(self, numerator, denominator):
         """Innitiate class assuming use of Polynomials"""
-        if not isinstance(numerator, Polynomial):
-            raise TypeError("Error: Numerator must be Polynomial")
-        if not isinstance(denominator, Polynomial):
-            raise TypeError("Error: Denominator must be Polynomial")
-        self.numerator = numerator
-        self.denominator = denominator
+        if not isinstance(numerator, (Polynomial, RationalExpression)):
+            raise TypeError("Error: Numerator must be Polynomial/RationalExpression")
+        if not isinstance(denominator, (Polynomial, RationalExpression)):
+            raise TypeError("Error: Denominator must be Polynomial/RationalExpression")
+        if isinstance(numerator, RationalExpression) and isinstance(denominator, Polynomial):
+            self.numerator = numerator.numerator
+            self.denominator = numerator.denominator * denominator
+        elif isinstance(numerator, Polynomial) and isinstance(denominator, RationalExpression):
+            self.numerator = numerator * denominator.denominator
+            self.denominator = denominator.numerator
+        elif isinstance(numerator, RationalExpression) and isinstance(denominator, RationalExpression):
+            self.numerator = numerator.numerator * denominator.denominator
+            self.denominator = denominator.numerator * numerator.denominator
+        else:
+            self.numerator = numerator
+            self.denominator = denominator
         self.var = numerator.var
 
     def __repr__(self):
@@ -608,6 +630,9 @@ class RationalExpression:
         """Check the rational expression to see if terms can be cancelled"""
         num_factors = self.numerator.factor()
         den_factors = self.denominator.factor()
+
+        if num_factors is None or den_factors is None:
+            return self
 
         # Cancel common factors
         i = 0

@@ -50,7 +50,7 @@ def get_function_value(func_name, func_var, history):
     elif isinstance(variable, (int, float, Rational, Complex)):
         variable = Variable(function.var, variable)
     else:
-        print("variable is other type, maybe matrix")
+        print("variable type is non-standard")
 
     if isinstance(variable, Variable) and variable.value is None:
         print('here1')

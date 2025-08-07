@@ -224,7 +224,7 @@ def parse_cmd(cmd, history):
             degree = function.get_degree()
 
             if degree < 3 and degree >= 0:
-                print("solving quadratic equation:", function, '= 0')
+                # print("solving quadratic equation:", function, '= 0')
                 # need to plug in non-function variables
                 function2 = function.plug_vars(history)
                 a, b, c = function2.get_coefficients(2)

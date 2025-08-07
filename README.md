@@ -28,12 +28,7 @@ These two projects are based on the Ecole 42 computor (v1) and (v2) projects. Th
 - Functions, variables, matrices, and vectors are entered at the command prompt.
 - Imaginary numbers are supported.
 - Variables/functions/matrices can be redefined, type does not need to be conserved.
-	- > f = 2
-	- > 2
-	- > g = f
-	- > 2
-	- > f(x) = 3 + x
-	- > 3 + x
+- Variables cannot be set equal to functions (e.g., g = f(x))
 - The following operators are supported for variables and in functions: *, /, +, -, %
 - Matrices/vectors should be entered in the following format: matA = [[1,2];[4,7]] with semicolons seperating the rows of the matrix and commas seperating the columns.
 	- Allowed operations include:
@@ -63,6 +58,3 @@ These two projects are based on the Ecole 42 computor (v1) and (v2) projects. Th
 
 ### V2
 3. python computorv2.py
-
-> f(x)=x-[3,x]
-unsupported operand type(s) for *: 'int' and 'NoneType'

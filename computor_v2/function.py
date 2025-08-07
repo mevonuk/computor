@@ -38,6 +38,8 @@ class Function:
     def convert_function(self):
         """Convert function to polynomial"""
         polynomial = self._node_to_polynomial(self.terms)
+        if polynomial is None:
+            return self
         return polynomial
 
     def _node_to_polynomial(self, node):
@@ -59,7 +61,6 @@ class Function:
             return p
 
         if node is None:
-            # print("in node to polynomial: node is none")
             return
 
         if isinstance(node, Node):
@@ -76,10 +77,10 @@ class Function:
             elif node.type == '*':
                 return mul_exprs(left, right)
             elif node.type == '/':
-                if not isinstance(left, Polynomial):
+                if not isinstance(left, (Polynomial, RationalExpression)):
                     print("Polynomials only in rational expressions")
                     return self
-                if not isinstance(right, Polynomial):
+                if not isinstance(right, (Polynomial, RationalExpression)):
                     print("Polynomials only in rational expressions")
                     return self
                 return RationalExpression(left, right)
