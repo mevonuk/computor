@@ -63,3 +63,6 @@ These two projects are based on the Ecole 42 computor (v1) and (v2) projects. Th
 
 ### V2
 3. python computorv2.py
+
+> f(x)=x-[3,x]
+unsupported operand type(s) for *: 'int' and 'NoneType'
