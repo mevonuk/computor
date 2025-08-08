@@ -30,6 +30,7 @@ def check_matrix(s: str) -> int:
     """check if trying to do crazy stuff with a matrix"""
     # rm excess spaces
     s2 = s.replace(" ", "")
+    s2 = s2.replace("\t", "")
     s_list = list(s2)
     for i, c in enumerate(s_list):
         if c == '[':
@@ -41,6 +42,10 @@ def check_matrix(s: str) -> int:
             if i + 1 < len(s_list):
                 if s_list[i+1] in set('%'):
                     print("Error: undefined matrix/vector operation")
+                    return 1
+            if i + 1 < len(s_list):
+                if s_list[i+1] in set(','):
+                    print("Error: bad syntax")
                     return 1
         if c == ';':
             if i + 1 < len(s_list):
@@ -96,7 +101,9 @@ def check_decimals(s: str):
 
 def check_new_term(s: str):
     """Checks to see if a new term starts after certain characters"""
-    s_list = list(s)
+    s2 = s.replace(" ", "")
+    s2 = s2.replace("\t", "")
+    s_list = list(s2)
     c_new_term = set('+-=(*/%^i')
     for i, c in enumerate(s_list):
         if c.isdigit() or c == '.' or c.isalpha() or c == ')':

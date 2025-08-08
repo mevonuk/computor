@@ -111,8 +111,9 @@ def parse_cmd(cmd, history):
     key = None
     value = None
 
-    # rm excess spaces
+    # rm excess spaces and tabs
     cmd = cmd.replace(" ", "")
+    cmd = cmd.replace("\t", "")
 
     tokens = tokenize(cmd)
     func = parse_tokens(tokens)
@@ -164,6 +165,8 @@ def parse_cmd(cmd, history):
                     sol = Vector(new_matrix)  # return vector
                 else:
                     sol = Matrix(new_matrix)  # return matrix
+                if sol.shape == (1, 1):
+                    sol = sol.data[0][0]
 
             if sol is not None:
                 print(sol)
@@ -287,6 +290,8 @@ def parse_cmd(cmd, history):
                     value = Vector(new_matrix)  # return vector
                 else:
                     value = Matrix(new_matrix)  # return matrix
+                if value.shape == (1, 1):
+                    value = value.data[0][0]
 
             var = Variable(key, value)
             if value is not None and not isinstance(value, Node):
@@ -308,6 +313,8 @@ def parse_cmd(cmd, history):
                         tree = Vector(new_matrix)  # return vector
                     else:
                         tree = Matrix(new_matrix)  # return matrix
+                    if tree.shape == (1, 1):
+                        tree = tree.data[0][0]
 
                 print(tree)
                 return key, tree

@@ -15,36 +15,41 @@ These two projects are based on the Ecole 42 computor (v1) and (v2) projects. Th
 - Equations are simplified, terms are combined, and solutions are found for equations with dregree up to 2.
 - Imaginary solutions are supported.
 - Users have flexibility in how they enter terms:
-	- "Explicit": a * x^0 + b * x^1 + c * x^2 ...
-	- Free form: a + b x + c x^2 + ...
-	- "Implicit": a + bx + cx2 + ...
-	- Mixed order (of exponent degree): ax^3 - b + x = 4x^x - 3
+    - "Explicit": a * x^0 + b * x^1 + c * x^2 ...
+    - Free form: a + b x + c x^2 + ...
+    - "Implicit": a + bx + cx2 + ...
+    - Mixed order (of exponent degree): ax^3 - b + x = 4x^x - 3
 - However:
-	- x*x != x^2
-	- exponents must be positive integers
-	- multiplication and division (in equation entry) are not supported
+    - x*x != x^2
+    - exponents must be positive integers
+    - multiplication and division (in equation entry) are not supported
 
 ### V2
 - Functions, variables, matrices, and vectors are entered at the command prompt.
 - Imaginary numbers are supported.
+    - Note that ib would be a variable name, not i*b
 - Variables/functions/matrices can be redefined, type does not need to be conserved.
 - Variables cannot be set equal to functions (e.g., g = f(x))
 - The following operators are supported for variables and in functions: *, /, +, -, %
 - Matrices/vectors should be entered in the following format: matA = [[1,2];[4,7]] with semicolons seperating the rows of the matrix and commas seperating the columns.
-	- Allowed operations include:
-		- '+' and '-' (two matrices of same size)
-		- '*' and '/' by a constant
-		- '**' matrix multiplication
-			- make sure matrix shapes are compatible!
-			- e.g., a = [3,4]; b = [[1];[2]]; c = a ** b and d = b ** a are permitted.
+    - Allowed operations include:
+        - '+' and '-' (two matrices of same size)
+        - '*' and '/' by a constant
+        - '**' matrix multiplication
+            - make sure matrix shapes are compatible!
+            - e.g., a = [3,4]; b = [[1];[2]]; c = a ** b and d = b ** a are permitted.
+    - Note that a 0D matrix is treated as a scalar
+    - Note that, while an equation may be written, it may not make sence to solve it, for example:
+        - g = m + [3, 4], where m = [1, 2], legitamately gives g = [4, 6]
+        - However, if m = 4, g = 4 + [3, 4], which is not defined
 - The modulo (%) operator is not supported for Matrices, Vectors, or Complex numbers
 - To define a function (of a single variable): f(x) = x^2 + ...
-	- To solve an order < 3 equation: "f(x) = something ?" where "something" can be a constant or variable
-	- "f(1) = ?" will return the value of the function f(x) at x = 1.
+    - To solve an order < 3 equation: "f(x) = something ?" where "something" can be a constant or variable
+    - "f(1) = ?" will return the value of the function f(x) at x = 1.
 - Constants can be type Rational or Complex: A = 2 + 3 * i, C = 4.2
 - To access a previously defined variable, function, or matrix, use the "?"
-	- "C = ?" will return its value if defined, otherwise itself
-	- C is equivalent to c
+    - "C = ?" will return its value if defined, otherwise itself
+    - C is equivalent to c
 - Polynomials and variables will be simplified using the history of declared variables and values if possible
 - Program is exited using "exit" or cntl-C
 
@@ -54,7 +59,7 @@ These two projects are based on the Ecole 42 computor (v1) and (v2) projects. Th
 
 ### V1
 3. python computor.py "equation"
-	- e.g.: python computor.py "2x + 3 x^2 = 5x^3 -x"
+    - e.g.: python computor.py "2x + 3 x^2 = 5x^3 -x"
 
 ### V2
 3. python computorv2.py

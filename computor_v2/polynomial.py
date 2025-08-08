@@ -103,7 +103,8 @@ class Term:
             self.exp = exp
         else:
             raise TypeError("Usage Term: Exponent must be integer >= 0", exp)
-        if isinstance(coefficient, (int, float, Rational, Complex, Node, Matrix)):
+        types = (int, float, Rational, Complex, Node, Matrix)
+        if isinstance(coefficient, types):
             self.coef = coefficient
         elif isinstance(coefficient, str):
             self.coef = Variable(coefficient, None)
@@ -248,10 +249,10 @@ class Polynomial:
                 term = Term(abs(coef.real), var, exp, op)
 
             term_str = str(term)
+            types = (Complex, Variable, Node, str, Matrix)
             if i == 0:
                 # First term: include sign only if negative
-                if (not isinstance(coef, (Complex, Variable, Node, str, Matrix)) and
-                        coef < 0):
+                if (not isinstance(coef, types) and coef < 0):
                     parts.append(f"-{term_str}")
                 elif (isinstance(coef, Complex) and coef.imag == 0 and
                         coef.real < 0):
@@ -260,8 +261,7 @@ class Polynomial:
                     parts.append(f"{term_str}")
             else:
                 # Subsequent terms: prepend with + or -
-                if (not isinstance(coef, (Complex, Variable, Node, str, Matrix)) and
-                        coef < 0):
+                if (not isinstance(coef, types) and coef < 0):
                     parts.append(f" - {term_str}")
                 elif (isinstance(coef, Complex) and
                         coef.imag == 0 and
@@ -558,6 +558,8 @@ class Polynomial:
                     new_coef = Vector(new_matrix)  # return vector
                 else:
                     new_coef = Matrix(new_matrix)  # return matrix
+                if new_coef.shape == (1, 1):
+                    new_coef = new_coef.data[0][0]
             else:
                 new_coef = None
 
@@ -583,17 +585,15 @@ class Polynomial:
 
 class RationalExpression:
     """Class to represent a Polynomial divided by a Polynomial"""
-
-    # !!! Can this be written to accept Rationalexpression?
     def __init__(self, numerator, denominator):
         """Innitiate class assuming use of Polynomials"""
         if not isinstance(numerator, (Polynomial, RationalExpression)):
             raise TypeError(
-                "Error: Numerator must be Polynomial/RationalExpression"
+                "Error: numerator must be Polynomial/RationalExpression"
             )
         if not isinstance(denominator, (Polynomial, RationalExpression)):
             raise TypeError(
-                "Error: Denominator must be Polynomial/RationalExpression"
+                "Error: denominator must be Polynomial/RationalExpression"
             )
         if (isinstance(numerator, RationalExpression) and
                 isinstance(denominator, Polynomial)):
@@ -611,6 +611,8 @@ class RationalExpression:
             self.numerator = numerator
             self.denominator = denominator
         self.var = numerator.var
+        if str(self.numerator) == '0':
+            return None
 
     def __repr__(self):
         """How to represent RationalExpression as a string"""
@@ -623,7 +625,7 @@ class RationalExpression:
         return f"{top} / {bot}"
 
     def __add__(self, other):
-        """Instructions to add two RationalExpressions"""
+        """Instructions to add two RationalExpression values"""
         if isinstance(other, Polynomial):
             other = RationalExpression(other, Polynomial())
             other.denominator.add_term((1, self.var, 0, '+'))
@@ -716,6 +718,8 @@ def plug_in_var(func, var, history):
         top = plug_in_var(func.numerator, value, history)
         bottom = plug_in_var(func.denominator, value, history)
         result = RationalExpression(top, bottom)
+        if result is None:
+            result = Rational(0)
         return result
 
     # Polynomial support
@@ -760,9 +764,15 @@ def plug_in_var(func, var, history):
                             lst.append(value2)
                         new_matrix.append(lst)
                     if len(new_matrix) == 1 or len(new_matrix[0]) == 1:
-                        new_value = Vector(new_matrix) * (value.value ** key[1])
+                        new_value = Vector(new_matrix) * (
+                            value.value ** key[1]
+                        )
                     else:
-                        new_value = Matrix(new_matrix) * (value.value ** key[1])
+                        new_value = Matrix(new_matrix) * (
+                            value.value ** key[1]
+                        )
+                    if new_value.shape == (1, 1):
+                        new_value = new_value.data[0][0]
                 else:
                     new_value = Node(new_coef, value.value ** key[1], '*')
                 result.add_term((new_value, func.var, 0, '+'))
@@ -798,6 +808,8 @@ def plug_in_var(func, var, history):
             result = Vector(new_matrix)  # return vector
         else:
             result = Matrix(new_matrix)  # return matrix
+        if result.shape == (1, 1):
+            result = result.data[0][0]
         return result
 
     return func

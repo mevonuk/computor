@@ -6,6 +6,19 @@ from matrix import Matrix
 from node import Node
 
 from tools import get_value2, power_node
+from tree_functions import resolve
+
+
+def resolve_matrix(input_matrix, history):
+    """sub history values in matrix"""
+    new_matrix = []
+    for i in range(input_matrix.shape[0]):
+        lst = []
+        for k in range(input_matrix.shape[1]):
+            value2 = resolve(input_matrix.data[i][k], history)
+            lst.append(value2)
+        new_matrix.append(lst)
+    return Matrix(new_matrix)  # return matrix
 
 
 def solve_node(node: Node, history: dict):
@@ -37,9 +50,17 @@ def solve_node(node: Node, history: dict):
     if node.type == 'VAR' and right_value is None:
         return left_value
 
+    if isinstance(left_value, Matrix):
+        left_value = resolve_matrix(left_value, history)
+    if isinstance(right_value, Matrix):
+        right_value = resolve_matrix(right_value, history)
+
     # if not isinstance(left_value, (str, Node))
     #     and not isinstance(right_value, (str, Node)):
-    if all(not isinstance(v, (str, Node)) for v in (left_value, right_value)):
+    if all(
+        not isinstance(v, (str, Node, Matrix))
+        for v in (left_value, right_value)
+    ):
         if node.type == '+':
             return left_value + right_value
         if node.type == '-':
@@ -52,20 +73,49 @@ def solve_node(node: Node, history: dict):
             return left_value % right_value
         if node.type == '^':
             return power_node(left_value, right_value)
+
+    elif isinstance(left_value, str) or isinstance(right_value, str):
+        if node.type == '+':
+            return Node(left_value, right_value, '+')
+        if node.type == '-':
+            return Node(left_value, right_value, '-')
+        if node.type == '*':
+            return left_value * right_value
+        if node.type == '/':
+            return left_value / right_value
+        if node.type == '%':
+            return Node(left_value, right_value, '%')
+        if node.type == '^':
+            return Node(left_value, right_value, '^')
+
+    elif isinstance(left_value, Matrix) or isinstance(right_value, Matrix):
+        if node.type == '+':
+            return Node(left_value, right_value, '+')
+        if node.type == '-':
+            return Node(left_value, right_value, '-')
+        if node.type == '*':
+            return Node(left_value, right_value, '*')
+        if node.type == '/':
+            return Node(left_value, right_value, '/')
+    else:
+        if node.type == '+':
+            return Node(left_value, right_value, '+')
+        if node.type == '-':
+            return Node(left_value, right_value, '-')
+        if node.type == '*':
+            return Node(left_value, right_value, '*')
+        if node.type == '/':
+            return Node(left_value, right_value, '/')
+        if node.type == '%':
+            return Node(left_value, right_value, '%')
+        if node.type == '^':
+            return Node(left_value, right_value, '^')
+
     if node.type == '**':
         if isinstance(left_value, Matrix):
             if isinstance(right_value, Matrix):
                 return right_value * left_value
         print("** can only be used with matrix multiplication")
         return None
-    # if node.type == 'FUNC':
-    #     function_name = node.left
-    #     function_var = None
-    #     if isinstance(node.right, Node):
-    #         function_var = node.right.left
-    #     else:
-    #         function_var = node.right
-    #     result = get_function_value(function_name, function_var, history)
-    #     return result
 
     return node
