@@ -51,7 +51,10 @@ These two projects are based on the Ecole 42 computor (v1) and (v2) projects. Th
     - "C = ?" will return its value if defined, otherwise itself
     - C is equivalent to c
 - Polynomials and variables will be simplified using the history of declared variables and values if possible
-- Program is exited using "exit" or cntl-C
+- Program is exited using 'exit' or cntl-C
+- Type 'history' to list all saved variables/functions
+- Type 'clear' to clear the history
+- Use the up arrow key to access past entries
 
 ## Installation and Setup
 1. Clone the repository
